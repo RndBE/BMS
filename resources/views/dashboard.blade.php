@@ -41,6 +41,36 @@
     </div>
 </div>
 
+<!-- HOVER TOOLTIP -->
+<div id="room-tooltip" style="
+    display:none;
+    position:fixed;
+    z-index:9999;
+    background:white;
+    border-radius:10px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.18);
+    padding:12px 15px;
+    min-width:170px;
+    pointer-events:none;
+    border:1px solid #e2e8f0;
+    font-family:'Inter',sans-serif;
+">
+    <div id="tt-name" style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:8px;"></div>
+    <div id="tt-status" style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;margin-bottom:10px;"></div>
+    <div class="tt-row" style="display:flex;align-items:center;gap:8px;font-size:13px;color:#334155;padding:3px 0;">
+        <span style="font-size:14px;">🌡️</span>
+        <span id="tt-temp"></span>
+    </div>
+    <div class="tt-row" style="display:flex;align-items:center;gap:8px;font-size:13px;color:#334155;padding:3px 0;">
+        <span style="font-size:14px;">💧</span>
+        <span id="tt-hum"></span>
+    </div>
+    <div class="tt-row" style="display:flex;align-items:center;gap:8px;font-size:13px;color:#334155;padding:3px 0;">
+        <span style="font-size:14px;">❄️</span>
+        <span id="tt-ac"></span>
+    </div>
+</div>
+
 <!-- MAIN CONTENT -->
 <div class="main-grid">
     <!-- FLOOR PLAN -->
@@ -70,14 +100,26 @@
                             'poor'    => '#ef4444',
                             default   => '#22c55e',
                         };
-                        $iconSymbol = match($room->status) {
-                            'warning' => '▲',
-                            'poor'    => '●',
-                            default   => '✔',
-                        };
                         $shortName = strlen($room->name) > 10 ? wordwrap($room->name, 10, "\n", true) : $room->name;
+                        // Pre-load latest sensor readings for tooltip
+                        $readings = $room->getLatestReadings();
+                        $tempVal  = isset($readings['temperature']) ? number_format($readings['temperature']['value'], 1) . $readings['temperature']['unit'] : '-';
+                        $humVal   = isset($readings['humidity'])    ? number_format($readings['humidity']['value'], 0) . $readings['humidity']['unit']       : '-';
+                        $ac       = $room->acUnits->first();
+                        $acVal    = $ac ? ($ac->is_active ? 'ON' : 'OFF') : '-';
                     @endphp
-                    <g class="room-group" data-room-id="{{ $room->id }}" onclick="selectRoom({{ $room->id }})">
+                    <g class="room-group"
+                        data-room-id="{{ $room->id }}"
+                        data-name="{{ $room->name }}"
+                        data-status="{{ $room->status }}"
+                        data-temp="{{ $tempVal }}"
+                        data-hum="{{ $humVal }}"
+                        data-ac="{{ $acVal }}"
+                        onmouseenter="showTooltip(event, this)"
+                        onmousemove="moveTooltip(event)"
+                        onmouseleave="hideTooltip()"
+                        onclick="selectRoom({{ $room->id }})"
+                    >
                         <rect
                             id="room-{{ $room->id }}"
                             class="room-rect {{ $statusClass }}"
@@ -157,6 +199,49 @@
 </div>
 
 <script>
+const tooltip = document.getElementById('room-tooltip');
+
+function showTooltip(event, el) {
+    const name   = el.dataset.name;
+    const status = el.dataset.status;
+    const temp   = el.dataset.temp;
+    const hum    = el.dataset.hum;
+    const ac     = el.dataset.ac;
+
+    const statusConfig = {
+        normal:  { label: 'Normal',  bg: '#dcfce7', color: '#15803d', icon: '✓' },
+        warning: { label: 'Warning', bg: '#fef3c7', color: '#b45309', icon: '▲' },
+        poor:    { label: 'Poor',    bg: '#fee2e2', color: '#b91c1c', icon: '●' },
+    };
+    const cfg = statusConfig[status] || statusConfig.normal;
+
+    document.getElementById('tt-name').textContent   = name;
+    document.getElementById('tt-status').textContent = cfg.icon + ' ' + cfg.label;
+    document.getElementById('tt-status').style.background = cfg.bg;
+    document.getElementById('tt-status').style.color      = cfg.color;
+    document.getElementById('tt-temp').textContent   = temp;
+    document.getElementById('tt-hum').textContent    = hum;
+    document.getElementById('tt-ac').textContent     = ac;
+
+    tooltip.style.display = 'block';
+    moveTooltip(event);
+}
+
+function moveTooltip(event) {
+    const offset = 14;
+    let x = event.clientX + offset;
+    let y = event.clientY + offset;
+    // Keep tooltip inside viewport
+    if (x + 190 > window.innerWidth)  x = event.clientX - 190;
+    if (y + 160 > window.innerHeight) y = event.clientY - 160;
+    tooltip.style.left = x + 'px';
+    tooltip.style.top  = y + 'px';
+}
+
+function hideTooltip() {
+    tooltip.style.display = 'none';
+}
+
 let selectedRoomId = null;
 
 function selectRoom(roomId) {
