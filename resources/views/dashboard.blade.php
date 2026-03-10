@@ -1,17 +1,241 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
-    </x-slot>
+@extends('layouts.app')
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    {{ __("You're logged in!") }}
+@section('content')
+<!-- SUMMARY CARDS -->
+<div class="summary-grid">
+    {{-- Status Ruangan --}}
+    <div class="sum-card">
+        <div class="sum-card-label" style="color:#64748b;">
+            <i data-feather="home" style="color:#4f7dfc"></i> Status Ruangan
+        </div>
+        <div class="status-badges">
+            <span class="badge-n">●&nbsp;{{ $statusCounts['normal'] }}</span>
+            <span class="badge-w">▲&nbsp;{{ $statusCounts['warning'] }}</span>
+            <span class="badge-p">●&nbsp;{{ $statusCounts['poor'] }}</span>
+        </div>
+    </div>
+    {{-- Rerata Suhu --}}
+    <div class="sum-card">
+        <div class="sum-card-label"><i data-feather="thermometer" style="color:#f59e0b"></i> Rerata Suhu</div>
+        <div><span class="sum-value">{{ number_format($avgTemp, 1) }}</span> <span class="sum-unit">°C</span></div>
+    </div>
+    {{-- Rerata Kelembaban --}}
+    <div class="sum-card">
+        <div class="sum-card-label"><i data-feather="droplet" style="color:#22c55e"></i> Rerata Kelembaban</div>
+        <div><span class="sum-value">{{ number_format($avgHumidity, 0) }}</span> <span class="sum-unit">%</span></div>
+    </div>
+    {{-- Daya Saat Ini --}}
+    <div class="sum-card">
+        <div class="sum-card-label"><i data-feather="zap" style="color:#f59e0b"></i> Daya Saat Ini</div>
+        <div><span class="sum-value">{{ number_format($currentPower, 1) }}</span> <span class="sum-unit">kW</span></div>
+    </div>
+    {{-- Energi Hari Ini --}}
+    <div class="sum-card">
+        <div class="sum-card-label"><i data-feather="battery-charging" style="color:#4f7dfc"></i> Energi Hari Ini</div>
+        <div><span class="sum-value">{{ number_format($energyToday, 0) }}</span> <span class="sum-unit">kWh</span></div>
+    </div>
+    {{-- Unit AC Aktif --}}
+    <div class="sum-card">
+        <div class="sum-card-label"><i data-feather="wind" style="color:#22c55e"></i> Unit AC Aktif</div>
+        <div><span class="sum-value">{{ $activeAc }}/{{ $totalAc }}</span></div>
+    </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-grid">
+    <!-- FLOOR PLAN -->
+    <div class="floor-plan-card">
+        <div class="section-title">Denah Kantor</div>
+        <div class="svg-container">
+            <svg class="floorplan" viewBox="0 0 800 530" xmlns="http://www.w3.org/2000/svg" id="floorplan-svg">
+                <!-- Background -->
+                <rect width="800" height="530" fill="#f8fafc"/>
+
+                <!-- Arrow decorations (corridors) -->
+                <defs>
+                    <marker id="arrowhead" markerWidth="6" markerHeight="4" refX="3" refY="2" orient="auto">
+                        <polygon points="0 0, 6 2, 0 4" fill="#94a3b8"/>
+                    </marker>
+                </defs>
+                <line x1="170" y1="380" x2="170" y2="440" stroke="#94a3b8" stroke-width="1" marker-end="url(#arrowhead)" stroke-dasharray="4,2"/>
+                <line x1="340" y1="380" x2="340" y2="440" stroke="#94a3b8" stroke-width="1" marker-end="url(#arrowhead)" stroke-dasharray="4,2"/>
+
+                @foreach($rooms as $room)
+                    @php
+                        $statusClass = 'status-' . $room->status;
+                        $cx = $room->svg_x + $room->svg_width / 2;
+                        $cy = $room->svg_y + $room->svg_height / 2;
+                        $iconColor = match($room->status) {
+                            'warning' => '#f59e0b',
+                            'poor'    => '#ef4444',
+                            default   => '#22c55e',
+                        };
+                        $iconSymbol = match($room->status) {
+                            'warning' => '▲',
+                            'poor'    => '●',
+                            default   => '✔',
+                        };
+                        $shortName = strlen($room->name) > 10 ? wordwrap($room->name, 10, "\n", true) : $room->name;
+                    @endphp
+                    <g class="room-group" data-room-id="{{ $room->id }}" onclick="selectRoom({{ $room->id }})">
+                        <rect
+                            id="room-{{ $room->id }}"
+                            class="room-rect {{ $statusClass }}"
+                            x="{{ $room->svg_x }}"
+                            y="{{ $room->svg_y }}"
+                            width="{{ $room->svg_width }}"
+                            height="{{ $room->svg_height }}"
+                            rx="4"
+                        />
+                        {{-- Status icon --}}
+                        <circle cx="{{ $cx }}" cy="{{ $cy - 14 }}" r="9" fill="{{ $iconColor }}" opacity="0.9"/>
+                        <text x="{{ $cx }}" y="{{ $cy - 10 }}" text-anchor="middle" font-size="9" fill="white" style="pointer-events:none;">
+                            {{ $room->status === 'warning' ? '!' : ($room->status === 'poor' ? '✕' : '✓') }}
+                        </text>
+                        {{-- Room name --}}
+                        @foreach(explode("\n", $shortName) as $lineIdx => $line)
+                            <text
+                                class="room-label"
+                                x="{{ $cx }}"
+                                y="{{ $cy + 4 + ($lineIdx * 10) }}"
+                                text-anchor="middle"
+                            >{{ $line }}</text>
+                        @endforeach
+                    </g>
+                @endforeach
+            </svg>
+        </div>
+        <div class="legend">
+            <div class="legend-item"><span class="legend-dot n"></span> Normal</div>
+            <div class="legend-item"><span class="legend-dot w"></span> Warning</div>
+            <div class="legend-item"><span class="legend-dot p"></span> Poor</div>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+        <!-- ROOM DETAIL -->
+        <div class="detail-card">
+            <div class="section-title">Detail Ruangan</div>
+            <div id="room-detail-content">
+                <div class="detail-placeholder">
+                    <i data-feather="mouse-pointer"></i>
+                    Klik ruangan pada denah untuk melihat detail
                 </div>
             </div>
         </div>
+
+        <!-- RECENT ALERTS -->
+        <div class="alerts-card">
+            <div class="section-title">Peringatan Terbaru</div>
+            @foreach($recentAlerts as $alert)
+                <div class="alert-item">
+                    <div class="alert-icon {{ $alert->type }}">
+                        @php
+                            $alertIcon = match($alert->type) {
+                                'sensor_offline' => 'wifi-off',
+                                'high_temp'      => 'thermometer',
+                                'ac_off'         => 'wind',
+                                'high_power'     => 'zap',
+                                default          => 'alert-triangle',
+                            };
+                        @endphp
+                        <i data-feather="{{ $alertIcon }}"></i>
+                    </div>
+                    <div class="alert-text">
+                        <div class="alert-msg">{{ $alert->message }}</div>
+                        <div class="alert-room">{{ $alert->room->name }}</div>
+                    </div>
+                    <div class="alert-time">{{ $alert->created_at->format('H:i') }}</div>
+                </div>
+            @endforeach
+            <div class="see-all">
+                Lihat Semua <i data-feather="arrow-right"></i>
+            </div>
+        </div>
     </div>
-</x-app-layout>
+</div>
+
+<script>
+let selectedRoomId = null;
+
+function selectRoom(roomId) {
+    // Deselect previous
+    document.querySelectorAll('.room-rect').forEach(r => r.classList.remove('selected'));
+
+    // Select new
+    const rect = document.getElementById('room-' + roomId);
+    if (rect) rect.classList.add('selected');
+
+    selectedRoomId = roomId;
+
+    // Show loading
+    document.getElementById('room-detail-content').innerHTML = `
+        <div class="detail-placeholder">
+            <i data-feather="loader"></i>
+            Memuat data...
+        </div>
+    `;
+    feather.replace();
+
+    // Fetch room detail
+    fetch('/api/rooms/' + roomId, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+        }
+    })
+    .then(res => res.json())
+    .then(room => {
+        const statusLabel = { normal: 'Normal', warning: 'Warning', poor: 'Poor' }[room.status] || room.status;
+        const acStatus = room.ac_status === 'ON'
+            ? '<span style="color:#22c55e;font-weight:700;">ON</span>'
+            : '<span style="color:#ef4444;font-weight:700;">OFF</span>';
+        const sensorStatus = room.sensor_connected
+            ? '<span class="detail-row-value connected">Terhubung</span>'
+            : '<span class="detail-row-value disconnected">Offline</span>';
+        const temp = room.temperature ? room.temperature.value + ' ' + room.temperature.unit : '-';
+        const hum  = room.humidity    ? room.humidity.value + ' ' + room.humidity.unit    : '-';
+        const co2  = room.co2         ? room.co2.value + ' ' + room.co2.unit              : '-';
+
+        document.getElementById('room-detail-content').innerHTML = `
+            <div class="detail-header">
+                <div class="detail-room-name">${room.name}</div>
+                <span class="detail-status ${room.status}">▲ ${statusLabel}</span>
+            </div>
+            <div class="detail-updated">
+                <i data-feather="circle"></i>
+                Terakhir diperbarui: ${room.updated_at}
+            </div>
+            <div class="detail-row">
+                <span class="detail-row-label">Suhu</span>
+                <span class="detail-row-value">${temp}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-row-label">Kelembaban</span>
+                <span class="detail-row-value">${hum}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-row-label">Level CO₂</span>
+                <span class="detail-row-value">${co2}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-row-label">Status AC</span>
+                <span class="detail-row-value">${acStatus}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-row-label">Status Sensor</span>
+                ${sensorStatus}
+            </div>
+            <button class="btn-analisa">Analisa Data</button>
+        `;
+        feather.replace();
+    })
+    .catch(() => {
+        document.getElementById('room-detail-content').innerHTML = `
+            <div class="detail-placeholder">Gagal memuat data ruangan.</div>
+        `;
+    });
+}
+</script>
+@endsection
