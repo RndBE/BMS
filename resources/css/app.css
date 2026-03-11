@@ -1,3 +1,36 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Alpine.js: sembunyikan elemen sebelum JS load */
+[x-cloak] { display: none !important; }
+
+/* Nav active indicator — pseudo-element tidak bisa jadi Tailwind utility */
+.nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: #4f7dfc;
+    border-radius: 0 2px 2px 0;
+}
+
+/* SVG floor plan styling */
+.room-rect {
+    fill: #f8fafc;
+    stroke: #334155;
+    stroke-width: 1.5;
+    cursor: pointer;
+    transition: fill .2s;
+}
+.room-rect:hover { fill: #eff6ff; }
+.room-rect.selected { fill: #fef9c3; stroke: #f59e0b; stroke-width: 2; }
+.room-rect.status-warning { stroke: #f59e0b; }
+.room-rect.status-poor { stroke: #ef4444; }
+.room-label {
+    font-size: 8px;
+    fill: #334155;
+    pointer-events: none;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+}

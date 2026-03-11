@@ -3,13 +3,25 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Room extends Model
 {
     protected $fillable = [
-        'name', 'code', 'svg_x', 'svg_y', 'svg_width', 'svg_height', 'status',
+        'name', 'code', 'floor_id', 'marker_x', 'marker_y',
+        'svg_x', 'svg_y', 'svg_width', 'svg_height', 'status',
     ];
+
+    protected $casts = [
+        'marker_x' => 'float',
+        'marker_y' => 'float',
+    ];
+
+    public function floor(): BelongsTo
+    {
+        return $this->belongsTo(Floor::class);
+    }
 
     public function sensors(): HasMany
     {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AcUnit;
 use App\Models\Alert;
+use App\Models\Floor;
 use App\Models\Room;
 use App\Models\SensorReading;
 use Illuminate\Http\JsonResponse;
@@ -35,14 +36,56 @@ class DashboardController extends Controller
         $activeAc    = AcUnit::where('is_active', true)->count();
         $totalAc     = AcUnit::count();
         $currentPower = AcUnit::where('is_active', true)->sum('power_kw');
-        $energyToday  = round($currentPower * 11.5, 1); // ~11.5h average usage
+        $energyToday  = round($currentPower * 11.5, 1);
 
         $recentAlerts = Alert::with('room')->latest()->limit(4)->get();
 
+        // Load first available floor with canvas_data for dashboard display
+        $displayFloor = Floor::with([
+            'building',
+            'rooms.sensors.readings' => function ($q) {
+                $q->latest('recorded_at')->limit(1);
+            },
+            'rooms.acUnits',
+        ])->where(function ($q) {
+            $q->whereNotNull('plan_file_path')->orWhereNotNull('canvas_data');
+        })->latest()->first();
+
+        // Pre-build all room detail data as JSON (eliminates AJAX roundtrip)
+        $roomDetailMap = $rooms->mapWithKeys(function ($room) {
+            $readings = [];
+            foreach ($room->sensors as $sensor) {
+                $latest = $sensor->readings->first();
+                $readings[$sensor->type] = [
+                    'value'     => $latest ? $latest->value : null,
+                    'unit'      => $sensor->unit,
+                    'is_active' => $sensor->is_active,
+                ];
+            }
+            $ac = $room->acUnits->first();
+            return [$room->id => [
+                'id'               => $room->id,
+                'name'             => $room->name,
+                'status'           => $room->status,
+                'updated_at'       => $room->updated_at->format('d/m/Y H:i'),
+                'temperature'      => $readings['temperature'] ?? null,
+                'humidity'         => $readings['humidity'] ?? null,
+                'co2'              => $readings['co2'] ?? null,
+                'ac_status'        => $ac ? ($ac->is_active ? 'ON' : 'OFF') : 'N/A',
+                'sensor_connected' => $room->sensors->where('is_active', true)->count() > 0,
+            ]];
+        });
+
         return view('dashboard', compact(
             'rooms', 'statusCounts', 'avgTemp', 'avgHumidity',
-            'activeAc', 'totalAc', 'currentPower', 'energyToday', 'recentAlerts'
+            'activeAc', 'totalAc', 'currentPower', 'energyToday',
+            'recentAlerts', 'displayFloor', 'roomDetailMap'
         ));
+    }
+
+    public function byFloor(Floor $floor)
+    {
+        return redirect()->route('dashboard');
     }
 
     public function roomDetail(int $id): JsonResponse
@@ -60,18 +103,17 @@ class DashboardController extends Controller
                 'is_active' => $sensor->is_active,
             ];
         }
-
         $ac = $room->acUnits->first();
 
         return response()->json([
-            'id'          => $room->id,
-            'name'        => $room->name,
-            'status'      => $room->status,
-            'updated_at'  => $room->updated_at->format('d/m/Y H:i'),
-            'temperature' => $readings['temperature'] ?? null,
-            'humidity'    => $readings['humidity'] ?? null,
-            'co2'         => $readings['co2'] ?? null,
-            'ac_status'   => $ac ? ($ac->is_active ? 'ON' : 'OFF') : 'N/A',
+            'id'               => $room->id,
+            'name'             => $room->name,
+            'status'           => $room->status,
+            'updated_at'       => $room->updated_at->format('d/m/Y H:i'),
+            'temperature'      => $readings['temperature'] ?? null,
+            'humidity'         => $readings['humidity'] ?? null,
+            'co2'              => $readings['co2'] ?? null,
+            'ac_status'        => $ac ? ($ac->is_active ? 'ON' : 'OFF') : 'N/A',
             'sensor_connected' => $room->sensors->where('is_active', true)->count() > 0,
         ]);
     }
