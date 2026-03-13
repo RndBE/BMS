@@ -300,6 +300,10 @@ let currentTool = 'select';
 let isDrawing = false, drawOrigin = null, activeDrawObj = null;
 const STATUS_COLORS = { normal: '#22c55e', warning: '#f59e0b', poor: '#ef4444' };
 
+// Natural canvas dimensions (referensi koordinat marker, sama dengan dashboard)
+let _natW = 900, _natH = 560;
+let _editorZoom = 1;
+
 /* ── Tool style helpers ── */
 function getStrokeColor() { return document.getElementById('strokeColor').value; }
 function getStrokeWidth() { return parseInt(document.getElementById('strokeWidth').value); }
@@ -309,14 +313,33 @@ window.addEventListener('load', initCanvas);
 
 function initCanvas() {
     const wrapper = document.getElementById('canvasWrapper');
-    const w = wrapper.clientWidth  || 900;
-    const h = wrapper.clientHeight || 600;
+
+    // Baca natural size dari canvas_data jika ada
+    if (CANVAS_DATA) {
+        try {
+            const parsed = JSON.parse(CANVAS_DATA);
+            if (parsed._canvasWidth)  _natW = parsed._canvasWidth;
+            if (parsed._canvasHeight) _natH = parsed._canvasHeight;
+        } catch(e) {}
+    }
+
+    // Display size = wrapper size
+    const dispW = wrapper.clientWidth  || 900;
+    const dispH = wrapper.clientHeight || 560;
+
+    // Zoom: scale natural coords ke display
+    _editorZoom = Math.min(dispW / _natW, dispH / _natH);
+    document.getElementById('zoomLevel').textContent = Math.round(_editorZoom * 100);
 
     canvas = new fabric.Canvas('floor-canvas', {
-        width: w, height: h,
+        width:  dispW,
+        height: dispH,
         selection: true,
         backgroundColor: '#f1f5f9',
     });
+
+    // Viewport transform: semua objek di natural coords
+    canvas.setViewportTransform([_editorZoom, 0, 0, _editorZoom, 0, 0]);
 
     if (FLOOR_PLAN_URL) {
         document.getElementById('canvasHint').classList.add('hidden');
@@ -325,11 +348,9 @@ function initCanvas() {
 
     // Load saved canvas drawing data
     if (CANVAS_DATA) {
-        // Fix Fabric.js bug: 'alphabetical' is not valid CanvasTextBaseline, should be 'alphabetic'
         const cleanJson = CANVAS_DATA.replace(/"textBaseline"\s*:\s*"alphabetical"/g, '"textBaseline":"alphabetic"');
         canvas.loadFromJSON(cleanJson, () => {
             canvas.renderAll();
-            // Re-add room markers on top after loading saved shapes
             ROOMS_DATA.forEach(r => addMarkerToCanvas(r.id, r.name, r.status, r.marker_x, r.marker_y));
         });
     } else {
@@ -341,7 +362,6 @@ function initCanvas() {
     canvas.on('mouse:up',   onMouseUp);
     canvas.on('object:modified', onMarkerMoved);
 
-    // Tool button active style update
     updateToolStyles();
     feather.replace();
 }
@@ -481,10 +501,10 @@ function saveCanvas() {
     const markers = allObjs.filter(o => o.data && o.data.roomId);
     markers.forEach(m => canvas.remove(m));
 
-    // Include canvas dimensions so dashboard can reproduce exact layout
+    // Include NATURAL canvas dimensions (referensi koordinat marker untuk dashboard)
     const jsonObj = canvas.toJSON(['data']);
-    jsonObj._canvasWidth  = canvas.width;
-    jsonObj._canvasHeight = canvas.height;
+    jsonObj._canvasWidth  = _natW;   // natural, bukan display size
+    jsonObj._canvasHeight = _natH;
     const jsonStr = JSON.stringify(jsonObj);
 
     // Re-add markers
@@ -504,8 +524,9 @@ function saveCanvas() {
 /* ── Load bg image ── */
 function loadBgImage(url) {
     fabric.Image.fromURL(url, function(img) {
-        const scaleX = canvas.width  / img.width;
-        const scaleY = canvas.height / img.height;
+        // Scale to natural canvas size; viewport transform handles display scaling
+        const scaleX = _natW / img.width;
+        const scaleY = _natH / img.height;
         const scale  = Math.min(scaleX, scaleY);
         img.set({ scaleX: scale, scaleY: scale, selectable: false, evented: false, originX: 'left', originY: 'top' });
         canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
@@ -526,33 +547,39 @@ const STATUS_BG = {
 };
 
 function addMarkerToCanvas(roomId, roomName, status, xPct, yPct) {
-    const x    = (xPct / 100) * canvas.width;
-    const y    = (yPct / 100) * canvas.height;
+    // Posisi dalam natural coords — viewport transform scale ke display
+    const x    = (xPct / 100) * _natW;
+    const y    = (yPct / 100) * _natH;
     const bg   = STATUS_BG[status]    || STATUS_BG.normal;
     const iconUrl = STATUS_ICONS[status] || STATUS_ICONS.normal;
 
-    // Square background badge
+    // Marker size dalam natural coords — sama persis dengan dashboard
+    const inv      = 1 / _editorZoom;
+    const sqSize   = 36 * inv;
+    const iconSize = 24 * inv;
+    const fSize    = 11 * inv;
+    const labelTop = 28 * inv;
     const square = new fabric.Rect({
-        width: 36, height: 36,
-        fill: bg, stroke: 'white', strokeWidth: 2,
-        rx: 8, ry: 8,                          // rounded corners
-        shadow: new fabric.Shadow({ color: 'rgba(0,0,0,0.20)', blur: 8, offsetX: 0, offsetY: 3 }),
+        width: sqSize, height: sqSize,
+        fill: bg, stroke: 'white', strokeWidth: 2 * inv,
+        rx: 8 * inv, ry: 8 * inv,
+        shadow: new fabric.Shadow({ color: 'rgba(0,0,0,0.20)', blur: 8 * inv, offsetX: 0, offsetY: 3 * inv }),
         originX: 'center', originY: 'center',
     });
 
     // Room name label below the square
     const label = new fabric.Text(roomName, {
-        fontSize: 11, fill: '#1e293b', fontFamily: 'Inter, sans-serif', fontWeight: '700',
-        backgroundColor: 'rgba(255,255,255,0.88)', padding: 2,
+        fontSize: fSize, fill: '#1e293b', fontFamily: 'Inter, sans-serif', fontWeight: '700',
+        backgroundColor: 'rgba(255,255,255,0.88)', padding: 2 * inv,
         originX: 'center', originY: 'center',
-        top: 28,
+        top: labelTop,
     });
 
     // Load status icon as SVG image
     fabric.Image.fromURL(iconUrl, function(icon) {
         icon.set({
-            scaleX: 24 / icon.width,
-            scaleY: 24 / icon.height,
+            scaleX: iconSize / icon.width,
+            scaleY: iconSize / icon.height,
             originX: 'center', originY: 'center',
             top: 0,
         });
@@ -572,8 +599,9 @@ function addMarkerToCanvas(roomId, roomName, status, xPct, yPct) {
 function refreshMarker(roomId, roomName, status) {
     const existing = canvas.getObjects().find(o => o.data && o.data.roomId == roomId);
     if (!existing) return;
-    const xPct = (existing.left / canvas.width)  * 100;
-    const yPct = (existing.top  / canvas.height) * 100;
+    // existing.left/top adalah dalam natural coords
+    const xPct = (existing.left / _natW) * 100;
+    const yPct = (existing.top  / _natH) * 100;
     canvas.remove(existing);
     addMarkerToCanvas(roomId, roomName, status, xPct, yPct);
 }
@@ -586,8 +614,9 @@ function onCanvasClick(opt) {
     if (!name || !code) { alert('Isi Nama dan Kode ruangan terlebih dahulu.'); return; }
 
     const ptr  = canvas.getPointer(opt.e);
-    const xPct = (ptr.x / canvas.width)  * 100;
-    const yPct = (ptr.y / canvas.height) * 100;
+    // getPointer dengan viewport transform mengembalikan natural coords
+    const xPct = (ptr.x / _natW) * 100;
+    const yPct = (ptr.y / _natH) * 100;
 
     fetch(ROUTES.roomAdd, {
         method: 'POST',
@@ -608,8 +637,9 @@ function onCanvasClick(opt) {
 function onMarkerMoved(opt) {
     const obj = opt.target;
     if (!obj || !obj.data || !obj.data.roomId) return;
-    const xPct = (obj.left / canvas.width)  * 100;
-    const yPct = (obj.top  / canvas.height) * 100;
+    // obj.left/top dalam natural coords (viewport transform sudah dibalik)
+    const xPct = (obj.left / _natW) * 100;
+    const yPct = (obj.top  / _natH) * 100;
     const url  = ROUTES.markerUpdate.replace('__ID__', obj.data.roomId);
     fetch(url, {
         method: 'PUT',

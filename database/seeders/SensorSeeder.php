@@ -15,7 +15,8 @@ class SensorSeeder extends Seeder
         foreach ($rooms as $room) {
             Sensor::create(['room_id' => $room->id, 'type' => 'temperature', 'unit' => '°C',  'is_active' => true]);
             Sensor::create(['room_id' => $room->id, 'type' => 'humidity',    'unit' => '%',   'is_active' => true]);
-            Sensor::create(['room_id' => $room->id, 'type' => 'co2',         'unit' => 'ppm', 'is_active' => $room->status !== 'poor']);
+            Sensor::create(['room_id' => $room->id, 'type' => 'energy',      'unit' => 'kWh', 'is_active' => true]);
+            Sensor::create(['room_id' => $room->id, 'type' => 'power',       'unit' => 'W',   'is_active' => true]);
         }
     }
 }

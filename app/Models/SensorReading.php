@@ -7,12 +7,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SensorReading extends Model
 {
-    protected $fillable = ['sensor_id', 'value', 'recorded_at'];
+    public $timestamps = false;
 
-    protected $casts = ['recorded_at' => 'datetime'];
+    protected $fillable = ['room_id', 'temperature', 'humidity', 'energy', 'power', 'co2', 'waktu'];
 
-    public function sensor(): BelongsTo
+    protected $casts = ['waktu' => 'datetime'];
+
+    public function room(): BelongsTo
     {
-        return $this->belongsTo(Sensor::class);
+        return $this->belongsTo(Room::class);
     }
 }
+

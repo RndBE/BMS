@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\BuildingController;
 use App\Http\Controllers\Admin\FloorController;
 use App\Http\Controllers\Admin\RoomMarkerController;
+use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +16,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard (with optional floor filter)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/floor/{floor}', [DashboardController::class, 'byFloor'])->name('dashboard.floor');
+
+    // Analisa Data
+    Route::get('/analisa-data', [AnalysisController::class, 'index'])->name('analisa-data.index');
 
     // Room detail API for AJAX tooltip click
     Route::get('/api/rooms/{id}', [DashboardController::class, 'roomDetail'])->name('rooms.detail');

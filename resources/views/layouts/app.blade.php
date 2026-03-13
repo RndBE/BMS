@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/feather-icons"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         /* Sidebar & layout transition */
         #sidebar       { transition: width .25s ease, transform .25s ease; width: 220px; }
@@ -37,44 +38,41 @@
 <body class="font-['Inter'] bg-slate-100 flex min-h-screen">
 
 <!-- SIDEBAR -->
-<aside id="sidebar" class="min-h-screen bg-[#1e2a45] flex flex-col fixed top-0 left-0 z-[100] overflow-hidden">
+<aside id="sidebar" class="min-h-screen bg-[#FFFFFF] flex flex-col fixed top-0 left-0 z-[100] overflow-hidden">
     <!-- Logo -->
-    <div class="px-4 py-[18px] border-b border-white/[.08] flex items-center gap-2.5 text-white shrink-0">
-        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-[34px] h-[34px] shrink-0">
-            <rect width="40" height="40" rx="8" fill="#4f7dfc"/>
-            <text x="7" y="27" font-size="18" font-weight="900" fill="white" font-family="Inter">BE</text>
-        </svg>
+    <div class="px-4 py-[18px] border-b border-slate-100 flex items-center gap-2.5 shrink-0">
+        <img src="{{ asset('images/beacon-logo.png') }}" alt="Beacon Logo" class="w-[34px] h-[34px] shrink-0 object-contain">
         <div class="sidebar-logo-text overflow-hidden">
-            <div class="text-white font-bold text-[13px] whitespace-nowrap">BMS</div>
-            <div class="text-[10px] font-semibold tracking-[1px] text-[#93a5c4] uppercase whitespace-nowrap">Beacon Engineering</div>
+            <div class="text-slate-800 font-bold text-[13px] whitespace-nowrap">BMS</div>
+            <div class="text-[10px] font-semibold tracking-[1px] text-slate-400 uppercase whitespace-nowrap">Beacon Engineering</div>
         </div>
     </div>
 
     <nav class="py-4 flex-1">
-        <a href="{{ route('dashboard') }}" class="nav-item flex items-center gap-3 px-5 py-[11px] text-[#93a5c4] no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:text-white hover:bg-[#273554] {{ request()->routeIs('dashboard') ? 'active text-white bg-[#273554]' : '' }}">
+        <a href="{{ route('dashboard') }}" class="nav-item flex items-center gap-3 px-5 py-[11px] text-slate-500 no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:text-slate-900 hover:bg-slate-100 {{ request()->routeIs('dashboard') ? 'active text-slate-900 bg-slate-100' : '' }}">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
             <span class="sidebar-label">Dashboard</span>
         </a>
-        <a href="#" class="nav-item flex items-center gap-3 px-5 py-[11px] text-[#93a5c4] no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:text-white hover:bg-[#273554]">
+        <a href="{{ route('analisa-data.index') }}" class="nav-item flex items-center gap-3 px-5 py-[11px] text-slate-500 no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:text-slate-900 hover:bg-slate-100 {{ request()->routeIs('analisa-data.*') ? 'active text-slate-900 bg-slate-100' : '' }}">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
             <span class="sidebar-label">Analisa Data</span>
         </a>
-        <a href="#" class="nav-item flex items-center gap-3 px-5 py-[11px] text-[#93a5c4] no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:text-white hover:bg-[#273554]">
+        <a href="#" class="nav-item flex items-center gap-3 px-5 py-[11px] text-slate-500 no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:text-slate-900 hover:bg-slate-100">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
             <span class="sidebar-label">Energi</span>
         </a>
-        <a href="#" class="nav-item flex items-center gap-3 px-5 py-[11px] text-[#93a5c4] no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:text-white hover:bg-[#273554]">
+        <a href="#" class="nav-item flex items-center gap-3 px-5 py-[11px] text-slate-500 no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:text-slate-900 hover:bg-slate-100">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             <span class="sidebar-label">Peringatan</span>
         </a>
-        <a href="#" class="nav-item flex items-center gap-3 px-5 py-[11px] text-[#93a5c4] no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:text-white hover:bg-[#273554]">
+        <a href="#" class="nav-item flex items-center gap-3 px-5 py-[11px] text-slate-500 no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:text-slate-900 hover:bg-slate-100">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
             <span class="sidebar-label">Pengaturan</span>
         </a>
 
         @if(auth()->user()->hasRole('superadmin'))
-        <div class="sidebar-section-label mx-5 mt-3 mb-1.5 text-[10px] font-semibold text-[#4a5568] tracking-[.8px] uppercase whitespace-nowrap overflow-hidden">Admin</div>
-        <a href="{{ route('admin.buildings.index') }}" class="nav-item flex items-center gap-3 px-5 py-[11px] text-[#93a5c4] no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:text-white hover:bg-[#273554] {{ request()->routeIs('admin.*') ? 'active text-white bg-[#273554]' : '' }}">
+        <div class="sidebar-section-label mx-5 mt-3 mb-1.5 text-[10px] font-semibold text-slate-400 tracking-[.8px] uppercase whitespace-nowrap overflow-hidden">Admin</div>
+        <a href="{{ route('admin.buildings.index') }}" class="nav-item flex items-center gap-3 px-5 py-[11px] text-slate-500 no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:text-slate-900 hover:bg-slate-100 {{ request()->routeIs('admin.*') ? 'active text-slate-900 bg-slate-100' : '' }}">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
             <span class="sidebar-label">Manajemen Denah</span>
         </a>

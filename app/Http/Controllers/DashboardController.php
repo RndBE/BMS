@@ -14,65 +14,57 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $rooms = Room::with(['sensors.readings' => function ($q) {
-            $q->latest('recorded_at')->limit(1);
-        }, 'acUnits'])->get();
+        // Load rooms dengan latest sensor reading per room
+        $rooms = Room::with(['latestReading', 'acUnits'])->get();
 
-        // Summary stats
+        // Summary stats dari collection (tidak perlu query lagi)
         $statusCounts = [
             'normal'  => $rooms->where('status', 'normal')->count(),
             'warning' => $rooms->where('status', 'warning')->count(),
             'poor'    => $rooms->where('status', 'poor')->count(),
         ];
 
-        $avgTemp = SensorReading::whereHas('sensor', fn($q) => $q->where('type', 'temperature'))
-            ->latest('recorded_at')->get()->groupBy('sensor_id')
-            ->map(fn($r) => $r->first()->value)->avg();
+        // ── Avg sensor: ambil latest reading per room, lalu avg ──
+        $avgTemp = SensorReading::whereIn('id', function ($q) {
+            $q->selectRaw('MAX(id)')
+              ->from('sensor_readings')
+              ->groupBy('room_id');
+        })->avg('temperature');
 
-        $avgHumidity = SensorReading::whereHas('sensor', fn($q) => $q->where('type', 'humidity'))
-            ->latest('recorded_at')->get()->groupBy('sensor_id')
-            ->map(fn($r) => $r->first()->value)->avg();
+        $avgHumidity = SensorReading::whereIn('id', function ($q) {
+            $q->selectRaw('MAX(id)')
+              ->from('sensor_readings')
+              ->groupBy('room_id');
+        })->avg('humidity');
 
-        $activeAc    = AcUnit::where('is_active', true)->count();
-        $totalAc     = AcUnit::count();
+        $activeAc     = AcUnit::where('is_active', true)->count();
+        $totalAc      = AcUnit::count();
         $currentPower = AcUnit::where('is_active', true)->sum('power_kw');
         $energyToday  = round($currentPower * 11.5, 1);
 
         $recentAlerts = Alert::with('room')->latest()->limit(4)->get();
 
-        // Load first available floor with canvas_data for dashboard display
-        $displayFloor = Floor::with([
-            'building',
-            'rooms.sensors.readings' => function ($q) {
-                $q->latest('recorded_at')->limit(1);
-            },
-            'rooms.acUnits',
-        ])->where(function ($q) {
-            $q->whereNotNull('plan_file_path')->orWhereNotNull('canvas_data');
-        })->latest()->first();
+        // Load floor untuk denah
+        $displayFloor = Floor::with(['building', 'rooms.acUnits'])
+            ->where(function ($q) {
+                $q->whereNotNull('plan_file_path')->orWhereNotNull('canvas_data');
+            })->latest()->first();
 
         // Pre-build all room detail data as JSON (eliminates AJAX roundtrip)
         $roomDetailMap = $rooms->mapWithKeys(function ($room) {
-            $readings = [];
-            foreach ($room->sensors as $sensor) {
-                $latest = $sensor->readings->first();
-                $readings[$sensor->type] = [
-                    'value'     => $latest ? $latest->value : null,
-                    'unit'      => $sensor->unit,
-                    'is_active' => $sensor->is_active,
-                ];
-            }
-            $ac = $room->acUnits->first();
+            $latest = $room->latestReading;
+            $ac     = $room->acUnits->first();
             return [$room->id => [
                 'id'               => $room->id,
                 'name'             => $room->name,
                 'status'           => $room->status,
                 'updated_at'       => $room->updated_at->format('d/m/Y H:i'),
-                'temperature'      => $readings['temperature'] ?? null,
-                'humidity'         => $readings['humidity'] ?? null,
-                'co2'              => $readings['co2'] ?? null,
+                'temperature'      => $latest ? ['value' => $latest->temperature, 'unit' => '°C'] : null,
+                'humidity'         => $latest ? ['value' => $latest->humidity,    'unit' => '%']  : null,
+                'energy'           => $latest ? ['value' => $latest->energy,      'unit' => 'kWh'] : null,
+                'power'            => $latest ? ['value' => $latest->power,       'unit' => 'W']  : null,
                 'ac_status'        => $ac ? ($ac->is_active ? 'ON' : 'OFF') : 'N/A',
-                'sensor_connected' => $room->sensors->where('is_active', true)->count() > 0,
+                'sensor_connected' => $latest !== null,
             ]];
         });
 
@@ -90,31 +82,21 @@ class DashboardController extends Controller
 
     public function roomDetail(int $id): JsonResponse
     {
-        $room = Room::with(['sensors.readings' => function ($q) {
-            $q->latest('recorded_at')->limit(1);
-        }, 'acUnits'])->findOrFail($id);
-
-        $readings = [];
-        foreach ($room->sensors as $sensor) {
-            $latest = $sensor->readings->first();
-            $readings[$sensor->type] = [
-                'value'     => $latest ? $latest->value : null,
-                'unit'      => $sensor->unit,
-                'is_active' => $sensor->is_active,
-            ];
-        }
-        $ac = $room->acUnits->first();
+        $room   = Room::with(['latestReading', 'acUnits'])->findOrFail($id);
+        $latest = $room->latestReading;
+        $ac     = $room->acUnits->first();
 
         return response()->json([
             'id'               => $room->id,
             'name'             => $room->name,
             'status'           => $room->status,
             'updated_at'       => $room->updated_at->format('d/m/Y H:i'),
-            'temperature'      => $readings['temperature'] ?? null,
-            'humidity'         => $readings['humidity'] ?? null,
-            'co2'              => $readings['co2'] ?? null,
+            'temperature'      => $latest ? ['value' => $latest->temperature, 'unit' => '°C'] : null,
+            'humidity'         => $latest ? ['value' => $latest->humidity,    'unit' => '%']  : null,
+            'energy'           => $latest ? ['value' => $latest->energy,      'unit' => 'kWh'] : null,
+            'power'            => $latest ? ['value' => $latest->power,       'unit' => 'W']  : null,
             'ac_status'        => $ac ? ($ac->is_active ? 'ON' : 'OFF') : 'N/A',
-            'sensor_connected' => $room->sensors->where('is_active', true)->count() > 0,
+            'sensor_connected' => $latest !== null,
         ]);
     }
 }

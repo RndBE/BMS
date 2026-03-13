@@ -38,18 +38,13 @@ class Room extends Model
         return $this->hasMany(Alert::class);
     }
 
-    public function getLatestReadings(): array
+    public function sensorReadings(): HasMany
     {
-        $readings = [];
-        foreach ($this->sensors as $sensor) {
-            $latest = $sensor->readings()->latest('recorded_at')->first();
-            if ($latest) {
-                $readings[$sensor->type] = [
-                    'value' => $latest->value,
-                    'unit'  => $sensor->unit,
-                ];
-            }
-        }
-        return $readings;
+        return $this->hasMany(SensorReading::class);
+    }
+
+    public function latestReading()
+    {
+        return $this->hasOne(SensorReading::class)->latestOfMany('waktu');
     }
 }

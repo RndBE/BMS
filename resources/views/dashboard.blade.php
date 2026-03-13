@@ -87,7 +87,7 @@
                 </div>
 
                 {{-- Status legend overlay (bottom-left) --}}
-                <div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm rounded-xl shadow-sm border border-slate-100 px-5 py-5 z-10">
+                <div class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-xl shadow-sm border border-slate-100 px-5 py-5 z-10">
                     <div class="text-[16px] font-semibold text-slate-600 mb-1.5">Status Ruangan</div>
                     <div class="flex flex-col gap-1">
                         <div class="flex items-center gap-1.5 text-[16px] text-slate-900">
@@ -196,7 +196,8 @@ const STATUS_COLORS   = { normal: '#22c55e', warning: '#f59e0b', poor: '#ef4444'
 <script>
 /* ═══ DASHBOARD FABRIC.JS CANVAS (Read-Only, Scaled to Fit) ═══ */
 let dashCanvas;
-let _natW = 900, _natH = 560; // natural canvas dimensions from editor
+let _natW = 900, _natH = 560; // natural canvas size from editor
+let _zoom = 1;
 
 window.addEventListener('load', initDashCanvas);
 
@@ -213,52 +214,46 @@ function initDashCanvas() {
         } catch(e) {}
     }
 
-    // ── Canvas fills full wrapper width, height follows natural aspect ratio ──
-    const wrapperW = wrapper.clientWidth || 900;
-    const zoom     = wrapperW / _natW;          // scale based on width only → always full width
-    const displayW = wrapperW;
-    const displayH = Math.round(_natH * zoom);
+    // ── Display size: full wrapper width, height follows aspect ratio ──
+    const dispW = wrapper.clientWidth || 900;
+    _zoom       = dispW / _natW;
+    const dispH = Math.round(_natH * _zoom);
 
-    // ── Create canvas at DISPLAY size ──
+    // ── Canvas dibuat di display size ──
     dashCanvas = new fabric.Canvas('dash-canvas', {
-        width:  displayW,
-        height: displayH,
+        width:  dispW,
+        height: dispH,
         selection: false,
         backgroundColor: '#f1f5f9',
     });
+    wrapper.style.height = dispH + 'px';
 
-    // Set wrapper height to match scaled canvas
-    wrapper.style.height = displayH + 'px';
+    // ── Viewport transform: semua objek di-render seolah di natural coords ──
+    dashCanvas.setViewportTransform([_zoom, 0, 0, _zoom, 0, 0]);
 
-    // ── Apply Fabric viewport transform (zoom) ──
-    // All objects and background image will render at the scaled size,
-    // but their internal coordinates stay at natural size → markers match editor perfectly
-    dashCanvas.setViewportTransform([zoom, 0, 0, zoom, 0, 0]);
-
-    // ── Load drawing shapes from canvas_data ──
+    // ── Load drawing shapes (natural coords, viewport transform handles scaling) ──
     if (CANVAS_DATA) {
-        // Fix Fabric.js bug: 'alphabetical' → 'alphabetic' (invalid CanvasTextBaseline)
-        const cleanJson = CANVAS_DATA.replace(/"textBaseline"\s*:\s*"alphabetical"/g, '"textBaseline":"alphabetic"');
+        const cleanJson = CANVAS_DATA
+            .replace(/"textBaseline"\s*:\s*"alphabetical"/g, '"textBaseline":"alphabetic"');
         dashCanvas.loadFromJSON(cleanJson, () => {
-            // Drawings are read-only
             dashCanvas.getObjects().forEach(obj => {
                 obj.set({ selectable: false, evented: false, hoverCursor: 'default' });
             });
             dashCanvas.renderAll();
-            loadBgAndMarkers(zoom);
+            loadBgAndMarkers();
         });
     } else {
-        loadBgAndMarkers(zoom);
+        loadBgAndMarkers();
     }
 
     document.getElementById('dashCanvasHint')?.remove();
     feather.replace();
 }
 
-function loadBgAndMarkers(zoom) {
+function loadBgAndMarkers() {
     if (FLOOR_PLAN_URL) {
         fabric.Image.fromURL(FLOOR_PLAN_URL, function(img) {
-            // Scale image to fill natural canvas size; viewport zoom handles the rest
+            // Scale to natural size; viewport transform handles the rest
             const scaleX = _natW / img.width;
             const scaleY = _natH / img.height;
             const scale  = Math.min(scaleX, scaleY);
@@ -290,31 +285,39 @@ const DASH_STATUS_BG = {
 };
 
 function addRoomMarkers() {
+    // Marker di natural coords — viewport transform handles scaling ke display
+    // Counter-scale dimensi dengan 1/_zoom agar ukuran marker tetap konstan di layar
+    const inv      = 1 / _zoom;
+    const sqSize   = 36 * inv;   // 36px di layar
+    const iconSize = 24 * inv;   // 24px di layar
+    const fSize    = 11 * inv;   // 11px font
+    const labelTop = 28 * inv;
+
     FLOOR_ROOMS.forEach(room => {
-        // Position in NATURAL coordinates — viewport transform scales them to display
+        // Posisi dalam natural coords (viewport transform scale ke display)
         const x = (room.marker_x / 100) * _natW;
         const y = (room.marker_y / 100) * _natH;
         const bg      = DASH_STATUS_BG[room.status]    || DASH_STATUS_BG.normal;
         const iconUrl = DASH_STATUS_ICONS[room.status] || DASH_STATUS_ICONS.normal;
 
         const square = new fabric.Rect({
-            width: 36, height: 36,
-            fill: bg, stroke: 'white', strokeWidth: 2,
-            rx: 8, ry: 8,
-            shadow: new fabric.Shadow({ color: 'rgba(0,0,0,0.20)', blur: 8, offsetX: 0, offsetY: 3 }),
+            width: sqSize, height: sqSize,
+            fill: bg, stroke: 'white', strokeWidth: 2 * inv,
+            rx: 8 * inv, ry: 8 * inv,
+            shadow: new fabric.Shadow({ color: 'rgba(0,0,0,0.20)', blur: 8 * inv, offsetX: 0, offsetY: 3 * inv }),
             originX: 'center', originY: 'center',
         });
         const label = new fabric.Text(room.name, {
-            fontSize: 11, fill: '#1e293b', fontFamily: 'Inter, sans-serif', fontWeight: '700',
-            backgroundColor: 'rgba(255,255,255,0.88)', padding: 2,
+            fontSize: fSize, fill: '#1e293b', fontFamily: 'Inter, sans-serif', fontWeight: '700',
+            backgroundColor: 'rgba(255,255,255,0.88)', padding: 2 * inv,
             originX: 'center', originY: 'center',
-            top: 28,
+            top: labelTop,
         });
 
         fabric.Image.fromURL(iconUrl, function(icon) {
             icon.set({
-                scaleX: 24 / icon.width,
-                scaleY: 24 / icon.height,
+                scaleX: iconSize / icon.width,
+                scaleY: iconSize / icon.height,
                 originX: 'center', originY: 'center',
                 top: 0,
             });
@@ -358,6 +361,14 @@ function selectRoom(roomId) {
     renderRoomDetail(room);
 }
 
+function fmtVal(v) {
+    if (v === null || v === undefined) return '-';
+    const n = parseFloat(v);
+    if (isNaN(n)) return v;
+    // Jika punya desimal bermakna, tampilkan maks 2 angka di belakang koma; jika tidak, tampil bulat
+    return n % 1 === 0 ? n.toString() : parseFloat(n.toFixed(2)).toString();
+}
+
 function renderRoomDetail(room) {
     const statusColors = {
         normal:  'bg-green-100 text-green-700',
@@ -365,9 +376,9 @@ function renderRoomDetail(room) {
         poor:    'bg-red-100 text-red-700',
     };
     const statusLabel = { normal: 'Normal', warning: 'Warning', poor: 'Poor' }[room.status] || room.status;
-    const temp = room.temperature ? `${room.temperature.value} ${room.temperature.unit}` : '-';
-    const hum  = room.humidity    ? `${room.humidity.value} ${room.humidity.unit}` : '-';
-    const co2  = room.co2         ? `${room.co2.value} ${room.co2.unit}` : '-';
+    const temp = room.temperature ? `${fmtVal(room.temperature.value)} ${room.temperature.unit}` : '-';
+    const hum  = room.humidity    ? `${fmtVal(room.humidity.value)} ${room.humidity.unit}`    : '-';
+    const co2  = room.co2         ? `${fmtVal(room.co2.value)} ${room.co2.unit}`              : '-';
     const acColor   = room.ac_status === 'ON' ? 'text-green-500' : 'text-red-500';
     const sensorTxt = room.sensor_connected ? '<span class="text-green-500 font-semibold">Terhubung</span>' : '<span class="text-red-500 font-semibold">Offline</span>';
 
@@ -413,8 +424,8 @@ function showMarkerTooltip(event, roomId) {
         poor:    { bg: '#fee2e2', color: '#b91c1c', icon: '● Poor' },
     };
     const cfg = statusConfig[room.status] || statusConfig.normal;
-    const temp = room.temperature ? `${room.temperature.value} ${room.temperature.unit}` : '-';
-    const hum  = room.humidity    ? `${room.humidity.value} ${room.humidity.unit}` : '-';
+    const temp = room.temperature ? `${fmtVal(room.temperature.value)} ${room.temperature.unit}` : '-';
+    const hum  = room.humidity    ? `${fmtVal(room.humidity.value)} ${room.humidity.unit}`    : '-';
     const ac   = room.ac_status || '-';
 
     document.getElementById('tt-name').textContent = room.name;

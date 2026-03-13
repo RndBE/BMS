@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('sensors', function (Blueprint $table) {
             $table->id();
             $table->foreignId('room_id')->constrained('rooms')->onDelete('cascade');
-            $table->enum('type', ['temperature', 'humidity', 'co2']);
-            $table->string('unit'); // °C, %, ppm
+            $table->enum('type', ['temperature', 'humidity', 'energy', 'power']);
+            $table->string('unit');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

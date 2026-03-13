@@ -13,9 +13,7 @@ class FloorController extends Controller
 {
     public function show(Floor $floor)
     {
-        $floor->load(['building', 'rooms.sensors.readings' => function ($q) {
-            $q->latest('recorded_at')->limit(1);
-        }, 'rooms.acUnits']);
+        $floor->load(['building', 'rooms.latestReading', 'rooms.acUnits']);
 
         $buildings = Building::with('floors')->get();
         return view('admin.floors.editor', compact('floor', 'buildings'));
