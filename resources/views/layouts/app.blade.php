@@ -28,11 +28,7 @@
         body.sidebar-collapsed .nav-item svg,
         body.sidebar-collapsed .nav-item i     { margin: 0 auto; }
 
-        /* Active nav indicator */
-        .nav-item.active::before {
-            content: ''; position: absolute; left: 0; top: 20%; height: 60%;
-            width: 3px; background: #4f7dfc; border-radius: 0 3px 3px 0;
-        }
+
     </style>
 </head>
 <body class="font-['Inter'] bg-slate-100 flex min-h-screen">
@@ -49,31 +45,66 @@
     </div>
 
     <nav class="py-4 flex-1">
-        <a href="{{ route('dashboard') }}" class="nav-item flex items-center gap-3 px-5 py-[11px] text-slate-500 no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:text-slate-900 hover:bg-slate-100 {{ request()->routeIs('dashboard') ? 'active text-slate-900 bg-slate-100' : '' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <a href="{{ route('dashboard') }}" class="nav-item flex items-center gap-3 px-5 py-[11px] no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 {{ request()->routeIs('dashboard') ? 'bg-red-700 text-white' : 'text-slate-500' }}">
+            <img src="{{ asset('icons/dashboard.svg') }}" alt="Dashboard" class="w-[18px] h-[18px] shrink-0">
             <span class="sidebar-label">Dashboard</span>
         </a>
-        <a href="{{ route('analisa-data.index') }}" class="nav-item flex items-center gap-3 px-5 py-[11px] text-slate-500 no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:text-slate-900 hover:bg-slate-100 {{ request()->routeIs('analisa-data.*') ? 'active text-slate-900 bg-slate-100' : '' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <a href="{{ route('analisa-data.index') }}" class="nav-item flex items-center gap-3 px-5 py-[11px] no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 {{ request()->routeIs('analisa-data.*') ? 'bg-red-700 text-white' : 'text-slate-500' }}">
+            <img src="{{ asset('icons/analisa-data.svg') }}" alt="Analisa Data" class="w-[18px] h-[18px] shrink-0">
             <span class="sidebar-label">Analisa Data</span>
         </a>
-        <a href="#" class="nav-item flex items-center gap-3 px-5 py-[11px] text-slate-500 no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:text-slate-900 hover:bg-slate-100">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <a href="{{ route('energi.index') }}" class="nav-item flex items-center gap-3 px-5 py-[11px] no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 {{ request()->routeIs('energi.*') ? 'bg-red-700 text-white' : 'text-slate-500' }}">
+            <img src="{{ asset('icons/energi-bar.svg') }}" alt="Energi" class="w-[18px] h-[18px] shrink-0">
             <span class="sidebar-label">Energi</span>
         </a>
         <a href="#" class="nav-item flex items-center gap-3 px-5 py-[11px] text-slate-500 no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:text-slate-900 hover:bg-slate-100">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            <span class="sidebar-label">Peringatan</span>
+            <img src="{{ asset('icons/log.svg') }}" alt="Log Peringatan" class="w-[18px] h-[18px] shrink-0">
+            <span class="sidebar-label">Log Peringatan</span>
         </a>
-        <a href="#" class="nav-item flex items-center gap-3 px-5 py-[11px] text-slate-500 no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:text-slate-900 hover:bg-slate-100">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
-            <span class="sidebar-label">Pengaturan</span>
-        </a>
+        {{-- Pengaturan Accordion --}}
+        <div id="nav-pengaturan">
+            {{-- Trigger --}}
+            <button onclick="togglePengaturan()"
+                class="nav-item w-full flex items-center gap-3 px-5 py-[11px] text-slate-500 text-[13.5px] font-medium transition-all duration-200 hover:text-slate-900 hover:bg-slate-100 cursor-pointer bg-transparent border-0">
+                {{-- pengaturan icon --}}
+                <img src="{{ asset('icons/pengaturan.svg') }}" alt="Pengaturan" class="w-[18px] h-[18px] shrink-0">
+                <span class="sidebar-label flex-1 text-left">Pengaturan</span>
+                {{-- chevron --}}
+                <svg id="pengaturan-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sidebar-label shrink-0 transition-transform duration-200"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+
+            {{-- Sub-menu --}}
+            <div id="pengaturan-sub" class="overflow-hidden transition-all duration-200" style="max-height:0;">
+                @php
+                    $subMenus = [
+                        ['label' => 'Umum',        'route' => 'pengaturan.umum',        'img' => 'umum.svg'],
+                        ['label' => 'Konfigurasi', 'route' => 'pengaturan.konfigurasi', 'img' => 'konfig.svg'],
+                        ['label' => 'Peringatan',  'route' => '',                        'img' => 'peringatan.svg'],
+                        ['label' => 'Pengguna',    'route' => '',                        'img' => 'pengguna.svg'],
+                    ];
+                @endphp
+                @foreach($subMenus as $sub)
+                    @php
+                        $isActive = $sub['route'] && request()->routeIs($sub['route']);
+                        $href     = $sub['route'] ? route($sub['route']) : '#';
+                    @endphp
+                    <a href="{{ $href }}"
+                        class="flex items-center gap-3 pl-12 pr-5 py-[9px] no-underline text-[13px] font-medium transition-all duration-150
+                                {{ $isActive
+                                    ? 'bg-red-700 text-white'
+                                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50' }}">
+                        <img src="{{ asset('icons/' . $sub['img']) }}" alt="{{ $sub['label'] }}"
+                             class="w-[15px] h-[15px] shrink-0 {{ $isActive ? 'opacity-90' : 'opacity-70' }}">
+                        <span class="sidebar-label">{{ $sub['label'] }}</span>
+                    </a>
+                @endforeach
+            </div>
+        </div>
 
         @if(auth()->user()->hasRole('superadmin'))
         <div class="sidebar-section-label mx-5 mt-3 mb-1.5 text-[10px] font-semibold text-slate-400 tracking-[.8px] uppercase whitespace-nowrap overflow-hidden">Admin</div>
-        <a href="{{ route('admin.buildings.index') }}" class="nav-item flex items-center gap-3 px-5 py-[11px] text-slate-500 no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:text-slate-900 hover:bg-slate-100 {{ request()->routeIs('admin.*') ? 'active text-slate-900 bg-slate-100' : '' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+        <a href="{{ route('admin.buildings.index') }}" class="nav-item flex items-center gap-3 px-5 py-[11px] no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 {{ request()->routeIs('admin.*') ? 'bg-red-700 text-white' : 'text-slate-500' }}">
+            <img src="{{ asset('icons/pengaturan.svg') }}" alt="Manajemen Denah" class="w-[18px] h-[18px] shrink-0">
             <span class="sidebar-label">Manajemen Denah</span>
         </a>
         @endif
@@ -164,6 +195,39 @@
         document.body.classList.add('sidebar-collapsed');
         updateToggleIcon(true);
     }
+
+    // ── Pengaturan Accordion ──
+    const PENG_KEY = 'bms_pengaturan_open';
+
+    function togglePengaturan() {
+        const sub     = document.getElementById('pengaturan-sub');
+        const chevron = document.getElementById('pengaturan-chevron');
+        const isOpen  = sub.style.maxHeight !== '0px' && sub.style.maxHeight !== '';
+
+        if (isOpen) {
+            sub.style.maxHeight = '0';
+            chevron.style.transform = 'rotate(0deg)';
+            localStorage.setItem(PENG_KEY, '0');
+        } else {
+            sub.style.maxHeight = sub.scrollHeight + 'px';
+            chevron.style.transform = 'rotate(180deg)';
+            localStorage.setItem(PENG_KEY, '1');
+        }
+    }
+
+    // Restore accordion state — dari localStorage ATAU jika sedang di halaman pengaturan
+    const isPengaturanPage = window.location.pathname.startsWith('/pengaturan');
+    if (localStorage.getItem(PENG_KEY) === '1' || isPengaturanPage) {
+        const sub     = document.getElementById('pengaturan-sub');
+        const chevron = document.getElementById('pengaturan-chevron');
+        if (sub) {
+            sub.style.maxHeight = sub.scrollHeight + 'px';
+            chevron.style.transform = 'rotate(180deg)';
+            if (isPengaturanPage) localStorage.setItem(PENG_KEY, '1');
+        }
+    }
 </script>
+@stack('modals')
+@stack('scripts')
 </body>
 </html>

@@ -233,9 +233,7 @@
                 <tbody>
                     @forelse($tableData as $row)
                         <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                            <td class="px-5 py-3 text-slate-600">
-                                {{ \Carbon\Carbon::parse($row['waktu'])->format('H:i') }}
-                            </td>
+                            <td class="px-5 py-3 text-slate-600">{{ $row['waktu'] }}</td>
                             <td class="px-5 py-3 text-slate-700 font-medium">
                                 {{ $row['nilai'] }} {{ $unit }}
                             </td>
@@ -259,58 +257,6 @@
                         <tr>
                             <td colspan="3" class="px-5 py-10 text-center text-slate-400 text-[13px]">
                                 Tidak ada data untuk periode ini.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    {{-- ── TABEL ENERGI (selalu tampil, terpisah) ────────────────────────────── --}}
-    <div class="bg-white rounded-xl border border-slate-100 shadow-sm">
-        <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-            <img src="{{ asset('icons/energi.svg') }}" class="w-5 h-5">
-            <span class="text-[14px] font-semibold text-slate-800">Tabel Data Energi (kWh)</span>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-[13px]">
-                <thead>
-                    <tr class="border-b border-slate-100">
-                        <th class="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Waktu</th>
-                        <th class="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Energi (kWh)</th>
-                        <th class="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($energyTableData as $row)
-                        <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                            <td class="px-5 py-3 text-slate-600">
-                                {{ \Carbon\Carbon::parse($row['waktu'])->format('H:i') }}
-                            </td>
-                            <td class="px-5 py-3 text-slate-700 font-medium">
-                                {{ $row['nilai'] }} kWh
-                            </td>
-                            <td class="px-5 py-3">
-                                @if($row['status'] === 'normal')
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-green-600 bg-green-50 rounded-full px-2.5 py-0.5">
-                                        <img src="{{ asset('icons/normal.svg') }}" alt="Normal" class="w-5 h-5"> Normal
-                                    </span>
-                                @elseif($row['status'] === 'warning')
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 bg-orange-50 rounded-full px-2.5 py-0.5">
-                                        <img src="{{ asset('icons/warning.svg') }}" alt="Warning" class="w-5 h-5"> Warning
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-red-600 bg-red-50 rounded-full px-2.5 py-0.5">
-                                        <img src="{{ asset('icons/poor.svg') }}" alt="Poor" class="w-5 h-5"> Poor
-                                    </span>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="3" class="px-5 py-10 text-center text-slate-400 text-[13px]">
-                                Tidak ada data energi untuk periode ini.
                             </td>
                         </tr>
                     @endforelse
@@ -348,9 +294,9 @@
     };
 
     function getStatus(val) {
-        if (val < th.warnLower || val > th.warnUpper) return { label: 'Poor',    icon: icons.poor    };
-        if (val < th.normalMin || val > th.normalMax) return { label: 'Warning',  icon: icons.warning };
-        return                                               { label: 'Normal',   icon: icons.normal  };
+        if (val < th.warnLower || val > th.warnUpper) return { label: 'Poor',    icon: icons.poor,    color: '#ef4444' };
+        if (val < th.normalMin || val > th.normalMax) return { label: 'Warning',  icon: icons.warning, color: '#f59e0b' };
+        return                                               { label: 'Normal',   icon: icons.normal,  color: '#22c55e' };
     }
 
     // ── Custom HTML Tooltip ──────────────────────────────────────────────────
@@ -377,11 +323,14 @@
         const st   = getStatus(val);
 
         tooltipEl.innerHTML = `
-            <div style="font-weight:700; color:#000000; margin-bottom:4px; text-align:center;">${lbl}</div>
-            <div style="margin-bottom:3px; font-weight:600;">${val} ${unit}</div>
-            <div style="display:flex; align-items:center; gap:5px;">
-                <img src="${st.icon}" style="width:16px; height:16px;">
-                <span style="font-weight:600;">${st.label}</span>
+            <div style="font-weight:700;font-size:13px;color:#0f172a;margin-bottom:6px;text-align:center">${lbl}</div>
+            <div style="display:flex;align-items:center;margin-bottom:3px;color:#475569">
+                <span style="display:inline-block;width:13px;height:13px;border-radius:50%;background:${st.color};margin-right:6px;flex-shrink:0"></span>
+                ${val} ${unit}
+            </div>
+            <div style="display:flex;align-items:center;color:#475569">
+                <img src="${st.icon}" style="width:16px;height:16px;margin-right:6px;flex-shrink:0">
+                <span>${st.label}</span>
             </div>
         `;
 

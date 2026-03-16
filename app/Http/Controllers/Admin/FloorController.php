@@ -16,7 +16,13 @@ class FloorController extends Controller
         $floor->load(['building', 'rooms.latestReading', 'rooms.acUnits']);
 
         $buildings = Building::with('floors')->get();
-        return view('admin.floors.editor', compact('floor', 'buildings'));
+
+        // Ruangan tersedia = yang belum di-assign ke lantai manapun
+        $availableRooms = Room::whereNull('floor_id')
+            ->orderBy('name')
+            ->get(['id', 'name', 'code', 'status']);
+
+        return view('admin.floors.editor', compact('floor', 'buildings', 'availableRooms'));
     }
 
     public function store(Request $request)
@@ -84,6 +90,25 @@ class FloorController extends Controller
 
     public function addRoom(Request $request, Floor $floor)
     {
+        // Jika room_id dikirim → assign existing room ke lantai ini
+        if ($request->filled('room_id')) {
+            $request->validate([
+                'room_id'  => 'required|exists:rooms,id',
+                'marker_x' => 'required|numeric|min:0|max:100',
+                'marker_y' => 'required|numeric|min:0|max:100',
+            ]);
+
+            $room = Room::findOrFail($request->room_id);
+            $room->update([
+                'floor_id' => $floor->id,
+                'marker_x' => $request->marker_x,
+                'marker_y' => $request->marker_y,
+            ]);
+
+            return response()->json(['success' => true, 'room' => $room->fresh()]);
+        }
+
+        // Fallback: buat room baru (tidak digunakan dari drag-drop, tapi dipertahankan)
         $data = $request->validate([
             'name'     => 'required|string|max:255',
             'code'     => 'required|string|max:20',

@@ -30,11 +30,14 @@ class DatabaseSeeder extends Seeder
         // BMS data seeders (order matters for FK constraints)
         $this->call([
             RoomSeeder::class,
+            SensorGroupSeeder::class,
             SensorSeeder::class,
+            SensorParameterSeeder::class,
             SensorReadingSeeder::class,
             AcUnitSeeder::class,
             AlertSeeder::class,
             BuildingSeeder::class,
+            SettingSeeder::class,
         ]);
     }
 }

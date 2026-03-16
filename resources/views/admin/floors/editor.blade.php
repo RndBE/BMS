@@ -60,30 +60,31 @@
             @endif
         </div>
 
-        {{-- Tambah Ruangan --}}
+        {{-- Ruangan Tersedia (Drag ke Canvas) --}}
         <div>
-            <div class="text-[13px] font-bold text-slate-800 border-b border-slate-100 pb-2">➕ Tambah Ruangan</div>
-            <p class="text-[11px] text-slate-400 leading-relaxed mt-1.5">Isi form lalu klik di canvas untuk menempatkan marker ruangan.</p>
-            <div class="mb-2.5">
-                <label class="block text-[11px] font-semibold text-slate-500 mb-1">Nama Ruangan *</label>
-                <input type="text" id="newRoomName" placeholder="Ruang Rapat" class="w-full px-2.5 py-2 border border-slate-200 rounded-lg text-[12px] box-border outline-none focus:border-blue-400">
+            <div class="text-[13px] font-bold text-slate-800 border-b border-slate-100 pb-2">📋 Ruangan Tersedia</div>
+            <p class="text-[11px] text-slate-400 leading-relaxed mt-1.5">Drag ruangan ke canvas untuk menempatkan marker.</p>
+            <div class="flex flex-col gap-1.5 mt-2 max-h-[220px] overflow-y-auto" id="availableRoomsList">
+                @forelse($availableRooms as $ar)
+                    @php
+                        $arColors = ['normal' => 'bg-green-500', 'warning' => 'bg-amber-500', 'poor' => 'bg-red-500'];
+                    @endphp
+                    <div class="flex items-center gap-2 px-2.5 py-2 rounded-lg bg-blue-50 border border-blue-200 text-[12px] cursor-grab select-none hover:bg-blue-100 transition-colors"
+                        draggable="true"
+                        id="avail-room-{{ $ar->id }}"
+                        data-room-id="{{ $ar->id }}"
+                        data-room-name="{{ $ar->name }}"
+                        data-room-code="{{ $ar->code }}"
+                        data-room-status="{{ $ar->status ?? 'normal' }}"
+                        ondragstart="onRoomDragStart(event, this)">
+                        <span class="w-2.5 h-2.5 rounded-full shrink-0 {{ $arColors[$ar->status ?? 'normal'] ?? 'bg-green-500' }}"></span>
+                        <span class="flex-1 font-medium text-slate-700 truncate">{{ $ar->name }}</span>
+                        <span class="text-[10px] text-slate-400 font-mono shrink-0">{{ $ar->code }}</span>
+                    </div>
+                @empty
+                    <p class="text-[11px] text-slate-400 text-center py-3" id="availableEmptyMsg">Semua ruangan sudah di-assign ke lantai.</p>
+                @endforelse
             </div>
-            <div class="mb-2.5">
-                <label class="block text-[11px] font-semibold text-slate-500 mb-1">Kode *</label>
-                <input type="text" id="newRoomCode" placeholder="RR-01" class="w-full px-2.5 py-2 border border-slate-200 rounded-lg text-[12px] box-border outline-none focus:border-blue-400 uppercase">
-            </div>
-            <div class="mb-2.5">
-                <label class="block text-[11px] font-semibold text-slate-500 mb-1">Status</label>
-                <select id="newRoomStatus" class="w-full px-2.5 py-2 border border-slate-200 rounded-lg text-[12px] box-border outline-none focus:border-blue-400">
-                    <option value="normal">Normal</option>
-                    <option value="warning">Warning</option>
-                    <option value="poor">Poor</option>
-                </select>
-            </div>
-            <button id="btnAddMode" onclick="toggleAddMode()"
-                class="w-full py-2.5 rounded-lg border-none text-[13px] font-semibold cursor-pointer bg-[#4f7dfc] text-white hover:bg-[#3a65e0] transition-colors">
-                <span id="addModeLabel">🎯 Aktifkan Mode Penempatan</span>
-            </button>
         </div>
 
         {{-- Daftar Ruangan --}}
@@ -278,9 +279,9 @@
     $canvasData = $floor->canvas_data;
 @endphp
 <script>
-const ROOMS_DATA     = {!! $roomsJson !!};
-const FLOOR_PLAN_URL = {!! json_encode($planUrl) !!};
-const CANVAS_DATA    = {!! json_encode($canvasData) !!};
+const ROOMS_DATA      = {!! $roomsJson !!};
+const FLOOR_PLAN_URL  = {!! json_encode($planUrl) !!};
+const CANVAS_DATA     = {!! json_encode($canvasData) !!};
 const ROUTES = {
     markerUpdate:  '{{ route('admin.rooms.marker.update', ['room' => '__ID__']) }}',
     roomDestroy:   '{{ route('admin.rooms.destroy', ['room' => '__ID__']) }}',
@@ -295,7 +296,7 @@ const CSRF = '{{ csrf_token() }}';
 /* ═══════════════════════════════════════════════
 FABRIC.JS CANVAS EDITOR — with Drawing Tools
 ═══════════════════════════════════════════════ */
-let canvas, bgImage, addMode = false, currentZoom = 1;
+let canvas, bgImage, currentZoom = 1;
 let currentTool = 'select';
 let isDrawing = false, drawOrigin = null, activeDrawObj = null;
 const STATUS_COLORS = { normal: '#22c55e', warning: '#f59e0b', poor: '#ef4444' };
@@ -364,15 +365,12 @@ function initCanvas() {
 
     updateToolStyles();
     feather.replace();
+    initDropZone();
 }
 
 /* ── Tool Selection ── */
 function setTool(tool) {
     currentTool = tool;
-    addMode = false;
-    document.getElementById('addModeLabel').textContent = '🎯 Aktifkan Mode Penempatan';
-    document.getElementById('btnAddMode').style.background = '';
-    document.getElementById('modeIndicator').textContent = '';
 
     if (tool === 'select') {
         canvas.isDrawingMode = false;
@@ -409,8 +407,6 @@ function updateActiveWidth() {
 
 /* ── Mouse Events for Drawing ── */
 function onMouseDown(opt) {
-    // If in add-marker mode, let addRoom logic handle it
-    if (addMode) { onCanvasClick(opt); return; }
     if (currentTool === 'select') return;
 
     const ptr = canvas.getPointer(opt.e);
@@ -776,28 +772,75 @@ document.getElementById('modalEditRoom').addEventListener('click', function(e) {
     if (e.target === this) closeEditModal();
 });
 
-/* ── Add Mode Toggle ── */
-function toggleAddMode() {
-    addMode = !addMode;
-    const btn   = document.getElementById('btnAddMode');
-    const label = document.getElementById('addModeLabel');
-    const ind   = document.getElementById('modeIndicator');
-    if (addMode) {
-        currentTool = 'addMarker';
-        btn.style.background = '#ef4444';
-        label.textContent = '✕ Batalkan Penempatan';
-        ind.textContent = '🎯 Mode Penempatan Aktif — Klik di canvas';
-        canvas.defaultCursor = 'crosshair';
-        canvas.selection = false;
-    } else {
-        currentTool = 'select';
-        btn.style.background = '';
-        label.textContent = '🎯 Aktifkan Mode Penempatan';
-        ind.textContent = '';
-        canvas.defaultCursor = 'default';
-        canvas.selection = true;
-        updateToolStyles();
-    }
+/* ── Drag & Drop: Ruangan dari panel ke canvas ── */
+let _draggedRoom = null;
+
+function onRoomDragStart(event, el) {
+    _draggedRoom = {
+        id:     el.dataset.roomId,
+        name:   el.dataset.roomName,
+        code:   el.dataset.roomCode,
+        status: el.dataset.roomStatus,
+    };
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', el.dataset.roomId);
+    el.classList.add('opacity-50');
+    setTimeout(() => el.classList.remove('opacity-50'), 0);
+}
+
+function initDropZone() {
+    const wrapper = document.getElementById('canvasWrapper');
+
+    wrapper.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        wrapper.classList.add('ring-2', 'ring-blue-400', 'ring-inset');
+    });
+
+    wrapper.addEventListener('dragleave', function(e) {
+        if (!wrapper.contains(e.relatedTarget)) {
+            wrapper.classList.remove('ring-2', 'ring-blue-400', 'ring-inset');
+        }
+    });
+
+    wrapper.addEventListener('drop', function(e) {
+        e.preventDefault();
+        wrapper.classList.remove('ring-2', 'ring-blue-400', 'ring-inset');
+        if (!_draggedRoom) return;
+
+        // Hitung posisi drop relatif ke canvas element
+        const canvasEl = document.getElementById('floor-canvas');
+        const rect     = canvasEl.getBoundingClientRect();
+        const clientX  = e.clientX - rect.left;
+        const clientY  = e.clientY - rect.top;
+
+        // Transform ke natural canvas coords (bagi viewport transform zoom)
+        const vpt  = canvas.viewportTransform;
+        const natX = (clientX - vpt[4]) / vpt[0];
+        const natY = (clientY - vpt[5]) / vpt[3];
+
+        const xPct = Math.max(0, Math.min(100, (natX / _natW) * 100));
+        const yPct = Math.max(0, Math.min(100, (natY / _natH) * 100));
+
+        const room = { ..._draggedRoom };
+        _draggedRoom = null;
+
+        fetch(ROUTES.roomAdd, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+            body: JSON.stringify({ room_id: room.id, marker_x: xPct, marker_y: yPct }),
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.room) {
+                addMarkerToCanvas(data.room.id, data.room.name, data.room.status, xPct, yPct);
+                appendRoomListItem(data.room);
+                removeFromAvailableList(data.room.id);
+                showToast('Ruangan "' + data.room.name + '" ditempatkan ✓');
+            }
+        })
+        .catch(() => showToast('Gagal menempatkan ruangan'));
+    });
 }
 
 /* ── Zoom ── */
@@ -823,7 +866,7 @@ function showToast(msg) {
     t._timer = setTimeout(() => t.classList.add('hidden'), 2500);
 }
 
-/* ── Append room list item (after adding new room) ── */
+/* ── Append room list item (after placing room on canvas) ── */
 function appendRoomListItem(room) {
     const dotColors = { normal: 'bg-green-500', warning: 'bg-amber-500', poor: 'bg-red-500' };
     const li = document.createElement('div');
@@ -842,6 +885,26 @@ function appendRoomListItem(room) {
         </button>
     `;
     document.getElementById('roomListPanel').appendChild(li);
+    // Update jumlah ruangan
+    const cnt = document.getElementById('roomCountLabel');
+    if (cnt) cnt.textContent = parseInt(cnt.textContent || 0) + 1;
+    const cnt2 = document.getElementById('roomCount');
+    if (cnt2) cnt2.textContent = parseInt(cnt2.textContent || 0) + 1;
+}
+
+/* ── Hapus dari daftar "Ruangan Tersedia" setelah di-drop ── */
+function removeFromAvailableList(roomId) {
+    const el = document.getElementById('avail-room-' + roomId);
+    if (el) el.remove();
+    // Tampilkan pesan kosong jika tidak ada lagi
+    const list = document.getElementById('availableRoomsList');
+    if (list && list.children.length === 0) {
+        const msg = document.createElement('p');
+        msg.className = 'text-[11px] text-slate-400 text-center py-3';
+        msg.id = 'availableEmptyMsg';
+        msg.textContent = 'Semua ruangan sudah di-assign ke lantai.';
+        list.appendChild(msg);
+    }
 }
 </script>
 @endsection

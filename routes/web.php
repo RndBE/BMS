@@ -5,6 +5,8 @@ use App\Http\Controllers\Admin\FloorController;
 use App\Http\Controllers\Admin\RoomMarkerController;
 use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EnergyController;
+use App\Http\Controllers\PengaturanController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +21,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Analisa Data
     Route::get('/analisa-data', [AnalysisController::class, 'index'])->name('analisa-data.index');
+
+    // Energi
+    Route::get('/energi', [EnergyController::class, 'index'])->name('energi.index');
+
+    // Pengaturan
+    Route::get('/pengaturan/umum', [PengaturanController::class, 'umum'])->name('pengaturan.umum');
+    Route::post('/pengaturan/umum', [PengaturanController::class, 'umumSave'])->name('pengaturan.umum.save');
+    Route::get('/pengaturan/konfigurasi', [PengaturanController::class, 'konfigurasi'])->name('pengaturan.konfigurasi');
+    Route::post('/pengaturan/rooms', [PengaturanController::class, 'roomStore'])->name('pengaturan.rooms.store');
+    Route::put('/pengaturan/rooms/{room}', [PengaturanController::class, 'roomUpdate'])->name('pengaturan.rooms.update');
+    Route::delete('/pengaturan/rooms/{room}', [PengaturanController::class, 'roomDestroy'])->name('pengaturan.rooms.destroy');
+    Route::get('/pengaturan/sensors/{sensor}', [PengaturanController::class, 'sensorShow'])->name('pengaturan.sensors.show');
+    Route::post('/pengaturan/sensors', [PengaturanController::class, 'sensorStore'])->name('pengaturan.sensors.store');
+    Route::put('/pengaturan/sensors/{sensor}', [PengaturanController::class, 'sensorUpdate'])->name('pengaturan.sensors.update');
+    Route::delete('/pengaturan/sensors/{sensor}', [PengaturanController::class, 'sensorDestroy'])->name('pengaturan.sensors.destroy');
+    Route::post('/pengaturan/acunits', [PengaturanController::class, 'acStore'])->name('pengaturan.acunits.store');
+    Route::put('/pengaturan/acunits/{acUnit}', [PengaturanController::class, 'acUpdate'])->name('pengaturan.acunits.update');
+    Route::delete('/pengaturan/acunits/{acUnit}', [PengaturanController::class, 'acDestroy'])->name('pengaturan.acunits.destroy');
+    Route::patch('/pengaturan/acunits/{acUnit}/toggle', [PengaturanController::class, 'acToggle'])->name('pengaturan.acunits.toggle');
 
     // Room detail API for AJAX tooltip click
     Route::get('/api/rooms/{id}', [DashboardController::class, 'roomDetail'])->name('rooms.detail');

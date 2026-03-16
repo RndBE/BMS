@@ -10,12 +10,15 @@ class Room extends Model
 {
     protected $fillable = [
         'name', 'code', 'floor_id', 'marker_x', 'marker_y',
-        'svg_x', 'svg_y', 'svg_width', 'svg_height', 'status',
+        'svg_x', 'svg_y', 'svg_width', 'svg_height',
+        'status', 'sort_order', 'is_active',
     ];
 
     protected $casts = [
-        'marker_x' => 'float',
-        'marker_y' => 'float',
+        'marker_x'   => 'float',
+        'marker_y'   => 'float',
+        'sort_order' => 'integer',
+        'is_active'  => 'boolean',
     ];
 
     public function floor(): BelongsTo
@@ -41,6 +44,11 @@ class Room extends Model
     public function sensorReadings(): HasMany
     {
         return $this->hasMany(SensorReading::class);
+    }
+
+    public function parameters(): HasMany
+    {
+        return $this->hasMany(SensorParameter::class)->orderBy('sort_order');
     }
 
     public function latestReading()

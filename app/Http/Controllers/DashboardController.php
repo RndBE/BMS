@@ -7,6 +7,7 @@ use App\Models\Alert;
 use App\Models\Floor;
 use App\Models\Room;
 use App\Models\SensorReading;
+use App\Models\Setting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -25,17 +26,18 @@ class DashboardController extends Controller
         ];
 
         // ── Avg sensor: ambil latest reading per room, lalu avg ──
+        // sensor1=Suhu, sensor2=Kelembaban, sensor3=Energi, sensor4=Daya
         $avgTemp = SensorReading::whereIn('id', function ($q) {
             $q->selectRaw('MAX(id)')
               ->from('sensor_readings')
               ->groupBy('room_id');
-        })->avg('temperature');
+        })->avg('sensor1');
 
         $avgHumidity = SensorReading::whereIn('id', function ($q) {
             $q->selectRaw('MAX(id)')
               ->from('sensor_readings')
               ->groupBy('room_id');
-        })->avg('humidity');
+        })->avg('sensor2');
 
         $activeAc     = AcUnit::where('is_active', true)->count();
         $totalAc      = AcUnit::count();
@@ -59,19 +61,22 @@ class DashboardController extends Controller
                 'name'             => $room->name,
                 'status'           => $room->status,
                 'updated_at'       => $room->updated_at->format('d/m/Y H:i'),
-                'temperature'      => $latest ? ['value' => $latest->temperature, 'unit' => '°C'] : null,
-                'humidity'         => $latest ? ['value' => $latest->humidity,    'unit' => '%']  : null,
-                'energy'           => $latest ? ['value' => $latest->energy,      'unit' => 'kWh'] : null,
-                'power'            => $latest ? ['value' => $latest->power,       'unit' => 'W']  : null,
+                'temperature'      => $latest ? ['value' => $latest->sensor1, 'unit' => '°C'] : null,
+                'humidity'         => $latest ? ['value' => $latest->sensor2, 'unit' => '%']  : null,
+                'energy'           => $latest ? ['value' => $latest->sensor3, 'unit' => 'kWh'] : null,
+                'power'            => $latest ? ['value' => $latest->sensor4, 'unit' => 'W']  : null,
                 'ac_status'        => $ac ? ($ac->is_active ? 'ON' : 'OFF') : 'N/A',
                 'sensor_connected' => $latest !== null,
             ]];
         });
 
+        // Refresh interval dari setting (dalam detik)
+        $refreshInterval = (int) Setting::get('refresh_interval', '0');
+
         return view('dashboard', compact(
             'rooms', 'statusCounts', 'avgTemp', 'avgHumidity',
             'activeAc', 'totalAc', 'currentPower', 'energyToday',
-            'recentAlerts', 'displayFloor', 'roomDetailMap'
+            'recentAlerts', 'displayFloor', 'roomDetailMap', 'refreshInterval'
         ));
     }
 
@@ -91,10 +96,10 @@ class DashboardController extends Controller
             'name'             => $room->name,
             'status'           => $room->status,
             'updated_at'       => $room->updated_at->format('d/m/Y H:i'),
-            'temperature'      => $latest ? ['value' => $latest->temperature, 'unit' => '°C'] : null,
-            'humidity'         => $latest ? ['value' => $latest->humidity,    'unit' => '%']  : null,
-            'energy'           => $latest ? ['value' => $latest->energy,      'unit' => 'kWh'] : null,
-            'power'            => $latest ? ['value' => $latest->power,       'unit' => 'W']  : null,
+            'temperature'      => $latest ? ['value' => $latest->sensor1, 'unit' => '°C'] : null,
+            'humidity'         => $latest ? ['value' => $latest->sensor2, 'unit' => '%']  : null,
+            'energy'           => $latest ? ['value' => $latest->sensor3, 'unit' => 'kWh'] : null,
+            'power'            => $latest ? ['value' => $latest->sensor4, 'unit' => 'W']  : null,
             'ac_status'        => $ac ? ($ac->is_active ? 'ON' : 'OFF') : 'N/A',
             'sensor_connected' => $latest !== null,
         ]);

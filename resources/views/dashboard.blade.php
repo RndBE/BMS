@@ -453,4 +453,28 @@ function moveTooltip(event) {
     tooltip.style.top  = y + 'px';
 }
 </script>
+
+@if($refreshInterval > 0)
+<div id="refresh-badge"
+     style="position:fixed;bottom:16px;right:16px;background:#1e293b;color:#fff;font-size:11px;font-family:Inter,sans-serif;
+            padding:5px 10px;border-radius:20px;opacity:.75;z-index:200;display:flex;align-items:center;gap:5px;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+    </svg>
+    Refresh dalam <strong id="refresh-count">{{ $refreshInterval }}</strong>s
+</div>
+<script>
+(function () {
+    const total = {{ $refreshInterval }};
+    let left    = total;
+    const el    = document.getElementById('refresh-count');
+    setInterval(() => {
+        left--;
+        if (el) el.textContent = left;
+        if (left <= 0) window.location.reload();
+    }, 1000);
+})();
+</script>
+@endif
 @endsection

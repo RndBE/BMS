@@ -9,7 +9,14 @@ class SensorReading extends Model
 {
     public $timestamps = false;
 
-    protected $fillable = ['room_id', 'temperature', 'humidity', 'energy', 'power', 'co2', 'waktu'];
+    protected $fillable = [
+        'room_id',
+        'sensor1',  'sensor2',  'sensor3',  'sensor4',
+        'sensor5',  'sensor6',  'sensor7',  'sensor8',
+        'sensor9',  'sensor10', 'sensor11', 'sensor12',
+        'sensor13', 'sensor14', 'sensor15', 'sensor16',
+        'waktu',
+    ];
 
     protected $casts = ['waktu' => 'datetime'];
 
@@ -18,4 +25,3 @@ class SensorReading extends Model
         return $this->belongsTo(Room::class);
     }
 }
-

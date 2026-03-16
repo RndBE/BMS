@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Sensor extends Model
 {
-    protected $fillable = ['room_id', 'type', 'unit', 'is_active'];
+    protected $fillable = ['room_id', 'sensor_group_id', 'gambar', 'tipe_sensor', 'type', 'unit', 'is_active'];
 
     protected $casts = ['is_active' => 'boolean'];
 
@@ -15,5 +15,9 @@ class Sensor extends Model
     {
         return $this->belongsTo(Room::class);
     }
-}
 
+    public function sensorGroup(): BelongsTo
+    {
+        return $this->belongsTo(SensorGroup::class);
+    }
+}

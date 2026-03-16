@@ -9,80 +9,92 @@ use Illuminate\Database\Seeder;
 
 class SensorReadingSeeder extends Seeder
 {
+    /**
+     * ╔══════════════════════════════════════════════════════════════╗
+     * ║           KONFIGURASI SEEDER — Ubah di sini                 ║
+     * ╠══════════════════════════════════════════════════════════════╣
+     * ║  $intervalMinutes  : jarak antar titik data (menit)         ║
+     * ║  $dateFrom         : tanggal mulai  (null = auto dari $days) ║
+     * ║  $dateTo           : tanggal selesai (null = hari ini)       ║
+     * ║  $days             : berapa hari ke belakang                 ║
+     * ╚══════════════════════════════════════════════════════════════╝
+     *
+     * Pemetaan default kolom:
+     *   sensor1  → Suhu           (°C)    18–40
+     *   sensor2  → Kelembaban     (%)     20–90
+     *   sensor3  → Energi         (kWh)   0–200
+     *   sensor4  → Daya           (W)     0–5000
+     *   sensor5  → CO₂            (ppm)   350–2000
+     *   sensor6  → Tekanan        (hPa)   900–1100
+     *   sensor7  → Cahaya         (lux)   0–10000
+     *   sensor8  → Kecepatan Angin(m/s)   0–20
+     *   sensor9  → PM2.5          (µg/m³) 0–500
+     *   sensor10 → PM10           (µg/m³) 0–600
+     *   sensor11 → VOC            (ppb)   0–1000
+     *   sensor12 → Noise          (dB)    30–120
+     *   sensor13 → Tegangan       (V)     200–240
+     *   sensor14 → Arus           (A)     0–32
+     *   sensor15 → Frekuensi      (Hz)    49–51
+     *   sensor16 → Power Factor   (-)     0.1–1.0
+     */
+
+    private int     $intervalMinutes = 1;
+    private ?string $dateFrom        = null;
+    private ?string $dateTo          = null;
+    private int     $days            = 7;
+
+    // Batas nilai per kolom sensor (min, max, decimals)
+    private array $limits = [
+        'sensor1'  => ['min' =>     18.0, 'max' =>    40.0, 'decimals' => 1],   // Suhu °C
+        'sensor2'  => ['min' =>     20.0, 'max' =>    90.0, 'decimals' => 1],   // Kelembaban %
+        'sensor3'  => ['min' =>      0.0, 'max' =>   200.0, 'decimals' => 2],   // Energi kWh
+        'sensor4'  => ['min' =>      0.0, 'max' =>  5000.0, 'decimals' => 1],   // Daya W
+        'sensor5'  => ['min' =>    350.0, 'max' =>  2000.0, 'decimals' => 0],   // CO₂ ppm
+        'sensor6'  => ['min' =>    900.0, 'max' =>  1100.0, 'decimals' => 1],   // Tekanan hPa
+        'sensor7'  => ['min' =>      0.0, 'max' => 10000.0, 'decimals' => 0],   // Cahaya lux
+        'sensor8'  => ['min' =>      0.0, 'max' =>    20.0, 'decimals' => 1],   // Angin m/s
+        'sensor9'  => ['min' =>      0.0, 'max' =>   500.0, 'decimals' => 1],   // PM2.5 µg/m³
+        'sensor10' => ['min' =>      0.0, 'max' =>   600.0, 'decimals' => 1],   // PM10 µg/m³
+        'sensor11' => ['min' =>      0.0, 'max' =>  1000.0, 'decimals' => 0],   // VOC ppb
+        'sensor12' => ['min' =>     30.0, 'max' =>   120.0, 'decimals' => 1],   // Noise dB
+        'sensor13' => ['min' =>    200.0, 'max' =>   240.0, 'decimals' => 1],   // Tegangan V
+        'sensor14' => ['min' =>      0.0, 'max' =>    32.0, 'decimals' => 2],   // Arus A
+        'sensor15' => ['min' =>     49.0, 'max' =>    51.0, 'decimals' => 2],   // Frekuensi Hz
+        'sensor16' => ['min' =>      0.1, 'max' =>     1.0, 'decimals' => 2],   // Power Factor
+    ];
+
     public function run(): void
     {
-        // Nilai baseline per ruangan
-        $roomData = [
-            'LBY' => ['temperature' => 24.5, 'humidity' => 50.0, 'energy' => 12.4,  'power' => 850.0,   'co2' => 650.0],
-            'HRD' => ['temperature' => 25.1, 'humidity' => 52.0, 'energy' => 18.7,  'power' => 1200.0,  'co2' => 700.0],
-            'FIN' => ['temperature' => 24.8, 'humidity' => 49.0, 'energy' => 15.2,  'power' => 980.0,   'co2' => 680.0],
-            'DIR' => ['temperature' => 31.0, 'humidity' => 65.0, 'energy' => 22.1,  'power' => 2100.0,  'co2' => 900.0],
-            'TLT' => ['temperature' => 26.0, 'humidity' => 70.0, 'energy' => 8.3,   'power' => 420.0,   'co2' => 500.0],
-            'IT'  => ['temperature' => 23.5, 'humidity' => 45.0, 'energy' => 45.6,  'power' => 3800.0,  'co2' => 620.0],
-            'SWR' => ['temperature' => 27.3, 'humidity' => 58.0, 'energy' => 19.8,  'power' => 1650.0,  'co2' => 750.0],
-            'MTG' => ['temperature' => 28.9, 'humidity' => 55.0, 'energy' => 16.4,  'power' => 1400.0,  'co2' => 850.0],
-            'MKT' => ['temperature' => 25.5, 'humidity' => 51.0, 'energy' => 14.9,  'power' => 1050.0,  'co2' => 710.0],
-            'PRD' => ['temperature' => 25.0, 'humidity' => 53.0, 'energy' => 21.3,  'power' => 1750.0,  'co2' => 780.0],
-            'GDG' => ['temperature' => 26.5, 'humidity' => 60.0, 'energy' => 9.7,   'power' => 630.0,   'co2' => 580.0],
-        ];
+        $to   = $this->dateTo
+                    ? Carbon::parse($this->dateTo)->endOfDay()
+                    : Carbon::now();
+        $from = $this->dateFrom
+                    ? Carbon::parse($this->dateFrom)->startOfDay()
+                    : $to->copy()->subDays($this->days);
 
-        // Rentang fluktuasi random per tipe (±)
-        $fluctuation = [
-            'temperature' => 1.5,    // ±1.5 °C
-            'humidity'    => 5.0,    // ±5 %
-            'energy'      => 2.0,    // ±2 kWh
-            'power'       => 150.0,  // ±150 W
-            'co2'         => 50.0,   // ±50 ppm
-        ];
-
-        $intervalMinutes = 1;                                           // data setiap 5 menit
-        $days            = 7;                                           // 7 hari ke belakang
-        $totalPoints     = (int)(($days * 24 * 60) / $intervalMinutes); // 2016 titik per ruangan
+        $totalMinutes = (int) $from->diffInMinutes($to);
+        $totalPoints  = (int) ($totalMinutes / $this->intervalMinutes);
 
         $rooms  = Room::all();
         $insert = [];
 
         foreach ($rooms as $room) {
-            $baseline = $roomData[$room->code] ?? null;
-            if (!$baseline) continue;
+            for ($i = 0; $i <= $totalPoints; $i++) {
+                $waktu = $from->copy()->addMinutes($i * $this->intervalMinutes);
 
-            // State nilai saat ini per tipe sensor (random walk)
-            $current = $baseline;
-
-            for ($i = $totalPoints; $i >= 0; $i--) {
-                $waktu = Carbon::now()->subMinutes($i * $intervalMinutes);
-                $hour  = $waktu->hour;
-
-                // Jam sibuk (08:00–17:00): nilai sedikit lebih tinggi
-                $workBoost = ($hour >= 8 && $hour < 17) ? 0.3 : 0;
-
-                foreach (['temperature', 'humidity', 'energy', 'power', 'co2'] as $type) {
-                    $fluc           = $fluctuation[$type];
-                    $delta          = (mt_rand(-100, 100) / 100) * $fluc + ($fluc * $workBoost);
-                    $current[$type] = round($current[$type] + $delta, 4);
-
-                    // Clamp agar tidak keluar batas wajar
-                    $current[$type] = match ($type) {
-                        'temperature' => max(18.0,  min(40.0,    $current[$type])),
-                        'humidity'    => max(20.0,  min(90.0,    $current[$type])),
-                        'energy'      => max(0.0,   min(200.0,   $current[$type])),
-                        'power'       => max(0.0,   min(10000.0, $current[$type])),
-                        'co2'         => max(350.0, min(2000.0,  $current[$type])),
-                        default       => $current[$type],
-                    };
-                }
-
-                $insert[] = [
-                    'room_id'     => $room->id,
-                    'temperature' => $current['temperature'],
-                    'humidity'    => $current['humidity'],
-                    'energy'      => $current['energy'],
-                    'power'       => $current['power'],
-                    'co2'         => $current['co2'],
-                    'waktu'       => $waktu->toDateTimeString(),
+                $row = [
+                    'room_id' => $room->id,
+                    'waktu'   => $waktu->toDateTimeString(),
                 ];
 
-                // Batch insert per 500 baris agar tidak out of memory
+                // Isi sensor1 – sensor16 dengan nilai random sesuai range
+                foreach ($this->limits as $kolom => $cfg) {
+                    $row[$kolom] = $this->randBetween($cfg['min'], $cfg['max'], $cfg['decimals']);
+                }
+
+                $insert[] = $row;
+
+                // Batch insert tiap 500 baris agar tidak out of memory
                 if (count($insert) >= 500) {
                     SensorReading::insert($insert);
                     $insert = [];
@@ -90,10 +102,14 @@ class SensorReadingSeeder extends Seeder
             }
         }
 
-        // Insert sisa batch
         if (!empty($insert)) {
             SensorReading::insert($insert);
         }
     }
-}
 
+    private function randBetween(float $min, float $max, int $decimals = 1): float
+    {
+        $factor = 10 ** $decimals;
+        return round(mt_rand((int)($min * $factor), (int)($max * $factor)) / $factor, $decimals);
+    }
+}

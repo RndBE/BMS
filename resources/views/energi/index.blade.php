@@ -1,0 +1,340 @@
+@extends('layouts.app')
+
+@section('page-title', 'Energi')
+
+@section('content')
+
+
+
+{{-- ── STAT CARDS ───────────────────────────────────────────────────────────── --}}
+<div class="grid grid-cols-5 gap-4 mb-5">
+    @php
+        $statCards = [
+            ['icon' => asset('icons/daya.svg'),   'label' => 'Daya Saat Ini',        'value' => number_format($currentPower, 1) . ' kW'],
+            ['icon' => asset('icons/energi.svg'), 'label' => 'Energi Hari Ini',       'value' => number_format($energyToday, 1)  . ' kWH'],
+            ['icon' => asset('icons/daya.svg'),   'label' => 'Daya Puncak Hari Ini',  'value' => number_format($peakPower, 1)    . ' kW'],
+            ['icon' => asset('icons/daya.svg'),   'label' => 'Rata-Rata Beban',        'value' => number_format($avgLoad, 1)      . ' kW'],
+            ['icon' => asset('icons/daya.svg'),   'label' => 'Tegangan Rata-Rata',     'value' => '220 V'],
+        ];
+    @endphp
+    @foreach($statCards as $card)
+        <div class="bg-white rounded-xl border border-slate-100 shadow-sm px-4 py-3.5 flex flex-col gap-1">
+            <div class="flex items-center gap-1.5 text-[12px] text-slate-500 font-medium">
+                <img src="{{ $card['icon'] }}" class="w-5 h-5"> {{ $card['label'] }}
+            </div>
+            <div class="text-[22px] font-bold text-slate-800 leading-tight">{{ $card['value'] }}</div>
+        </div>
+    @endforeach
+</div>
+
+{{-- ── MAIN LAYOUT: Chart + Side Panel ─────────────────────────────────────── --}}
+<div class="flex gap-4 mb-5">
+
+    {{-- Chart Card --}}
+    <div class="flex-1 bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+        <div class="px-5 pt-5 pb-3">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-[18px] font-bold text-slate-800">Grafik {{ $paramLabel }} Gedung</div>
+                    <div class="text-[12px] text-slate-400 mt-0.5">{{ $date->translatedFormat('d F Y') }}</div>
+                </div>
+                {{-- Dropdown inline Parameter + Periode — auto-submit --}}
+                <div class="flex items-center gap-2">
+                    {{-- Parameter --}}
+                    <div class="relative">
+                        <select id="chart-parameter"
+                            class="appearance-none border border-slate-200 bg-gray-100 rounded-full pl-3 pr-7 py-1.5 text-[12px] font-medium text-slate-700 focus:outline-none cursor-pointer hover:border-gray-300 transition-colors">
+                            <option value="power"  {{ $parameter === 'power'  ? 'selected' : '' }}>Daya</option>
+                            <option value="energy" {{ $parameter === 'energy' ? 'selected' : '' }}>Energi</option>
+                        </select>
+                    </div>
+                    {{-- Periode --}}
+                    <div class="relative">
+                        <select id="chart-periode"
+                            class="appearance-none border border-slate-200 bg-gray-100 rounded-full pl-3 pr-7 py-1.5 text-[12px] font-medium text-slate-700 focus:outline-none cursor-pointer hover:border-gray-300 transition-colors">
+                            <option value="harian"   {{ $periode === 'harian'   ? 'selected' : '' }}>Harian</option>
+                            <option value="mingguan" {{ $periode === 'mingguan' ? 'selected' : '' }}>Mingguan</option>
+                            <option value="bulanan"  {{ $periode === 'bulanan'  ? 'selected' : '' }}>Bulanan</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="px-4 pb-4" style="height:340px; position:relative;">
+            <canvas id="energyChart"></canvas>
+        </div>
+        <div class="flex justify-center items-center gap-1.5 mt-2 pb-4">
+            <span class="w-6 h-0.5 inline-block rounded bg-red-500"></span>
+            <span class="text-[12px] text-slate-500">{{ $paramLabel }} Gedung</span>
+        </div>
+    </div>
+
+    {{-- Side Panel --}}
+    <div class="w-[270px] flex flex-col gap-4 shrink-0">
+
+        {{-- Batas Normal --}}
+        <div class="bg-white rounded-xl border border-slate-100 shadow-sm px-5 py-4">
+            <div class="text-[13px] font-semibold text-slate-800 mb-3">Batas Normal</div>
+            <div class="flex flex-col gap-2.5">
+                @foreach($batasNormal as $b)
+                    <div class="flex items-center justify-between text-[13px]">
+                        <div class="flex items-center gap-2">
+                            <img src="{{ asset('icons/' . $b['status'] . '.svg') }}" class="w-4 h-4">
+                            <span class="text-slate-700 font-medium">{{ $b['label'] }}</span>
+                        </div>
+                        <span class="text-slate-500 text-[12px]">: {{ $b['desc'] }}</span>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Peringatan Terkait --}}
+        <div class="bg-white rounded-xl border border-slate-100 shadow-sm flex-1 flex flex-col overflow-hidden" style="max-height:260px;">
+            <div class="px-5 pt-4 pb-2 border-b border-slate-50 shrink-0">
+                <div class="text-[13px] font-semibold text-slate-800">Peringatan Terkait</div>
+            </div>
+            <div class="overflow-y-auto flex-1 px-5">
+                @forelse($alerts as $alert)
+                    @php
+                        $alertIcon = match($alert->type) {
+                            'high_power' => 'daya-tinggi',
+                            'high_temp'  => 'suhu-tinggi',
+                            default      => 'status',
+                        };
+                    @endphp
+                    <div class="flex items-center gap-2.5 py-2 border-b border-slate-50 last:border-0">
+                        <img src="{{ asset('icons/' . $alertIcon . '.svg') }}"
+                             onerror="this.src='{{ asset('icons/status.svg') }}'"
+                             class="w-5 h-5 shrink-0">
+                        <div class="flex-1 min-w-0">
+                            <div class="text-[12px] font-semibold text-slate-800 truncate">{{ $alert->message }}</div>
+                            <div class="text-[11px] text-slate-400">{{ $alert->room->name ?? '-' }}</div>
+                        </div>
+                        <div class="text-[11px] text-slate-400 whitespace-nowrap">
+                            {{ $alert->created_at->format('d/m H:i') }}
+                        </div>
+                    </div>
+                @empty
+                    <div class="text-center text-slate-400 text-[12px] py-4">Tidak ada peringatan</div>
+                @endforelse
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{{-- ── TABEL DATA ───────────────────────────────────────────────────────────── --}}
+<div class="bg-white rounded-xl border border-slate-100 shadow-sm">
+    <div class="px-5 py-4 border-b border-slate-100">
+        <span class="text-[16px] font-bold text-slate-800">Tabel Data</span>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-[13px]">
+            <thead>
+                <tr class="bg-slate-50 border-b border-slate-100">
+                    <th class="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wide w-1/3">Waktu</th>
+                    <th class="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wide w-1/3">Nilai</th>
+                    <th class="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($tableData as $row)
+                    <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                        <td class="px-5 py-3 text-slate-600">{{ $row['waktu'] }}</td>
+                        <td class="px-5 py-3 text-slate-700 font-medium">{{ $row['nilai'] }} {{ $unit }}</td>
+                        <td class="px-5 py-3">
+                            @if($row['status'] === 'normal')
+                                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-green-600 bg-green-50 rounded-full px-2.5 py-0.5">
+                                    <img src="{{ asset('icons/normal.svg') }}" class="w-4 h-4"> Normal
+                                </span>
+                            @elseif($row['status'] === 'warning')
+                                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 bg-orange-50 rounded-full px-2.5 py-0.5">
+                                    <img src="{{ asset('icons/warning.svg') }}" class="w-4 h-4"> Warning
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-red-600 bg-red-50 rounded-full px-2.5 py-0.5">
+                                    <img src="{{ asset('icons/poor.svg') }}" class="w-4 h-4"> Poor
+                                </span>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="3" class="px-5 py-10 text-center text-slate-400 text-[13px]">
+                            Tidak ada data untuk periode ini.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@endsection
+
+@push('scripts')
+
+<script>
+// ── Dropdown chart inline → redirect URL langsung ────────────────────────────
+(function () {
+    const baseUrl  = '{{ route("energi.index") }}';
+    const curParam = '{{ $parameter }}';
+    const curPer   = '{{ $periode }}';
+    const curTgl   = '{{ $tanggal }}';
+
+    function navigate(parameter, periode) {
+        const url = baseUrl + '?parameter=' + parameter + '&periode=' + periode + '&tanggal=' + encodeURIComponent(curTgl);
+        window.location.href = url;
+    }
+
+    const selParam = document.getElementById('chart-parameter');
+    const selPer   = document.getElementById('chart-periode');
+
+    selParam?.addEventListener('change', function () {
+        navigate(this.value, selPer?.value ?? curPer);
+    });
+
+    selPer?.addEventListener('change', function () {
+        navigate(selParam?.value ?? curParam, this.value);
+    });
+})();
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+    const labels = {!! json_encode($chartLabels) !!};
+    const values = {!! json_encode($chartValues) !!};
+    const unit   = '{{ $unit }}';
+    const th     = {!! json_encode($th) !!};
+    const param  = '{{ $paramLabel }}';
+
+    const statusColors = { normal: '#22c55e', warning: '#f59e0b', poor: '#ef4444' };
+    function getStatus(v) {
+        if (v > th.warn_upper) return 'poor';
+        if (v > th.normal_max) return 'warning';
+        return 'normal';
+    }
+
+    const ctx = document.getElementById('energyChart').getContext('2d');
+
+    // Gradient fill — merah muda fade ke transparan
+    const gradient = ctx.createLinearGradient(0, 0, 0, 320);
+    gradient.addColorStop(0,   'rgba(239,68,68,0.18)');
+    gradient.addColorStop(1,   'rgba(239,68,68,0)');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: param + ' Gedung',
+                data: values,
+                borderColor: '#ef4444',
+                backgroundColor: gradient,
+                borderWidth: 2,
+                // Hollow circles: background putih, border sesuai status
+                pointRadius: 5,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: values.map(v => statusColors[getStatus(v)]),
+                pointBorderWidth: 2,
+                pointHoverRadius: 6,
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderWidth: 2.5,
+                fill: true,
+                tension: 0.4,
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    enabled: false,   // matikan tooltip bawaan
+                    external: function ({ chart, tooltip }) {
+                        let el = document.getElementById('energyTooltip');
+                        if (!el) {
+                            el = document.createElement('div');
+                            el.id = 'energyTooltip';
+                            el.style.cssText = [
+                                'position:absolute',
+                                'pointer-events:none',
+                                'background:#fff',
+                                'border:1px solid #e2e8f0',
+                                'border-radius:8px',
+                                'padding:9px 12px',
+                                'font-size:12px',
+                                'box-shadow:0 2px 10px rgba(0,0,0,0.08)',
+                                'z-index:99',
+                                'min-width:110px',
+                                'transition:opacity .15s',
+                            ].join(';');
+                            document.body.appendChild(el);
+                        }
+
+                        if (tooltip.opacity === 0) {
+                            el.style.opacity = '0';
+                            return;
+                        }
+
+                        const iconBase = '{{ asset("icons") }}';
+
+                        const dp    = tooltip.dataPoints?.[0];
+                        const val   = dp ? dp.parsed.y : 0;
+                        const s     = getStatus(val);
+                        const sc    = statusColors[s];
+                        const sLbl  = s.charAt(0).toUpperCase() + s.slice(1);
+                        const title = tooltip.title?.[0] ?? '';
+
+                        const dot  = color => `<span style="display:inline-block;width:13px;height:13px;border-radius:50%;background:${color};margin-right:6px;flex-shrink:0"></span>`;
+                        const icon = status => `<img src="${iconBase}/${status}.svg" style="width:16px;height:16px;margin-right:6px;flex-shrink:0">`;
+
+                        el.innerHTML = `
+                            <div style="font-weight:700;font-size:13px;color:#0f172a;margin-bottom:6px">${title}</div>
+                            <div style="display:flex;align-items:center;color:#475569;margin-bottom:3px">${dot(sc)}${val} ${unit}</div>
+                            <div style="display:flex;align-items:center;color:#475569">${icon(s)}${sLbl}</div>
+                        `;
+
+                        const canvas = chart.canvas;
+                        const rect   = canvas.getBoundingClientRect();
+                        const scrollX = window.scrollX || document.documentElement.scrollLeft;
+                        const scrollY = window.scrollY || document.documentElement.scrollTop;
+
+                        let left = rect.left + scrollX + tooltip.caretX + 12;
+                        let top  = rect.top  + scrollY + tooltip.caretY  - 20;
+
+                        // jangan melewati kanan layar
+                        if (left + 140 > window.innerWidth + scrollX) {
+                            left = rect.left + scrollX + tooltip.caretX - 130;
+                        }
+
+                        el.style.opacity = '1';
+                        el.style.left    = left + 'px';
+                        el.style.top     = top  + 'px';
+                    },
+                },
+            },
+            scales: {
+                x: {
+                    grid: { display: false },  // tidak ada grid vertikal
+                    border: { display: false },
+                    ticks: { font: { size: 11 }, color: '#94a3b8' },
+                },
+                y: {
+                    grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
+                    border: { display: false, dash: [4, 4] },
+                    ticks: {
+                        font: { size: 11 },
+                        color: '#94a3b8',
+                        callback: v => v + ' ' + unit,
+                    },
+                },
+            },
+        },
+    });
+})();
+</script>
+@endpush
