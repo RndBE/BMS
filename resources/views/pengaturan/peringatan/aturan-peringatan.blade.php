@@ -1,6 +1,6 @@
 {{-- Tab: Aturan Peringatan --}}
 <div class="flex justify-between items-center mb-5">
-    <p class="text-[16px] font-bold text-slate-800">Daftar Peringatan</p>
+    <p class="text-[16px] font-bold text-slate-800 dark:text-slate-200">Daftar Peringatan</p>
     <div class="flex items-center gap-3">
         {{-- Search --}}
         <div class="relative">
@@ -9,7 +9,7 @@
                 <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
             </svg>
             <input type="text" id="search-rule" placeholder="Cari peringatan..."
-                class="pl-8 pr-3 py-[7px] border border-slate-200 bg-white rounded-lg text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 transition-colors w-52">
+                class="pl-8 pr-3 py-[7px] border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 transition-colors w-52">
         </div>
         <button id="btn-add-rule"
                 class="flex items-center gap-2 px-4 py-[7px] bg-red-700 text-white text-[12.5px] font-semibold rounded-lg hover:bg-red-800 transition-colors shadow-sm">
@@ -20,7 +20,7 @@
 </div>
 
 {{-- Rules Table --}}
-<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-white">
     @if($rules->isEmpty())
         <div class="py-16 flex flex-col items-center gap-3 text-slate-400">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2" class="text-slate-300"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
@@ -29,14 +29,14 @@
         </div>
     @else
         <table class="w-full text-[13px]" id="tbl-rules">
-            <thead class="bg-red-50 border-b border-red-100">
+            <thead class="bg-red-50 border-b border-red-100 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] ">
                 <tr>
-                    <th class="px-5 py-3 text-left font-semibold text-slate-800">Nama Peringatan</th>
-                    <th class="px-5 py-3 text-left font-semibold text-slate-800">Kategori</th>
-                    <th class="px-5 py-3 text-center font-semibold text-slate-800">Aktif</th>
-                    <th class="px-5 py-3 text-left font-semibold text-slate-800">Durasi Tunda</th>
-                    <th class="px-5 py-3 text-left font-semibold text-slate-800">Status</th>
-                    <th class="px-5 py-3 text-right font-semibold text-slate-800">Aksi</th>
+                    <th class="px-5 py-3 text-left font-semibold text-slate-800 dark:text-slate-200">Nama Peringatan</th>
+                    <th class="px-5 py-3 text-left font-semibold text-slate-800 dark:text-slate-200">Kategori</th>
+                    <th class="px-5 py-3 text-center font-semibold text-slate-800 dark:text-slate-200">Aktif</th>
+                    <th class="px-5 py-3 text-left font-semibold text-slate-800 dark:text-slate-200">Durasi Tunda</th>
+                    <th class="px-5 py-3 text-left font-semibold text-slate-800 dark:text-slate-200">Status</th>
+                    <th class="px-5 py-3 text-right font-semibold text-slate-800 dark:text-slate-200">Aksi</th>
                 </tr>
             </thead>
             <tbody id="rules-tbody">
@@ -50,10 +50,10 @@
                     $units = ['suhu' => '°C', 'kelembaban' => '%', 'co2' => 'ppm', 'daya' => 'kW', 'tegangan' => 'V'];
                     $unit = $units[$rule->parameter_key] ?? '';
                 @endphp
-                <tr class="rule-row border-b border-slate-100 hover:bg-slate-50 transition-colors" data-id="{{ $rule->id }}"
+                <tr class="rule-row border-b border-slate-100 hover:bg-slate-50 dark:hover:bg-transparent transition-colors" data-id="{{ $rule->id }}"
                     data-name="{{ $rule->name }}">
                     <td class="px-5 py-3">
-                        <p class="font-semibold text-slate-800">{{ $rule->name }}</p>
+                        <p class="font-semibold text-slate-800 dark:text-slate-200">{{ $rule->name }}</p>
                         <p class="text-[11.5px] text-slate-400 mt-0.5">Pemicu: {{ $paramLabel }} {{ $rule->condition }} {{ $rule->threshold }}{{ $unit }}</p>
                     </td>
                     <td class="px-5 py-3">
@@ -70,7 +70,7 @@
                             <span class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all {{ $rule->is_active ? 'left-5' : 'left-0.5' }}"></span>
                         </button>
                     </td>
-                    <td class="px-5 py-3 text-slate-600">
+                    <td class="px-5 py-3 text-slate-600 dark:text-slate-200">
                         {{ $rule->durasi_tunda ? $rule->durasi_tunda . ' menit' : '—' }}
                     </td>
                     <td class="px-5 py-3">
@@ -93,7 +93,7 @@
                                 data-durasi_tunda="{{ $rule->durasi_tunda }}"
                                 data-room_ids="{{ json_encode($rule->room_ids ?? []) }}"
                                 data-is_active="{{ $rule->is_active ? '1' : '0' }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            <img src="{{ asset('icons/edit.svg') }}" alt="Edit" class="w-7 h-7">
                         </button>
                     </td>
                 </tr>
@@ -105,9 +105,9 @@
 
 {{-- Modal Tambah/Edit Aturan --}}
 <div id="modal-rule" class="hidden fixed inset-0 bg-black/40 z-[200] flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 sticky top-0 bg-white z-10">
-            <h2 id="modal-rule-title" class="text-[16px] font-bold text-slate-800">Tambah Peringatan</h2>
+    <div class="bg-white dark:bg-[#232323] rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-[#2d2d2d] sticky top-0 bg-white dark:bg-[#232323] z-10">
+            <h2 id="modal-rule-title" class="text-[16px] font-bold text-slate-800 dark:text-white">Tambah Peringatan</h2>
             <button onclick="closeRuleModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
@@ -118,13 +118,13 @@
             {{-- Row 1: Nama + Kategori --}}
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-[12px] font-medium text-slate-600 mb-1.5">Nama Peringatan</label>
+                    <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-400 mb-1.5">Nama Peringatan</label>
                     <input id="rule-name" type="text" placeholder="e.g. Suhu Tinggi"
-                        class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors">
+                        class="w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors">
                 </div>
                 <div>
-                    <label class="block text-[12px] font-medium text-slate-600 mb-1.5">Kategori</label>
-                    <select id="rule-kategori" class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors bg-white">
+                    <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-400 mb-1.5">Kategori</label>
+                    <select id="rule-kategori" class="w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors bg-white">
                         <option value="">-- Pilih Kategori --</option>
                         <option value="Kenyamanan">Kenyamanan</option>
                         <option value="Keamanan">Keamanan</option>
@@ -136,13 +136,13 @@
 
             {{-- Ruangan --}}
             <div>
-                <label class="block text-[12px] font-medium text-slate-600 mb-2">Ruangan</label>
+                <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-400 mb-2">Ruangan</label>
                 <div class="grid grid-cols-2 gap-2 max-h-36 overflow-y-auto pr-1">
                     @foreach($rooms as $room)
-                    <label class="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
+                    <label class="flex items-center gap-2 px-3 py-2 border border-slate-200 dark:border-[#3d3d3d] dark:hover:bg-[#2a2a2a] rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
                         <input type="checkbox" class="rule-room-chk w-3.5 h-3.5 accent-red-600 shrink-0"
                                value="{{ $room->id }}">
-                        <span class="text-[12.5px] text-slate-700 truncate">{{ $room->name }}</span>
+                        <span class="text-[12.5px] text-slate-700 dark:text-slate-300 truncate">{{ $room->name }}</span>
                     </label>
                     @endforeach
                     @if($rooms->isEmpty())
@@ -153,7 +153,7 @@
 
             {{-- Status Keaktifan --}}
             <div class="flex items-center justify-between py-1">
-                <label class="text-[12.5px] font-medium text-slate-600">Status Keaktifan</label>
+                <label class="text-[12.5px] font-medium text-slate-600 dark:text-slate-400">Status Keaktifan</label>
                 <label class="relative inline-flex items-center cursor-pointer">
                     <input id="rule-active" type="checkbox" class="sr-only peer" checked>
                     <div class="w-10 h-5 bg-slate-200 rounded-full peer peer-checked:bg-green-500 transition-colors"></div>
@@ -164,16 +164,16 @@
             {{-- Durasi Tunda + Status --}}
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-[12px] font-medium text-slate-600 mb-1.5">Durasi Tunda</label>
+                    <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-400 mb-1.5">Durasi Tunda</label>
                     <div class="relative">
                         <input id="rule-durasi" type="number" min="0" placeholder="e.g. 15"
-                               class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 pr-14 text-[13px] focus:outline-none focus:border-red-400 transition-colors">
+                               class="w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3.5 py-2.5 pr-14 text-[13px] focus:outline-none focus:border-red-400 transition-colors">
                         <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-[12px] text-slate-400 select-none">menit</span>
                     </div>
                 </div>
                 <div>
-                    <label class="block text-[12px] font-medium text-slate-600 mb-1.5">Status</label>
-                    <select id="rule-severity" class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors bg-white">
+                    <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-400 mb-1.5">Status</label>
+                    <select id="rule-severity" class="w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors bg-white">
                         <option value="warning">Warning</option>
                         <option value="critical">Critical</option>
                     </select>
@@ -191,7 +191,7 @@
                         <option value="daya">Daya</option>
                         <option value="tegangan">Tegangan</option>
                     </select>
-                    <select id="rule-condition" class="w-24 border border-slate-200 rounded-lg px-3 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors bg-white">
+                    <select id="rule-condition" class="w-24 border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors bg-white">
                         <option value=">">&gt;</option>
                         <option value="<">&lt;</option>
                         <option value=">=">&ge;</option>
@@ -199,7 +199,7 @@
                     </select>
                     <div class="relative w-32">
                         <input id="rule-threshold" type="number" step="any" placeholder="28"
-                               class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 pr-10 text-[13px] focus:outline-none focus:border-red-400 transition-colors">
+                               class="w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3.5 py-2.5 pr-10 text-[13px] focus:outline-none focus:border-red-400 transition-colors">
                         <span id="rule-unit" class="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-slate-400 select-none">°C</span>
                     </div>
                 </div>
@@ -207,9 +207,9 @@
 
             <div id="rule-error" class="hidden text-[12px] text-red-500 bg-red-50 rounded-lg px-3 py-2"></div>
 
-            <div class="flex justify-end gap-3 pt-2 border-t border-slate-100">
+            <div class="flex justify-end gap-3 pt-2 border-t border-slate-100 dark:border-[#2d2d2d]">
                 <button type="button" onclick="closeRuleModal()"
-                        class="px-5 py-2.5 rounded-lg border border-slate-300 text-[13px] font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                        class="px-5 py-2.5 rounded-lg border border-slate-300 dark:border-[#3d3d3d] dark:text-slate-300 dark:hover:bg-[#2a2a2a] text-[13px] font-medium text-slate-600 hover:bg-slate-50 transition-colors">
                     Batal
                 </button>
                 <button type="submit"

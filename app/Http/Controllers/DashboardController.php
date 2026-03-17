@@ -15,29 +15,26 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Load rooms dengan latest sensor reading per room
+        // Load rooms dengan latest reading — status sudah dikelola oleh UpdateRoomStatusCommand
         $rooms = Room::with(['latestReading', 'acUnits'])->get();
 
-        // Summary stats dari collection (tidak perlu query lagi)
+        // Summary stats dari kolom status di DB
         $statusCounts = [
             'normal'  => $rooms->where('status', 'normal')->count(),
             'warning' => $rooms->where('status', 'warning')->count(),
             'poor'    => $rooms->where('status', 'poor')->count(),
         ];
 
-        // ── Avg sensor: ambil latest reading per room, lalu avg ──
-        // sensor1=Suhu, sensor2=Kelembaban, sensor3=Energi, sensor4=Daya
-        $avgTemp = SensorReading::whereIn('id', function ($q) {
-            $q->selectRaw('MAX(id)')
-              ->from('sensor_readings')
-              ->groupBy('room_id');
-        })->avg('sensor1');
 
-        $avgHumidity = SensorReading::whereIn('id', function ($q) {
-            $q->selectRaw('MAX(id)')
-              ->from('sensor_readings')
-              ->groupBy('room_id');
-        })->avg('sensor2');
+        // ── Avg sensor: satu subquery untuk 2 kolom sekaligus ──────────────────
+        $avgSensor = SensorReading::selectRaw('AVG(sensor1) as avg_temp, AVG(sensor2) as avg_humidity')
+            ->whereIn('id', function ($q) {
+                $q->selectRaw('MAX(id)')
+                  ->from('sensor_readings')
+                  ->groupBy('room_id');
+            })->first();
+        $avgTemp     = round((float) ($avgSensor->avg_temp ?? 0), 1);
+        $avgHumidity = round((float) ($avgSensor->avg_humidity ?? 0), 1);
 
         $activeAc     = AcUnit::where('is_active', true)->count();
         $totalAc      = AcUnit::count();

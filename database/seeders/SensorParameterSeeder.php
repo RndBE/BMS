@@ -16,7 +16,7 @@ class SensorParameterSeeder extends Seeder
     private array $parameters = [
         ['nama_parameter' => 'Suhu',           'unit' => '°C',    'kolom_reading' => 'sensor1',  'sort_order' => 1],
         ['nama_parameter' => 'Kelembaban',      'unit' => '%',     'kolom_reading' => 'sensor2',  'sort_order' => 2],
-        ['nama_parameter' => 'Energi',          'unit' => 'kWh',   'kolom_reading' => 'sensor3',  'sort_order' => 3],
+        ['nama_parameter' => 'Tegangan',        'unit' => 'V',     'kolom_reading' => 'sensor3',  'sort_order' => 3],
         ['nama_parameter' => 'Daya',            'unit' => 'W',     'kolom_reading' => 'sensor4',  'sort_order' => 4],
         ['nama_parameter' => 'CO₂',             'unit' => 'ppm',   'kolom_reading' => 'sensor5',  'sort_order' => 5],
         ['nama_parameter' => 'Tekanan',         'unit' => 'hPa',   'kolom_reading' => 'sensor6',  'sort_order' => 6],
@@ -26,10 +26,8 @@ class SensorParameterSeeder extends Seeder
         ['nama_parameter' => 'PM10',            'unit' => 'µg/m³', 'kolom_reading' => 'sensor10', 'sort_order' => 10],
         ['nama_parameter' => 'VOC',             'unit' => 'ppb',   'kolom_reading' => 'sensor11', 'sort_order' => 11],
         ['nama_parameter' => 'Noise',           'unit' => 'dB',    'kolom_reading' => 'sensor12', 'sort_order' => 12],
-        ['nama_parameter' => 'Tegangan',        'unit' => 'V',     'kolom_reading' => 'sensor13', 'sort_order' => 13],
-        ['nama_parameter' => 'Arus',            'unit' => 'A',     'kolom_reading' => 'sensor14', 'sort_order' => 14],
-        ['nama_parameter' => 'Frekuensi',       'unit' => 'Hz',    'kolom_reading' => 'sensor15', 'sort_order' => 15],
-        ['nama_parameter' => 'Power Factor',    'unit' => '-',     'kolom_reading' => 'sensor16', 'sort_order' => 16],
+        ['nama_parameter' => 'Frekuensi',       'unit' => 'Hz',    'kolom_reading' => 'sensor13', 'sort_order' => 13],
+        ['nama_parameter' => 'Power Factor',    'unit' => '-',     'kolom_reading' => 'sensor14', 'sort_order' => 14],
     ];
 
     public function run(): void

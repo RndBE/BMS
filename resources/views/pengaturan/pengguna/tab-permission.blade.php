@@ -2,7 +2,7 @@
 
 {{-- Toolbar --}}
 <div class="flex items-center justify-between mb-5">
-    <h2 class="text-[16px] font-bold text-slate-800">Daftar Permission</h2>
+    <h2 class="text-[16px] font-bold text-slate-800 dark:text-slate-200">Daftar Permission</h2>
     <div class="flex items-center gap-3">
         <form method="GET" action="{{ route('pengaturan.pengguna') }}" class="flex items-center">
             <input type="hidden" name="tab" value="permission">
@@ -12,7 +12,7 @@
                     <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
                 </svg>
                 <input type="text" name="search" value="{{ $search }}" placeholder="Cari permission..."
-                    class="pl-8 pr-3 py-[7px] border border-slate-200 rounded-lg text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 w-52">
+                    class="pl-8 pr-3 py-[7px] border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] rounded-lg text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 w-52">
             </div>
         </form>
         <button id="btn-add-perm"
@@ -26,36 +26,36 @@
 {{-- Table --}}
 <div class="rounded-xl border border-slate-200 overflow-hidden">
     <table class="w-full text-[13px]">
-        <thead class="bg-red-100 border-b border-slate-200">
+        <thead class="bg-red-100 border-b border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a]">
             <tr>
-                <th class="px-5 py-3 text-left font-semibold text-slate-800 w-8">No</th>
-                <th class="px-5 py-3 text-left font-semibold text-slate-800">Nama Permission</th>
-                <th class="px-5 py-3 text-center font-semibold text-slate-800">Guard</th>
-                <th class="px-5 py-3 text-center font-semibold text-slate-800">Roles</th>
-                <th class="px-5 py-3 text-right font-semibold text-slate-800">Aksi</th>
+                <th class="px-5 py-3 text-left font-semibold text-slate-800 w-8 dark:text-slate-200">No</th>
+                <th class="px-5 py-3 text-left font-semibold text-slate-800 dark:text-slate-200">Nama Permission</th>
+                <th class="px-5 py-3 text-center font-semibold text-slate-800 dark:text-slate-200">Guard</th>
+                <th class="px-5 py-3 text-center font-semibold text-slate-800 dark:text-slate-200">Roles</th>
+                <th class="px-5 py-3 text-right font-semibold text-slate-800 dark:text-slate-200">Aksi</th>
             </tr>
         </thead>
         <tbody>
             @forelse($permissions as $perm)
-            <tr class="border-b border-slate-100 hover:bg-slate-50/60 transition-colors">
+            <tr class="border-b border-slate-100 hover:bg-slate-50/60 dark:hover:bg-transparent transition-colors">
                 <td class="px-5 py-3 text-slate-400">{{ $permissions->firstItem() + $loop->index }}</td>
                 <td class="px-5 py-3">
-                    <span class="font-mono text-[12.5px] font-semibold text-slate-700 px-2.5 py-1 rounded-md">{{ str_replace('_', ' ', $perm->name) }}</span>
+                    <span class="font-mono text-[12.5px] font-semibold text-slate-700 px-2.5 py-1 rounded-md dark:text-slate-200">{{ str_replace('_', ' ', $perm->name) }}</span>
                 </td>
                 <td class="px-5 py-3 text-center">
                     <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">{{ $perm->guard_name }}</span>
                 </td>
-                <td class="px-5 py-3 text-center text-slate-500">{{ $perm->roles_count }}</td>
+                <td class="px-5 py-3 text-center text-slate-500 dark:text-slate-200">{{ $perm->roles_count }}</td>
                 <td class="px-5 py-3 text-right">
                     <div class="flex items-center justify-end gap-1.5">
                         <button class="btn-edit-perm p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
                                 data-id="{{ $perm->id }}"
                                 data-name="{{ str_replace('_', ' ', $perm->name) }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            <img src="{{ asset('icons/edit.svg') }}" alt="Edit" class="w-7 h-7">
                         </button>
                         <button onclick="deletePerm({{ $perm->id }})"
                                 class="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                            <img src="{{ asset('icons/hapus.svg') }}" alt="Delete" class="w-7 h-7">
                         </button>
                     </div>
                 </td>
@@ -78,9 +78,9 @@
 
 {{-- ═══════════════ MODAL TAMBAH/EDIT PERMISSION ═══════════════ --}}
 <div id="modal-perm" class="hidden fixed inset-0 bg-black/40 z-[200] flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-            <h2 id="modal-perm-title" class="text-[15px] font-semibold text-slate-800">Tambah Permission</h2>
+    <div class="bg-white dark:bg-[#232323] rounded-2xl shadow-2xl w-full max-w-sm">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-[#2d2d2d]">
+            <h2 id="modal-perm-title" class="text-[15px] font-semibold text-slate-800 dark:text-white">Tambah Permission</h2>
             <button onclick="closePermModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
@@ -88,14 +88,14 @@
         <form id="form-perm" class="px-6 py-1 space-y-2">
             <input type="hidden" id="perm-id">
             <div>
-                <label class="block text-[12px] font-medium text-slate-600 mb-1.5">Nama Permission</label>
+                <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-400 mb-1.5">Nama Permission</label>
                 <input id="perm-name" type="text" placeholder="e.g. view-dashboard"
-                       class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] font-mono focus:outline-none focus:border-red-400 transition-colors">
+                       class="w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] font-mono focus:outline-none focus:border-red-400 transition-colors">
             </div>
             <div id="perm-error" class="hidden text-[12px] text-red-500 bg-red-50 rounded-lg px-3 py-2"></div>
-            <div class="flex justify-end gap-3 pt-2 border-t border-slate-100">
+            <div class="flex justify-end gap-3 pt-2 border-t border-slate-100 dark:border-[#2d2d2d]">
                 <button type="button" onclick="closePermModal()"
-                        class="px-5 py-2.5 rounded-lg border border-slate-300 text-[13px] font-medium text-slate-600 hover:bg-slate-50 transition-colors">Batal</button>
+                        class="px-5 py-2.5 rounded-lg border border-slate-300 dark:border-[#3d3d3d] dark:text-slate-300 dark:hover:bg-[#2a2a2a] text-[13px] font-medium text-slate-600 hover:bg-slate-50 transition-colors">Batal</button>
                 <button type="submit"
                         class="px-6 py-2.5 bg-red-600 text-white text-[13px] font-semibold rounded-lg hover:bg-red-700 transition-colors shadow-sm">Simpan</button>
             </div>

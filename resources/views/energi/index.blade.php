@@ -18,11 +18,11 @@
         ];
     @endphp
     @foreach($statCards as $card)
-        <div class="bg-white rounded-xl border border-slate-100 shadow-sm px-4 py-3.5 flex flex-col gap-1">
-            <div class="flex items-center gap-1.5 text-[12px] text-slate-500 font-medium">
+        <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm px-4 py-3.5 flex flex-col gap-1">
+            <div class="flex items-center gap-1.5 text-[12px] text-slate-500 dark:text-slate-400 font-medium">
                 <img src="{{ $card['icon'] }}" class="w-5 h-5"> {{ $card['label'] }}
             </div>
-            <div class="text-[22px] font-bold text-slate-800 leading-tight">{{ $card['value'] }}</div>
+            <div class="text-[22px] font-bold text-slate-800 dark:text-white leading-tight">{{ $card['value'] }}</div>
         </div>
     @endforeach
 </div>
@@ -31,11 +31,11 @@
 <div class="flex gap-4 mb-5">
 
     {{-- Chart Card --}}
-    <div class="flex-1 bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+    <div class="flex-1 bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm overflow-hidden">
         <div class="px-5 pt-5 pb-3">
             <div class="flex items-center justify-between">
                 <div>
-                    <div class="text-[18px] font-bold text-slate-800">Grafik {{ $paramLabel }} Gedung</div>
+                    <div class="text-[18px] font-bold text-slate-800 dark:text-white">Grafik {{ $paramLabel }} Gedung</div>
                     <div class="text-[12px] text-slate-400 mt-0.5">{{ $date->translatedFormat('d F Y') }}</div>
                 </div>
                 {{-- Dropdown inline Parameter + Periode — auto-submit --}}
@@ -43,18 +43,20 @@
                     {{-- Parameter --}}
                     <div class="relative">
                         <select id="chart-parameter"
-                            class="appearance-none border border-slate-200 bg-gray-100 rounded-full pl-3 pr-7 py-1.5 text-[12px] font-medium text-slate-700 focus:outline-none cursor-pointer hover:border-gray-300 transition-colors">
-                            <option value="power"  {{ $parameter === 'power'  ? 'selected' : '' }}>Daya</option>
-                            <option value="energy" {{ $parameter === 'energy' ? 'selected' : '' }}>Energi</option>
+                            class="appearance-none border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 bg-gray-100 rounded-full pl-3 pr-7 py-1.5 text-[12px] font-medium text-slate-700 focus:outline-none cursor-pointer hover:border-gray-300 transition-colors">
+                            <option value="power"   {{ $parameter === 'power'   ? 'selected' : '' }}>Daya</option>
+                            <option value="voltage" {{ $parameter === 'voltage' ? 'selected' : '' }}>Tegangan</option>
+                            <option value="energy"  {{ $parameter === 'energy'  ? 'selected' : '' }}>Energi</option>
                         </select>
                     </div>
                     {{-- Periode --}}
                     <div class="relative">
                         <select id="chart-periode"
-                            class="appearance-none border border-slate-200 bg-gray-100 rounded-full pl-3 pr-7 py-1.5 text-[12px] font-medium text-slate-700 focus:outline-none cursor-pointer hover:border-gray-300 transition-colors">
+                            class="appearance-none border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 bg-gray-100 rounded-full pl-3 pr-7 py-1.5 text-[12px] font-medium text-slate-700 focus:outline-none cursor-pointer hover:border-gray-300 transition-colors">
                             <option value="harian"   {{ $periode === 'harian'   ? 'selected' : '' }}>Harian</option>
                             <option value="mingguan" {{ $periode === 'mingguan' ? 'selected' : '' }}>Mingguan</option>
                             <option value="bulanan"  {{ $periode === 'bulanan'  ? 'selected' : '' }}>Bulanan</option>
+                            <option value="tahunan"  {{ $periode === 'tahunan'  ? 'selected' : '' }}>Tahunan</option>
                         </select>
                     </div>
                 </div>
@@ -65,7 +67,7 @@
         </div>
         <div class="flex justify-center items-center gap-1.5 mt-2 pb-4">
             <span class="w-6 h-0.5 inline-block rounded bg-red-500"></span>
-            <span class="text-[12px] text-slate-500">{{ $paramLabel }} Gedung</span>
+            <span class="text-[12px] text-slate-500 dark:text-slate-400">{{ $paramLabel }} Gedung</span>
         </div>
     </div>
 
@@ -73,25 +75,78 @@
     <div class="w-[270px] flex flex-col gap-4 shrink-0">
 
         {{-- Batas Normal --}}
-        <div class="bg-white rounded-xl border border-slate-100 shadow-sm px-5 py-4">
-            <div class="text-[13px] font-semibold text-slate-800 mb-3">Batas Normal</div>
+        <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm px-5 py-4">
+            <div class="text-[13px] font-semibold text-slate-800 dark:text-white mb-3">Batas Normal</div>
+            @if($alertLimit)
             <div class="flex flex-col gap-2.5">
-                @foreach($batasNormal as $b)
-                    <div class="flex items-center justify-between text-[13px]">
-                        <div class="flex items-center gap-2">
-                            <img src="{{ asset('icons/' . $b['status'] . '.svg') }}" class="w-4 h-4">
-                            <span class="text-slate-700 font-medium">{{ $b['label'] }}</span>
-                        </div>
-                        <span class="text-slate-500 text-[12px]">: {{ $b['desc'] }}</span>
+                {{-- Normal --}}
+                <div class="flex items-start gap-2">
+                    <img src="{{ asset('icons/normal.svg') }}" class="w-5 h-5 mt-0.5 shrink-0">
+                    <div class="text-[12px]">
+                        <span class="font-semibold text-slate-700 dark:text-slate-300">Normal</span>
+                        <span class="text-slate-500 dark:text-slate-400 ml-1">
+                            : 
+                            @if($alertLimit->normal_min !== null)
+                                    &lt;{{ $alertLimit->normal_min }}{{ $unit }}
+                                @endif
+                                @if($alertLimit->normal_min !== null && $alertLimit->normal_max !== null)
+                                    atau
+                                @endif
+                                @if($alertLimit->normal_max !== null)
+                                    &gt;{{ $alertLimit->normal_max }}{{ $unit }}
+                            @endif
+                        </span>
                     </div>
-                @endforeach
+                </div>
+                {{-- Warning (rendah + tinggi digabung) --}}
+                <div class="flex items-start gap-2">
+                    <img src="{{ asset('icons/warning.svg') }}" class="w-5 h-5 mt-0.5 shrink-0">
+                    <div class="text-[12px]">
+                        <span class="font-semibold text-slate-700 dark:text-slate-300">Warning</span>
+                        <span class="text-slate-500 dark:text-slate-400 ml-1">:
+                            @if($alertLimit->warn_low_min !== null)
+                                {{ $alertLimit->warn_low_min }}{{ $unit }} – {{ $alertLimit->warn_low_max }}{{ $unit }}
+                            @endif
+                            @if($alertLimit->warn_low_min !== null && $alertLimit->warn_high_min !== null)
+                                atau
+                            @endif
+                            @if($alertLimit->warn_high_min !== null)
+                                {{ $alertLimit->warn_high_min }}{{ $unit }} – {{ $alertLimit->warn_high_max }}{{ $unit }}
+                            @endif
+                        </span>
+                    </div>
+                </div>
+                {{-- Poor --}}
+                @if($alertLimit->poor_low !== null || $alertLimit->poor_high !== null)
+                <div class="flex items-start gap-2">
+                    <img src="{{ asset('icons/poor.svg') }}" class="w-5 h-5 mt-0.5 shrink-0">
+                    <div class="text-[12px]">
+                        <span class="font-semibold text-slate-700 dark:text-slate-300">Poor</span>
+                        <span class="text-slate-500 dark:text-slate-400 ml-1">:
+                            @if($alertLimit->poor_low !== null)
+                                &lt;{{ $alertLimit->poor_low }}{{ $unit }}
+                            @endif
+                            @if($alertLimit->poor_low !== null && $alertLimit->poor_high !== null)
+                                atau
+                            @endif
+                            @if($alertLimit->poor_high !== null)
+                                &gt;{{ $alertLimit->poor_high }}{{ $unit }}
+                            @endif
+                        </span>
+                    </div>
+                </div>
+                @endif
             </div>
+            @else
+            <div class="text-[12px] text-slate-400 text-center py-3">Belum dikonfigurasi</div>
+            @endif
         </div>
 
+
         {{-- Peringatan Terkait --}}
-        <div class="bg-white rounded-xl border border-slate-100 shadow-sm flex-1 flex flex-col overflow-hidden" style="max-height:260px;">
-            <div class="px-5 pt-4 pb-2 border-b border-slate-50 shrink-0">
-                <div class="text-[13px] font-semibold text-slate-800">Peringatan Terkait</div>
+        <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm flex-1 flex flex-col overflow-hidden" style="max-height:260px;">
+            <div class="px-5 pt-4 pb-2 border-b border-slate-50 dark:border-[#2d2d2d] shrink-0">
+                <div class="text-[13px] font-semibold text-slate-800 dark:text-white">Peringatan Terkait</div>
             </div>
             <div class="overflow-y-auto flex-1 px-5">
                 @forelse($alerts as $alert)
@@ -102,12 +157,12 @@
                             default      => 'status',
                         };
                     @endphp
-                    <div class="flex items-center gap-2.5 py-2 border-b border-slate-50 last:border-0">
+                    <div class="flex items-center gap-2.5 py-2 border-b border-slate-50 dark:border-[#2d2d2d] last:border-0">
                         <img src="{{ asset('icons/' . $alertIcon . '.svg') }}"
                              onerror="this.src='{{ asset('icons/status.svg') }}'"
                              class="w-5 h-5 shrink-0">
                         <div class="flex-1 min-w-0">
-                            <div class="text-[12px] font-semibold text-slate-800 truncate">{{ $alert->message }}</div>
+                            <div class="text-[12px] font-semibold text-slate-800 dark:text-slate-200 truncate">{{ $alert->message }}</div>
                             <div class="text-[11px] text-slate-400">{{ $alert->room->name ?? '-' }}</div>
                         </div>
                         <div class="text-[11px] text-slate-400 whitespace-nowrap">
@@ -124,24 +179,24 @@
 </div>
 
 {{-- ── TABEL DATA ───────────────────────────────────────────────────────────── --}}
-<div class="bg-white rounded-xl border border-slate-100 shadow-sm">
-    <div class="px-5 py-4 border-b border-slate-100">
-        <span class="text-[16px] font-bold text-slate-800">Tabel Data</span>
+<div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm">
+    <div class="px-5 py-4 border-b border-slate-100 dark:border-[#2d2d2d]">
+        <span class="text-[16px] font-bold text-slate-800 dark:text-white">Tabel Data</span>
     </div>
     <div class="overflow-x-auto">
         <table class="w-full text-[13px]">
             <thead>
-                <tr class="bg-slate-50 border-b border-slate-100">
-                    <th class="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wide w-1/3">Waktu</th>
-                    <th class="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wide w-1/3">Nilai</th>
-                    <th class="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+                <tr class="bg-slate-50 dark:bg-[#1e1e1e] border-b border-slate-100 dark:border-[#2d2d2d]">
+                    <th class="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide w-1/3">Waktu</th>
+                    <th class="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide w-1/3">Nilai</th>
+                    <th class="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Status</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($tableData as $row)
-                    <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                        <td class="px-5 py-3 text-slate-600">{{ $row['waktu'] }}</td>
-                        <td class="px-5 py-3 text-slate-700 font-medium">{{ $row['nilai'] }} {{ $unit }}</td>
+                    <tr class="border-b border-slate-50 dark:border-[#2d2d2d] hover:bg-slate-50 dark:hover:bg-[#2a2a2a] transition-colors">
+                        <td class="px-5 py-3 text-slate-600 dark:text-slate-400">{{ $row['waktu'] }}</td>
+                        <td class="px-5 py-3 text-slate-700 dark:text-slate-200 font-medium">{{ $row['nilai'] }} {{ $unit }}</td>
                         <td class="px-5 py-3">
                             @if($row['status'] === 'normal')
                                 <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-green-600 bg-green-50 rounded-full px-2.5 py-0.5">

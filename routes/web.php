@@ -17,19 +17,40 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Dashboard (with optional floor filter)
+    // Dashboard — semua user login bisa akses
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/floor/{floor}', [DashboardController::class, 'byFloor'])->name('dashboard.floor');
+    Route::get('/api/rooms/{id}', [DashboardController::class, 'roomDetail'])->name('rooms.detail');
 
-    // Analisa Data
+    // Profile
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// ── Analisa Data ──────────────────────────────────────────────────────────────
+Route::middleware(['auth', 'permission:lihat_analisa'])->group(function () {
     Route::get('/analisa-data', [AnalysisController::class, 'index'])->name('analisa-data.index');
+});
 
-    // Energi
+// ── Energi ────────────────────────────────────────────────────────────────────
+Route::middleware(['auth', 'permission:lihat_energi'])->group(function () {
     Route::get('/energi', [EnergyController::class, 'index'])->name('energi.index');
+});
 
-    // Pengaturan
+// ── Log Peringatan ────────────────────────────────────────────────────────────
+Route::middleware(['auth', 'permission:lihat_log'])->group(function () {
+    Route::get('/log-peringatan', [PeringatanController::class, 'logIndex'])->name('log-peringatan.index');
+});
+
+// ── Kelola Pengaturan (Umum) ──────────────────────────────────────────────────
+Route::middleware(['auth', 'permission:kelola_pengaturan'])->group(function () {
     Route::get('/pengaturan/umum', [PengaturanController::class, 'umum'])->name('pengaturan.umum');
     Route::post('/pengaturan/umum', [PengaturanController::class, 'umumSave'])->name('pengaturan.umum.save');
+});
+
+// ── Kelola Konfigurasi (Ruangan, Sensor, AC) ──────────────────────────────────
+Route::middleware(['auth', 'permission:kelola_konfigurasi'])->group(function () {
     Route::get('/pengaturan/konfigurasi', [PengaturanController::class, 'konfigurasi'])->name('pengaturan.konfigurasi');
     Route::post('/pengaturan/rooms', [PengaturanController::class, 'roomStore'])->name('pengaturan.rooms.store');
     Route::put('/pengaturan/rooms/{room}', [PengaturanController::class, 'roomUpdate'])->name('pengaturan.rooms.update');
@@ -42,29 +63,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/pengaturan/acunits/{acUnit}', [PengaturanController::class, 'acUpdate'])->name('pengaturan.acunits.update');
     Route::delete('/pengaturan/acunits/{acUnit}', [PengaturanController::class, 'acDestroy'])->name('pengaturan.acunits.destroy');
     Route::patch('/pengaturan/acunits/{acUnit}/toggle', [PengaturanController::class, 'acToggle'])->name('pengaturan.acunits.toggle');
+});
 
-    // Peringatan
+// ── Kelola Peringatan (Batas Normal, Aturan, Log) ─────────────────────────────
+Route::middleware(['auth', 'permission:kelola_peringatan'])->group(function () {
     Route::get('/pengaturan/peringatan', [PeringatanController::class, 'index'])->name('pengaturan.peringatan');
-
-    // Log Peringatan (standalone sidebar page)
-    Route::get('/log-peringatan', [PeringatanController::class, 'logIndex'])->name('log-peringatan.index');
     Route::post('/pengaturan/peringatan/batas-normal', [PeringatanController::class, 'batasNormalSave'])->name('pengaturan.peringatan.batas-normal.save');
     Route::post('/pengaturan/peringatan/batas-normal/reset', [PeringatanController::class, 'batasNormalReset'])->name('pengaturan.peringatan.batas-normal.reset');
     Route::post('/pengaturan/peringatan/rules', [PeringatanController::class, 'rulesStore'])->name('pengaturan.peringatan.rules.store');
     Route::put('/pengaturan/peringatan/rules/{alertRule}', [PeringatanController::class, 'rulesUpdate'])->name('pengaturan.peringatan.rules.update');
     Route::delete('/pengaturan/peringatan/rules/{alertRule}', [PeringatanController::class, 'rulesDestroy'])->name('pengaturan.peringatan.rules.destroy');
     Route::patch('/pengaturan/peringatan/rules/{alertRule}/toggle', [PeringatanController::class, 'rulesToggle'])->name('pengaturan.peringatan.rules.toggle');
+    Route::patch('/pengaturan/peringatan/log/{alert}/read', [PeringatanController::class, 'logMarkRead'])->name('pengaturan.peringatan.log.read');
+    Route::patch('/pengaturan/peringatan/log/read-all', [PeringatanController::class, 'logMarkAllRead'])->name('pengaturan.peringatan.log.read-all');
+    Route::delete('/pengaturan/peringatan/log/{alert}', [PeringatanController::class, 'logDestroy'])->name('pengaturan.peringatan.log.destroy');
+    Route::delete('/pengaturan/peringatan/log', [PeringatanController::class, 'logClear'])->name('pengaturan.peringatan.log.clear');
+});
 
-    // Log Peringatan
-    Route::patch('/pengaturan/peringatan/log/{alert}/read',  [PeringatanController::class, 'logMarkRead'])->name('pengaturan.peringatan.log.read');
-    Route::patch('/pengaturan/peringatan/log/read-all',      [PeringatanController::class, 'logMarkAllRead'])->name('pengaturan.peringatan.log.read-all');
-    Route::delete('/pengaturan/peringatan/log/{alert}',      [PeringatanController::class, 'logDestroy'])->name('pengaturan.peringatan.log.destroy');
-    Route::delete('/pengaturan/peringatan/log',              [PeringatanController::class, 'logClear'])->name('pengaturan.peringatan.log.clear');
-
-    // Room detail API for AJAX tooltip click
-    Route::get('/api/rooms/{id}', [DashboardController::class, 'roomDetail'])->name('rooms.detail');
-
-    // Pengguna (User Management)
+// ── Kelola Pengguna (User, Role, Permission) ──────────────────────────────────
+Route::middleware(['auth', 'permission:kelola_pengguna'])->group(function () {
     Route::get('/pengaturan/pengguna', [PenggunaController::class, 'index'])->name('pengaturan.pengguna');
     Route::post('/pengaturan/pengguna/users', [PenggunaController::class, 'userStore'])->name('pengaturan.pengguna.users.store');
     Route::put('/pengaturan/pengguna/users/{user}', [PenggunaController::class, 'userUpdate'])->name('pengaturan.pengguna.users.update');
@@ -75,12 +92,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/pengaturan/pengguna/permissions', [PenggunaController::class, 'permissionStore'])->name('pengaturan.pengguna.permissions.store');
     Route::put('/pengaturan/pengguna/permissions/{permission}', [PenggunaController::class, 'permissionUpdate'])->name('pengaturan.pengguna.permissions.update');
     Route::delete('/pengaturan/pengguna/permissions/{permission}', [PenggunaController::class, 'permissionDestroy'])->name('pengaturan.pengguna.permissions.destroy');
-
-    // Profile
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
 
 // ─── Admin Routes (permission-based) ─────────────────────────────────────────
 Route::middleware(['auth', 'permission:kelola_denah'])->prefix('admin')->name('admin.')->group(function () {

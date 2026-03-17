@@ -1,7 +1,7 @@
 {{-- ═══ TAB PERANGKAT ═══ --}}
 
 <div class="flex items-center justify-between mb-5">
-    <h2 class="text-[16px] font-bold text-slate-800">Daftar Perangkat</h2>
+    <h2 class="text-[16px] font-bold text-slate-800 dark:text-white">Daftar Perangkat</h2>
     <div class="flex items-center gap-3">
         {{-- Search --}}
         <form method="GET" action="{{ route('pengaturan.konfigurasi') }}" class="flex items-center">
@@ -12,7 +12,7 @@
                     <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
                 </svg>
                 <input type="text" name="search" value="{{ $search }}" placeholder="Cari perangkat / ruangan..."
-                    class="pl-8 pr-3 py-[7px] border border-slate-200 rounded-lg text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 w-52">
+                    class="pl-8 pr-3 py-[7px] border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 w-52">
             </div>
         </form>
         {{-- Tambah Perangkat --}}
@@ -28,7 +28,7 @@
 <div class="overflow-x-auto">
     <table class="w-full text-[13px]">
         <thead>
-            <tr class="bg-red-100 text-slate-800 text-left">
+            <tr class="bg-red-100 text-slate-800 text-left dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-white">
                 <th class="px-4 py-2.5 font-semibold rounded-l-lg">Nama Perangkat</th>
                 <th class="px-4 py-2.5 font-semibold">Jenis</th>
                 <th class="px-4 py-2.5 font-semibold">Ruangan</th>
@@ -39,21 +39,21 @@
         </thead>
         <tbody class="divide-y divide-slate-50">
             @forelse($acUnits as $unit)
-                <tr class="hover:bg-slate-50/60 transition-colors">
+                <tr class="hover:bg-slate-50/60 dark:hover:bg-transparent transition-colors">
 
                     {{-- Nama Perangkat --}}
                     <td class="px-4 py-2.5">
-                        <p class="font-medium text-slate-800">{{ $unit->name }}</p>
+                        <p class="font-medium text-slate-800 dark:text-slate-200">{{ $unit->name }}</p>
                         @if($unit->power_kw > 0)
-                            <p class="text-[11px] text-slate-400 mt-0.5">{{ $unit->power_kw }} kW</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5 dark:text-slate-200">{{ $unit->power_kw }} kW</p>
                         @endif
                     </td>
 
                     {{-- Jenis --}}
-                    <td class="px-4 py-2.5 text-slate-600">AC</td>
+                    <td class="px-4 py-2.5 text-slate-600 dark:text-slate-200">AC</td>
 
                     {{-- Ruangan --}}
-                    <td class="px-4 py-2.5 text-slate-600">
+                    <td class="px-4 py-2.5 text-slate-600 dark:text-slate-200">
                         {{ $unit->room?->name ?? '-' }}
                     </td>
 
@@ -155,7 +155,7 @@
         @foreach($acUnits->getUrlRange(1, $acUnits->lastPage()) as $page => $url)
             <a href="{{ $url }}&tab=perangkat&search={{ $search }}"
                class="w-7 h-7 flex items-center justify-center rounded text-[12px] font-medium no-underline transition-colors
-                   {{ $page == $acUnits->currentPage() ? 'bg-red-700 text-white' : 'text-slate-500 hover:bg-slate-100' }}">
+                   {{ $page == $acUnits->currentPage() ? 'bg-red-700 text-white dark:border-[#FDEBEB] dark:bg-[#FDEBEB] dark:text-black' : 'text-slate-500 hover:bg-slate-100' }}">
                 {{ $page }}
             </a>
         @endforeach

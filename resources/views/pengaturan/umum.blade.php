@@ -12,11 +12,11 @@
 @endif
 
 <div class="max-w-2xl">
-    <div class="bg-white rounded-xl border border-slate-100 shadow-sm px-8 py-7">
+    <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm px-8 py-7">
 
         {{-- Header --}}
         <div class="mb-6">
-            <div class="text-[18px] font-bold text-slate-800">Informasi Dasar & Lokalisasi</div>
+            <div class="text-[18px] font-bold text-slate-800 dark:text-white">Informasi Dasar & Lokalisasi</div>
             <div class="text-[13px] text-slate-400 mt-0.5">Konfigurasikan informasi dasar dan preferensi tampilan sistem Anda</div>
         </div>
 
@@ -26,16 +26,16 @@
             {{-- Row 1: Nama Site / Zona Waktu --}}
             <div class="grid grid-cols-2 gap-5 mb-5">
                 <div>
-                    <label class="block text-[12px] font-semibold text-slate-600 mb-1.5">Nama Site/Kantor</label>
+                    <label class="block text-[12px] font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Nama Site/Kantor</label>
                     <input type="text" name="site_name" value="{{ old('site_name', $site_name) }}"
-                        class="w-full border border-slate-200 rounded-lg px-3 py-[8px] text-[13px] text-slate-700 focus:outline-none focus:border-red-400 transition-colors @error('site_name') border-red-400 @enderror">
+                        class="w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[8px] text-[13px] text-slate-700 focus:outline-none focus:border-red-400 transition-colors @error('site_name') border-red-400 @enderror">
                     @error('site_name')<p class="text-[11px] text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <label class="block text-[12px] font-semibold text-slate-600 mb-1.5">Zona Waktu</label>
+                    <label class="block text-[12px] font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Zona Waktu</label>
                     <div class="relative">
                         <select name="timezone"
-                            class="w-full appearance-none border border-slate-200 rounded-lg px-3 py-[8px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 transition-colors pr-8">
+                            class="w-full appearance-none border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[8px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 transition-colors pr-8">
                             @foreach(['Asia/Jakarta' => 'Asia/Jakarta (GMT+7)', 'Asia/Makassar' => 'Asia/Makassar (GMT+8)', 'Asia/Jayapura' => 'Asia/Jayapura (GMT+9)'] as $val => $lbl)
                                 <option value="{{ $val }}" {{ old('timezone', $timezone) === $val ? 'selected' : '' }}>{{ $lbl }}</option>
                             @endforeach
@@ -48,10 +48,10 @@
             {{-- Row 2: Format Tanggal / Format Jam --}}
             <div class="grid grid-cols-2 gap-5 mb-5">
                 <div>
-                    <label class="block text-[12px] font-semibold text-slate-600 mb-1.5">Format Tanggal</label>
+                    <label class="block text-[12px] font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Format Tanggal</label>
                     <div class="relative">
                         <select name="date_format"
-                            class="w-full appearance-none border border-slate-200 rounded-lg px-3 py-[8px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 transition-colors pr-8">
+                            class="w-full appearance-none border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[8px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 transition-colors pr-8">
                             @foreach(['DD/MM/YYYY' => 'DD/MM/YYYY (01/02/2026)', 'MM/DD/YYYY' => 'MM/DD/YYYY (02/01/2026)', 'YYYY-MM-DD' => 'YYYY-MM-DD (2026-02-01)'] as $val => $lbl)
                                 <option value="{{ $val }}" {{ old('date_format', $date_format) === $val ? 'selected' : '' }}>{{ $lbl }}</option>
                             @endforeach
@@ -60,10 +60,10 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-[12px] font-semibold text-slate-600 mb-1.5">Format Jam</label>
+                    <label class="block text-[12px] font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Format Jam</label>
                     <div class="relative">
                         <select name="time_format"
-                            class="w-full appearance-none border border-slate-200 rounded-lg px-3 py-[8px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 transition-colors pr-8">
+                            class="w-full appearance-none border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[8px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 transition-colors pr-8">
                             <option value="24" {{ old('time_format', $time_format) === '24' ? 'selected' : '' }}>24 Jam (23:59)</option>
                             <option value="12" {{ old('time_format', $time_format) === '12' ? 'selected' : '' }}>12 Jam (11:59 PM)</option>
                         </select>
@@ -75,10 +75,10 @@
             {{-- Row 3: Interval / Rentang Waktu --}}
             <div class="grid grid-cols-2 gap-5 mb-7">
                 <div>
-                    <label class="block text-[12px] font-semibold text-slate-600 mb-1.5">Interval Refresh Dashboard</label>
+                    <label class="block text-[12px] font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Interval Refresh Dashboard</label>
                     <div class="relative">
                         <select name="refresh_interval"
-                            class="w-full appearance-none border border-slate-200 rounded-lg px-3 py-[8px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 transition-colors pr-8">
+                            class="w-full appearance-none border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[8px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 transition-colors pr-8">
                             @foreach(['30' => '30 Detik', '60' => '1 Menit', '300' => '5 Menit', '86400' => '24 Jam (23:59)'] as $val => $lbl)
                                 <option value="{{ $val }}" {{ old('refresh_interval', $refresh_interval) === $val ? 'selected' : '' }}>{{ $lbl }}</option>
                             @endforeach
@@ -88,10 +88,10 @@
                     <p class="text-[11px] text-slate-400 mt-1">Menentukan seberapa sering data pada dashboard diperbarui otomatis.</p>
                 </div>
                 <div>
-                    <label class="block text-[12px] font-semibold text-slate-600 mb-1.5">Rentang Waktu Default Analisa</label>
+                    <label class="block text-[12px] font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Rentang Waktu Default Analisa</label>
                     <div class="relative">
                         <select name="default_range"
-                            class="w-full appearance-none border border-slate-200 rounded-lg px-3 py-[8px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 transition-colors pr-8">
+                            class="w-full appearance-none border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[8px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 transition-colors pr-8">
                             @foreach(['harian' => 'Harian', 'mingguan' => 'Mingguan', 'bulanan' => 'Bulanan'] as $val => $lbl)
                                 <option value="{{ $val }}" {{ old('default_range', $default_range) === $val ? 'selected' : '' }}>{{ $lbl }}</option>
                             @endforeach
@@ -105,7 +105,7 @@
             {{-- Action buttons --}}
             <div class="flex justify-end gap-3">
                 <button type="reset"
-                    class="px-10 py-[9px] rounded-lg border border-slate-200 text-[13px] font-semibold text-slate-700 bg-white hover:bg-slate-50 transition-colors cursor-pointer">
+                    class="px-10 py-[9px] rounded-lg border border-slate-200 dark:border-[#3d3d3d] dark:text-slate-300 dark:hover:bg-[#2a2a2a] text-[13px] font-semibold text-slate-700 bg-white dark:bg-transparent hover:bg-slate-50 transition-colors cursor-pointer">
                     Reset
                 </button>
                 <button type="submit"

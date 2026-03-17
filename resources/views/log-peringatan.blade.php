@@ -21,16 +21,16 @@ function logBadge(string $type): string {
 }
 @endphp
 
-<div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-visible">
+<div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-2xl shadow-sm border border-slate-200 overflow-visible">
 
     {{-- ── Filter Bar ── --}}
-    <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 gap-3 flex-wrap">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-[#2d2d2d] gap-3 flex-wrap">
         <form method="GET" action="{{ route('log-peringatan.index') }}" id="logForm" class="flex items-center gap-2 flex-wrap">
 
             {{-- Waktu --}}
             <div class="relative">
                 <select name="waktu" onchange="document.getElementById('logForm').submit()"
-                    class="appearance-none border border-slate-200 rounded-lg pl-3 pr-8 py-[7px] text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 bg-white cursor-pointer">
+                    class="appearance-none border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg pl-3 pr-8 py-[7px] text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 bg-white cursor-pointer">
                     <option value="hari_ini" {{ (request('waktu','hari_ini')==='hari_ini') ? 'selected':'' }}>Waktu: Hari Ini</option>
                     <option value="7hari"    {{ request('waktu')==='7hari'   ? 'selected':'' }}>Waktu: 7 Hari</option>
                     <option value="30hari"   {{ request('waktu')==='30hari'  ? 'selected':'' }}>Waktu: 30 Hari</option>
@@ -41,7 +41,7 @@ function logBadge(string $type): string {
             {{-- Kategori --}}
             <div class="relative">
                 <select name="kategori" onchange="document.getElementById('logForm').submit()"
-                    class="appearance-none border border-slate-200 rounded-lg pl-3 pr-8 py-[7px] text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 bg-white cursor-pointer">
+                    class="appearance-none border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg pl-3 pr-8 py-[7px] text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 bg-white cursor-pointer">
                     <option value="">Kategori: Semua</option>
                     @foreach($kategori as $kat)
                         <option value="{{ $kat }}" {{ request('kategori')===$kat ? 'selected':'' }}>Kategori: {{ $kat }}</option>
@@ -52,7 +52,7 @@ function logBadge(string $type): string {
             {{-- Ruangan --}}
             <div class="relative">
                 <select name="room_id" onchange="document.getElementById('logForm').submit()"
-                    class="appearance-none border border-slate-200 rounded-lg pl-3 pr-8 py-[7px] text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 bg-white cursor-pointer">
+                    class="appearance-none border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg pl-3 pr-8 py-[7px] text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 bg-white cursor-pointer">
                     <option value="">Ruangan: Semua</option>
                     @foreach($rooms as $room)
                         <option value="{{ $room->id }}" {{ request('room_id')==$room->id ? 'selected':'' }}>Ruangan: {{ $room->name }}</option>
@@ -63,7 +63,7 @@ function logBadge(string $type): string {
             {{-- Status --}}
             <div class="relative">
                 <select name="severity" onchange="document.getElementById('logForm').submit()"
-                    class="appearance-none border border-slate-200 rounded-lg pl-3 pr-8 py-[7px] text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 bg-white cursor-pointer">
+                    class="appearance-none border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg pl-3 pr-8 py-[7px] text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 bg-white cursor-pointer">
                     <option value="">Status: Semua</option>
                     <option value="warning"  {{ request('severity')==='warning'  ? 'selected':'' }}>Status: Warning</option>
                     <option value="critical" {{ request('severity')==='critical' ? 'selected':'' }}>Status: Poor</option>
@@ -82,7 +82,7 @@ function logBadge(string $type): string {
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 <input type="text" name="search" value="{{ request('search') }}"
                     placeholder="Cari ..."
-                    class="pl-8 pr-3 py-[7px] border border-slate-200 rounded-lg text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 bg-white w-44">
+                    class="pl-8 pr-3 py-[7px] border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 bg-white w-44">
             </div>
         </form>
     </div>
@@ -91,7 +91,7 @@ function logBadge(string $type): string {
     <div class="overflow-x-auto">
         <table class="w-full text-[13px]">
             <thead>
-                <tr class="text-left bg-red-100 text-[12px] border-b border-slate-100">
+                <tr class="text-left bg-red-100 text-slate-600 text-[12px] border-b border-slate-100 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200">
                     <th class="px-5 py-3 font-semibold">Waktu</th>
                     <th class="px-5 py-3 font-semibold">Nama Peringatan</th>
                     <th class="px-5 py-3 font-semibold">Kategori</th>
@@ -107,13 +107,13 @@ function logBadge(string $type): string {
                         $ruleKat   = $alert->alertRule?->kategori ?? '';
                         $katClass  = $kategoriColor[$ruleKat] ?? 'text-slate-500 bg-slate-100';
                     @endphp
-                    <tr class="hover:bg-slate-50/60 transition-colors {{ !$alert->is_read ? 'font-medium' : '' }}">
+                    <tr class="hover:bg-slate-50/60 dark:hover:bg-[#2a2a2a] transition-colors {{ !$alert->is_read ? 'font-medium' : '' }}">
 
-                        <td class="px-5 py-3 text-slate-500 whitespace-nowrap text-[12.5px]">
+                        <td class="px-5 py-3 text-slate-500 dark:text-slate-400 whitespace-nowrap text-[12.5px] ">
                             {{ $alert->created_at->format('H:i') }}
                         </td>
 
-                        <td class="px-5 py-3 text-slate-800">
+                        <td class="px-5 py-3 text-slate-800 dark:text-slate-200">
                             <span class="flex items-center gap-2">
                                 <!-- @if(!$alert->is_read)
                                     <span class="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"></span>
@@ -130,14 +130,14 @@ function logBadge(string $type): string {
                             @endif
                         </td>
 
-                        <td class="px-5 py-3 text-slate-700">{{ $alert->room?->name ?? '—' }}</td>
+                        <td class="px-5 py-3 text-slate-700 dark:text-slate-300">{{ $alert->room?->name ?? '—' }}</td>
 
                         <td class="px-5 py-3">{!! logBadge($alert->type) !!}</td>
 
                         <td class="px-5 py-3 text-center">
                             <button title="Detail"
                                 onclick="openLogDetail({{ $alert->id }})"
-                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer bg-white">
+                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-[#2a2a2a] text-slate-400 hover:text-slate-700 transition-colors cursor-pointer bg-white dark:bg-transparent">
                                 <img src="{{ asset('icons/detail.svg') }}" alt="Detail" class="w-6 h-6 shrink-0">
                             </button>
                         </td>
@@ -158,7 +158,7 @@ function logBadge(string $type): string {
 
     {{-- ── Footer / Pagination ── --}}
     <div class="flex items-center justify-between px-5 py-4 border-t border-slate-50">
-        <span class="text-[12px] text-slate-400">
+        <span class="text-[12px] text-slate-400 dark:text-slate-500">
             @if($alerts->total() > 0)
                 Menampilkan {{ $alerts->firstItem() }} dari {{ $alerts->total() }} data
             @else
@@ -200,12 +200,12 @@ function logBadge(string $type): string {
 
 {{-- Drawer Panel --}}
 <div id="logDrawer"
-    class="fixed top-0 right-0 h-full w-[340px] max-w-[95vw] bg-white shadow-2xl z-[201]
+    class="fixed top-0 right-0 h-full w-[340px] max-w-[95vw] bg-white dark:bg-[#1e1e1e] shadow-2xl z-[201]
     translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
 
     {{-- Drawer Header --}}
-    <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100 shrink-0">
-        <h3 class="text-[15px] font-bold text-slate-800">Detail Peringatan</h3>
+    <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-[#2d2d2d] shrink-0">
+        <h3 class="text-[15px] font-bold text-slate-800 dark:text-white">Detail Peringatan</h3>
         <button onclick="closeLogDetail()"
             class="w-7 h-7 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors cursor-pointer bg-transparent border-none">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -221,48 +221,48 @@ function logBadge(string $type): string {
                 <span class="text-[9.5px] font-bold uppercase tracking-widest text-slate-400">Peringatan</span>
                 <div id="drawerBadge"></div>
             </div>
-            <h2 id="drawerName" class="text-[22px] font-bold text-slate-800 leading-tight mt-1">—</h2>
+            <div id="drawerName" class="text-[22px] font-bold text-slate-800 dark:text-white leading-tight mt-1">—</div>
             <div id="drawerKategori" class="mt-1.5"></div>
         </div>
 
         {{-- Informasi Umum --}}
         <div>
-            <p class="text-[12px] font-bold text-slate-800 mb-3">Informasi Umum</p>
+            <p class="text-[12px] font-bold text-slate-800 dark:text-white mb-3">Informasi Umum</p>
             <div class="flex flex-col gap-2.5">
                 <div class="flex justify-between text-[12.5px]">
-                    <span class="text-slate-500">Ruangan</span>
-                    <span id="drawerRoom" class="text-slate-800 font-medium text-right">—</span>
+                    <span class="text-slate-500 dark:text-slate-400">Ruangan</span>
+                    <span id="drawerRoom" class="text-slate-800 dark:text-slate-200 font-medium text-right">—</span>
                 </div>
                 <div class="flex justify-between text-[12.5px]">
-                    <span class="text-slate-500">Waktu Mulai</span>
-                    <span id="drawerTime" class="text-slate-800 font-medium">—</span>
+                    <span class="text-slate-500 dark:text-slate-400">Waktu Mulai</span>
+                    <span id="drawerTime" class="text-slate-800 dark:text-slate-200 font-medium">—</span>
                 </div>
                 <div class="flex justify-between text-[12.5px]">
-                    <span class="text-slate-500">Waktu Selesai</span>
+                    <span class="text-slate-500 dark:text-slate-400">Waktu Selesai</span>
                     <span class="text-green-600 font-semibold text-[12px]">Masih Aktif</span>
                 </div>
                 <div class="flex justify-between text-[12.5px]">
-                    <span class="text-slate-500">Durasi</span>
-                    <span id="drawerDurasi" class="text-slate-800 font-medium">—</span>
+                    <span class="text-slate-500 dark:text-slate-400">Durasi</span>
+                    <span id="drawerDurasi" class="text-slate-800 dark:text-slate-200 font-medium">—</span>
                 </div>
             </div>
         </div>
 
         {{-- Metrik Sensor --}}
         <div>
-            <p class="text-[12px] font-bold text-slate-800 mb-3">Metrik Sensor</p>
+            <p class="text-[12px] font-bold text-slate-800 dark:text-white mb-3">Metrik Sensor</p>
             <div class="flex flex-col gap-2.5">
                 <div class="flex justify-between text-[12.5px]">
-                    <span class="text-slate-500">Nilai Saat Trigger</span>
-                    <span id="drawerNilai" class="text-slate-800 font-medium">—</span>
+                    <span class="text-slate-500 dark:text-slate-400">Nilai Saat Trigger</span>
+                    <span id="drawerNilai" class="text-slate-800 dark:text-slate-200 font-medium">—</span>
                 </div>
                 <div class="flex justify-between text-[12.5px]">
-                    <span class="text-slate-500">Ambang Batas</span>
-                    <span id="drawerThreshold" class="text-slate-800 font-medium">—</span>
+                    <span class="text-slate-500 dark:text-slate-400">Ambang Batas</span>
+                    <span id="drawerThreshold" class="text-slate-800 dark:text-slate-200 font-medium">—</span>
                 </div>
                 <div class="flex justify-between text-[12.5px]">
-                    <span class="text-slate-500">Kondisi</span>
-                    <span id="drawerCondition" class="text-slate-800 font-medium font-mono">—</span>
+                    <span class="text-slate-500 dark:text-slate-400">Kondisi</span>
+                    <span id="drawerCondition" class="text-slate-800 dark:text-slate-200 font-medium font-mono">—</span>
                 </div>
             </div>
         </div>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alert;
+use App\Models\AlertLimit;
 use App\Models\Room;
 use App\Models\SensorReading;
 use App\Models\Setting;
@@ -107,12 +108,47 @@ class AnalysisController extends Controller
         $max     = round((float) $statsQuery->max($column), 1);
         $min     = round((float) $statsQuery->min($column), 1);
 
-        // Batas normal per parameter
-        $thresholds = [
-            'temperature' => ['normal_min' => 23,  'normal_max' => 26,   'warn_lower' => 21,  'warn_upper' => 28],
-            'humidity'    => ['normal_min' => 40,  'normal_max' => 60,   'warn_lower' => 30,  'warn_upper' => 70],
-            'co2'         => ['normal_min' => 400, 'normal_max' => 800,  'warn_lower' => 350, 'warn_upper' => 1200],
+        // ── Map parameter analisa-data → parameter_key di AlertLimit ─────────
+        $paramKeyMap = [
+            'temperature' => 'suhu',
+            'humidity'    => 'kelembaban',
+            'co2'         => 'co2',
         ];
+
+        // Load semua limit dari DB, index by parameter_key
+        $limitsFromDb = AlertLimit::all()->keyBy('parameter_key');
+
+        // Bangun $thresholds dari DB (fallback ke nilai statis jika belum ada di DB)
+        $thresholds = [];
+        foreach ($paramKeyMap as $paramKey => $dbKey) {
+            $lim = $limitsFromDb->get($dbKey);
+            if ($lim) {
+                $thresholds[$paramKey] = [
+                    'normal_min'    => $lim->normal_min,
+                    'normal_max'    => $lim->normal_max,
+                    'warn_low_min'  => $lim->warn_low_min,
+                    'warn_low_max'  => $lim->warn_low_max,
+                    'warn_high_min' => $lim->warn_high_min,
+                    'warn_high_max' => $lim->warn_high_max,
+                    'poor_low'      => $lim->poor_low,
+                    'poor_high'     => $lim->poor_high,
+                    // backward-compat fields untuk tabel & chart status
+                    'warn_lower'    => $lim->warn_low_min ?? $lim->warn_high_min,
+                    'warn_upper'    => $lim->warn_high_max ?? $lim->warn_low_max,
+                ];
+            } else {
+                $thresholds[$paramKey] = [
+                    'normal_min' => null, 'normal_max' => null,
+                    'warn_low_min' => null, 'warn_low_max' => null,
+                    'warn_high_min' => null, 'warn_high_max' => null,
+                    'poor_low' => null, 'poor_high' => null,
+                    'warn_lower' => null, 'warn_upper' => null,
+                ];
+            }
+        }
+
+        // AlertLimit untuk parameter saat ini (untuk view langsung)
+        $alertLimit = $limitsFromDb->get($paramKeyMap[$parameter] ?? 'suhu');
 
         // Peringatan terkait ruangan ini
         $alerts = Alert::with('room')
@@ -159,7 +195,7 @@ class AnalysisController extends Controller
             'rooms', 'selectedRoom', 'selectedRoomId',
             'parameter', 'periode', 'tanggal', 'date',
             'chartData', 'latest', 'average', 'max', 'min',
-            'thresholds', 'alerts', 'tableData',
+            'thresholds', 'alerts', 'tableData', 'alertLimit',
             'parameterLabels', 'parameterUnits', 'timeFormat',
             'timezone', 'dateFormat', 'phpDateFormat'
         ));

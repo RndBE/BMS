@@ -2,17 +2,17 @@
 
 {{-- Toolbar --}}
 <div class="flex items-center justify-between mb-5">
-    <h2 class="text-[16px] font-bold text-slate-800">Daftar Role</h2>
+    <h2 class="text-[16px] font-bold text-slate-800 dark:text-slate-200">Daftar Role</h2>
     <div class="flex items-center gap-3">
         <form method="GET" action="{{ route('pengaturan.pengguna') }}" class="flex items-center">
             <input type="hidden" name="tab" value="role">
             <div class="relative">
                 <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400"
-                     fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
                 </svg>
                 <input type="text" name="search" value="{{ $search }}" placeholder="Cari role..."
-                    class="pl-8 pr-3 py-[7px] border border-slate-200 rounded-lg text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 w-52">
+                    class="pl-8 pr-3 py-[7px] border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] rounded-lg text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 w-52">
             </div>
         </form>
         <button id="btn-add-role"
@@ -26,21 +26,21 @@
 {{-- Table --}}
 <div class="rounded-xl border border-slate-200 overflow-hidden">
     <table class="w-full text-[13px]">
-        <thead class="bg-red-100 border-b border-slate-200">
+        <thead class="bg-red-100 border-b border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a]">
             <tr>
-                <th class="px-5 py-3 text-left font-semibold text-slate-800 w-8">No</th>
-                <th class="px-5 py-3 text-left font-semibold text-slate-800">Nama Role</th>
-                <th class="px-5 py-3 text-left font-semibold text-slate-800">Permissions</th>
-                <th class="px-5 py-3 text-right font-semibold text-slate-800">Aksi</th>
+                <th class="px-5 py-3 text-left font-semibold text-slate-800 w-8 dark:text-slate-200">No</th>
+                <th class="px-5 py-3 text-left font-semibold text-slate-800 dark:text-slate-200">Nama Role</th>
+                <th class="px-5 py-3 text-left font-semibold text-slate-800 dark:text-slate-200">Permissions</th>
+                <th class="px-5 py-3 text-right font-semibold text-slate-800 dark:text-slate-200">Aksi</th>
             </tr>
         </thead>
         <tbody>
             @forelse($roles as $role)
-            <tr class="border-b border-slate-100 hover:bg-slate-50/60 transition-colors">
+            <tr class="border-b border-slate-100 hover:bg-slate-50/60 dark:hover:bg-transparent transition-colors">
                 <td class="px-5 py-3 text-slate-400">{{ $roles->firstItem() + $loop->index }}</td>
                 <td class="px-5 py-3">
                     <span class="inline-flex items-center gap-1.5">
-                        <span class="font-semibold text-slate-700">{{ $role->name }}</span>
+                        <span class="font-semibold text-slate-700 dark:text-slate-200">{{ $role->name }}</span>
                     </span>
                 </td>
                 <td class="px-5 py-3">
@@ -54,11 +54,11 @@
                                 data-id="{{ $role->id }}"
                                 data-name="{{ $role->name }}"
                                 data-perms="{{ $role->permissions->pluck('name')->implode(',') }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            <img src="{{ asset('icons/edit.svg') }}" alt="Edit" class="w-7 h-7">
                         </button>
                         <button onclick="deleteRole({{ $role->id }})"
                                 class="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                            <img src="{{ asset('icons/hapus.svg') }}" alt="Hapus" class="w-7 h-7">
                         </button>
                     </div>
                 </td>
@@ -66,7 +66,7 @@
             @empty
             <tr>
                 <td colspan="5" class="px-5 py-12 text-center text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2" class="mx-auto mb-2 text-slate-300"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                    <img src="{{ asset('icons/empty.svg') }}" alt="Empty" class="w-36 h-36 mx-auto mb-2 text-slate-300">
                     <p class="text-[13px] font-medium">Belum ada role</p>
                 </td>
             </tr>
@@ -81,9 +81,9 @@
 
 {{-- ═══════════════ MODAL TAMBAH/EDIT ROLE ═══════════════ --}}
 <div id="modal-role" class="hidden fixed inset-0 bg-black/40 z-[200] flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
+    <div class="bg-white dark:bg-[#232323] rounded-2xl shadow-2xl w-full max-w-lg">
         <div class="flex items-center justify-between px-6 py-4">
-            <h2 id="modal-role-title" class="text-[16px] font-bold text-slate-800">Tambah Role</h2>
+            <h2 id="modal-role-title" class="text-[16px] font-bold text-slate-800 dark:text-white">Tambah Role</h2>
             <button onclick="closeRoleModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
@@ -93,21 +93,21 @@
 
             {{-- Nama Role --}}
             <div class="mb-4">
-                <label class="block text-[12px] font-semibold text-slate-700 mb-1.5">Nama Role</label>
+                <label class="block text-[12px] font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nama Role</label>
                 <input id="role-name" type="text" placeholder="e.g. Super Admin"
-                       class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors">
+                       class="w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors">
             </div>
 
             {{-- Permission Grid --}}
             @if($allPerms->isNotEmpty())
             <div class="mb-4">
-                <label class="block text-[12px] font-semibold text-slate-700 mb-2">Permission</label>
+                <label class="block text-[12px] font-semibold text-slate-700 dark:text-slate-300 mb-2">Permission</label>
                 <div class="max-h-64 overflow-y-auto grid grid-cols-2 gap-2">
                     @foreach($allPerms as $perm)
-                    <label class="flex items-center gap-2.5 px-3 py-2.5 border border-slate-200 rounded-lg cursor-pointer hover:border-red-300 hover:bg-red-50/30 transition-colors has-[:checked]:border-red-400 has-[:checked]:bg-red-50">
+                    <label class="flex items-center gap-2.5 px-3 py-2.5 border border-slate-200 dark:border-[#3d3d3d] dark:hover:bg-[#2a2a2a] rounded-lg cursor-pointer hover:border-red-300 hover:bg-red-50/30 transition-colors has-[:checked]:border-red-400 has-[:checked]:bg-red-50 dark:has-[:checked]:bg-red-900/20">
                         <input type="checkbox" name="permissions[]" value="{{ $perm->name }}"
                                class="role-perm-cb w-4 h-4 accent-red-600 shrink-0">
-                        <span class="text-[12.5px] text-slate-700 truncate">{{ str_replace('_', ' ', $perm->name) }}</span>
+                        <span class="text-[12.5px] text-slate-700 dark:text-slate-300 truncate">{{ str_replace('_', ' ', $perm->name) }}</span>
                     </label>
                     @endforeach
                 </div>
@@ -115,9 +115,9 @@
             @endif
 
             <div id="role-error" class="hidden text-[12px] text-red-500 bg-red-50 rounded-lg px-3 py-2 mb-3"></div>
-            <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+            <div class="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-[#2d2d2d]">
                 <button type="button" onclick="closeRoleModal()"
-                        class="px-6 py-2.5 rounded-lg border border-slate-300 text-[13px] font-medium text-slate-600 hover:bg-slate-50 transition-colors">Batal</button>
+                        class="px-6 py-2.5 rounded-lg border border-slate-300 dark:border-[#3d3d3d] dark:text-slate-300 dark:hover:bg-[#2a2a2a] text-[13px] font-medium text-slate-600 hover:bg-slate-50 transition-colors">Batal</button>
                 <button type="submit"
                         class="px-8 py-2.5 bg-red-700 text-white text-[13px] font-semibold rounded-lg hover:bg-red-800 transition-colors shadow-sm">Simpan</button>
             </div>

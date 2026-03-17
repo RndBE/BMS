@@ -3,54 +3,54 @@
 @section('content')
 <!-- SUMMARY CARDS -->
 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3.5 mb-5">
-    <div class="bg-white rounded-xl px-4 py-3.5 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
-        <div class="text-[13px] text-slate-900 font-medium mb-2 flex items-center gap-1.5">
+    <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl px-4 py-3.5 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
+        <div class="text-[13px] text-slate-900 dark:text-slate-200 font-medium mb-2 flex items-center gap-1.5">
             <img src="{{ asset('icons/status.svg') }}" alt="Normal" class="w-7 h-7">
             Status Ruangan
         </div>
-        <div class="flex items-center gap-1 text-[18px] font-bold">
+        <div class="flex items-center gap-1 text-[18px] font-bold ">
             <img src="{{ asset('icons/normal.svg') }}" alt="Normal" class="w-7 h-7">
-            {{ $statusCounts['normal'] }}
+            <span class="text-[22px] font-bold text-slate-800 dark:text-white">{{ $statusCounts['normal'] }}</span>
             <img src="{{ asset('icons/warning.svg') }}" alt="Warning" class="w-7 h-7">
-            {{ $statusCounts['warning'] }}
+            <span class="text-[22px] font-bold text-slate-800 dark:text-white">{{ $statusCounts['warning'] }}</span>
             <img src="{{ asset('icons/poor.svg') }}" alt="Poor" class="w-7 h-7">
-            {{ $statusCounts['poor'] }}
+            <span class="text-[22px] font-bold text-slate-800 dark:text-white">{{ $statusCounts['poor'] }}</span>
         </div>  
     </div>
-    <div class="bg-white rounded-xl px-4 py-3.5 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
-        <div class="text-[13px] text-slate-900 font-medium mb-2 flex items-center gap-1.5">
+    <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl px-4 py-3.5 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
+        <div class="text-[13px] text-slate-900 dark:text-slate-200 font-medium mb-2 flex items-center gap-1.5">
             <img src="{{ asset('icons/suhu.svg') }}" alt="Normal" class="w-7 h-7">
             Rerata Suhu
         </div>
-        <div><span class="text-[22px] font-bold text-slate-800">{{ number_format($avgTemp ?? 0, 1) }}</span> <span class="text-[22px] font-bold text-slate-800">°C</span></div>
+        <div><span class="text-[22px] font-bold text-slate-800 dark:text-white">{{ number_format($avgTemp ?? 0, 1) }}</span> <span class="text-[22px] font-bold text-slate-800 dark:text-white">°C</span></div>
     </div>
-    <div class="bg-white rounded-xl px-4 py-3.5 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
-        <div class="text-[13px] text-slate-900 font-medium mb-2 flex items-center gap-1.5">
+    <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl px-4 py-3.5 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
+        <div class="text-[13px] text-slate-900 dark:text-slate-200 font-medium mb-2 flex items-center gap-1.5">
             <img src="{{ asset('icons/kelembapan.svg') }}" alt="Normal" class="w-7 h-7">
             Rerata Kelembaban
         </div>
-        <div><span class="text-[22px] font-bold text-slate-800">{{ number_format($avgHumidity ?? 0, 0) }}</span> <span class="text-[22px] font-bold text-slate-800">%</span></div>
+        <div><span class="text-[22px] font-bold text-slate-800 dark:text-white">{{ number_format($avgHumidity ?? 0, 0) }}</span> <span class="text-[22px] font-bold text-slate-800 dark:text-white">%</span></div>
     </div>
-    <div class="bg-white rounded-xl px-4 py-3.5 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
-        <div class="text-[13px] text-slate-900 font-medium mb-2 flex items-center gap-1.5">
+    <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl px-4 py-3.5 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
+        <div class="text-[13px] text-slate-900 dark:text-slate-200 font-medium mb-2 flex items-center gap-1.5">
             <img src="{{ asset('icons/daya.svg') }}" alt="Normal" class="w-7 h-7">
             Daya Saat Ini
         </div>
-        <div><span class="text-[22px] font-bold text-slate-800">{{ number_format($currentPower, 1) }}</span> <span class="text-[22px] font-bold text-slate-800">kW</span></div>
+        <div><span class="text-[22px] font-bold text-slate-800 dark:text-white">{{ number_format($currentPower, 1) }}</span> <span class="text-[22px] font-bold text-slate-800 dark:text-white">kW</span></div>
     </div>
-    <div class="bg-white rounded-xl px-4 py-3.5 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
-        <div class="text-[13px] text-slate-900 font-medium mb-2 flex items-center gap-1.5">
+    <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl px-4 py-3.5 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
+        <div class="text-[13px] text-slate-900 dark:text-slate-200 font-medium mb-2 flex items-center gap-1.5">
             <img src="{{ asset('icons/energi.svg') }}" alt="Normal" class="w-7 h-7">
             Energi Hari Ini
         </div>
-        <div><span class="text-[22px] font-bold text-slate-800">{{ number_format($energyToday, 0) }}</span> <span class="text-[22px] font-bold text-slate-800">kWh</span></div>
+        <div><span class="text-[22px] font-bold text-slate-800 dark:text-white">{{ number_format($energyToday, 0) }}</span> <span class="text-[22px] font-bold text-slate-800 dark:text-white">kWh</span></div>
     </div>
-    <div class="bg-white rounded-xl px-4 py-3.5 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
-        <div class="text-[13px] text-slate-900 font-medium mb-2 flex items-center gap-1.5">
+    <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl px-4 py-3.5 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
+        <div class="text-[13px] text-slate-900 dark:text-slate-200 font-medium mb-2 flex items-center gap-1.5">
             <img src="{{ asset('icons/unit_ac.svg') }}" alt="Normal" class="w-7 h-7">
             Unit AC Aktif
         </div>
-        <div><span class="text-[22px] font-bold text-slate-800">{{ $activeAc }}/{{ $totalAc }}</span></div>
+        <div><span class="text-[22px] font-bold text-slate-800 dark:text-white">{{ $activeAc }}/{{ $totalAc }}</span></div>
     </div>
 </div>
 
@@ -67,9 +67,9 @@
 <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
 
     <!-- FLOOR PLAN — Fabric.js canvas (read-only, from manajemen denah) -->
-    <div class="bg-white rounded-xl p-4 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
+    <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl p-4 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
         <div class="flex items-center justify-between mb-3">
-            <div class="text-[14px] font-semibold text-slate-800">
+            <div class="text-[14px] font-semibold text-slate-800 dark:text-white">
                 🗺️ Denah
                 @if($displayFloor)
                     — {{ $displayFloor->building->name ?? '' }} · {{ $displayFloor->name }}
@@ -79,7 +79,7 @@
 
         @if($displayFloor)
             <!-- Canvas rendered from editor canvas_data + room markers -->
-            <div class="w-full rounded-lg overflow-hidden bg-slate-100 relative" id="dashCanvasWrapper" style="min-height: 400px;">
+            <div class="w-full rounded-lg overflow-hidden bg-slate-100 dark:bg-[#1a1a1a] relative" id="dashCanvasWrapper" style="min-height: 400px;">
                 <canvas id="dash-canvas"></canvas>
                 <div id="dashCanvasHint" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 text-[13px]">
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-2 opacity-40 animate-spin" style="animation-duration:2s"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>
@@ -114,8 +114,8 @@
     <!-- RIGHT PANEL -->
     <div class="flex flex-col gap-4">
         <!-- ROOM DETAIL — instant from pre-loaded data -->
-        <div class="bg-white rounded-xl p-[18px] shadow-[0_1px_4px_rgba(0,0,0,.07)]">
-            <div class="text-[14px] font-semibold text-slate-800 mb-3.5">Detail Ruangan</div>
+        <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl p-[18px] shadow-[0_1px_4px_rgba(0,0,0,.07)]">
+            <div class="text-[14px] font-semibold text-slate-800 dark:text-white mb-3.5">Detail Ruangan</div>
             <div id="room-detail-content">
                 <div class="text-center py-8 text-slate-400 text-[13px]">
                     <i data-feather="mouse-pointer" class="w-8 h-8 block mx-auto mb-2 opacity-40"></i>
@@ -125,8 +125,8 @@
         </div>
 
         <!-- RECENT ALERTS -->
-        <div class="bg-white rounded-xl p-[18px] shadow-[0_1px_4px_rgba(0,0,0,.07)]">
-            <div class="text-[14px] font-semibold text-slate-800 mb-3.5">Peringatan Terbaru</div>
+        <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl p-[18px] shadow-[0_1px_4px_rgba(0,0,0,.07)]">
+            <div class="text-[14px] font-semibold text-slate-800 dark:text-white mb-3.5">Peringatan Terbaru</div>
             @forelse($recentAlerts as $alert)
                 @php
                     $paramKey = $alert->alertRule?->parameter_key ?? '';
@@ -157,7 +157,7 @@
                             alt="{{ $alertTitle }}" class="w-5 h-5">
                     </div>
                     <div class="flex-1 min-w-0">
-                        <div class="text-[13px] font-semibold text-slate-800 truncate">{{ $alertTitle }}</div>
+                        <div class="text-[13px] font-semibold text-slate-800 dark:text-slate-200 truncate">{{ $alertTitle }}</div>
                         <div class="text-[11px] text-slate-400">{{ $alert->room?->name ?? '-' }}</div>
                     </div>
                     <div class="text-[11px] text-slate-400 whitespace-nowrap">{{ $alert->created_at->format('H:i') }}</div>
@@ -167,7 +167,7 @@
                 <div class="text-center text-slate-400 text-[12px] py-4">Tidak ada peringatan</div>
             @endforelse
             <a href="{{ route('log-peringatan.index') }}"
-                class="flex items-center justify-end gap-1 text-[12px] text-[#4f7dfc] mt-2.5 cursor-pointer font-medium no-underline hover:text-blue-700 transition-colors">
+                class="flex items-center justify-end gap-1 text-[12px] text-[#4f7dfc] mt-2.5 cursor-pointer font-medium no-underline hover:text-blue-700 transition-colors dark:text-[#FFFFFF] dark:hover:text-[#FFFFFF]">
                 Lihat Semua
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </a>
@@ -437,7 +437,7 @@ function renderRoomDetail(room) {
 
     document.getElementById('room-detail-content').innerHTML = `
         <div class="flex justify-between items-start mb-1">
-            <div class="text-[15px] font-bold text-slate-800">${room.name}</div>
+            <div class="text-[15px] font-bold text-slate-800 dark:text-slate-200">${room.name}</div>
             <span class="text-[11px] px-2 py-0.5 rounded-full font-semibold ${statusColors[room.status] || statusColors.normal}">
                 ${room.status === 'warning' ? '▲' : '●'} ${statusLabel}
             </span>
@@ -454,7 +454,7 @@ function renderRoomDetail(room) {
             ${detailRow('📡 Sensor', sensorTxt)}
         </div>
         <button onclick="window.location.href='{{ route('analisa-data.index') }}?room_id=' + ${room.id}"
-            class="block w-full py-2.5 bg-slate-800 hover:bg-[#4f7dfc] text-white border-none rounded-lg text-[13px] font-semibold cursor-pointer text-center mt-4 transition-colors">
+            class="block w-full py-2.5 bg-[#B40404] hover:bg-[#B40404] text-white border-none rounded-lg text-[13px] font-semibold cursor-pointer text-center mt-4 transition-colors">
             Analisa Data
         </button>
     `;
@@ -463,8 +463,8 @@ function renderRoomDetail(room) {
 function detailRow(label, value) {
     return `
         <div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 text-[13px]">
-            <span class="text-slate-500">${label}</span>
-            <span class="font-semibold text-slate-800">${value}</span>
+            <span class="text-slate-500 dark:text-slate-200">${label}</span>
+            <span class="font-semibold text-slate-800 dark:text-slate-200">${value}</span>
         </div>`;
 }
 

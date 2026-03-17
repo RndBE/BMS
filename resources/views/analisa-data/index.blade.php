@@ -14,13 +14,13 @@
 
     {{-- ── FILTER BAR ─────────────────────────────────────────────────────── --}}
     <form method="GET" action="{{ route('analisa-data.index') }}" id="filterForm">
-        <div class="bg-white rounded-xl border border-slate-100 shadow-sm px-5 py-4">
+        <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm px-5 py-4">
             <div class="flex flex-wrap gap-3 items-end w-full">
                 {{-- Ruangan --}}
                 <div class="flex flex-col gap-2 flex-1">
-                    <label class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Ruangan</label>
+                    <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Ruangan</label>
                     <select name="room_id" id="sel-room"
-                        class="border border-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-blue-400">
+                        class="border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-blue-400 cursor-pointer ">
                         @foreach($rooms as $room)
                             <option value="{{ $room->id }}" {{ $room->id == $selectedRoomId ? 'selected' : '' }}>
                                 {{ $room->name }}
@@ -31,9 +31,9 @@
 
                 {{-- Parameter --}}
                 <div class="flex flex-col gap-2 flex-1">
-                    <label class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Parameter</label>
+                    <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Parameter</label>
                     <select name="parameter" id="sel-parameter"
-                        class="border border-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-blue-400">
+                        class="border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-blue-400 cursor-pointer">
                         @foreach($parameterLabels as $key => $label)
                             <option value="{{ $key }}" {{ $parameter === $key ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
@@ -42,9 +42,9 @@
 
                 {{-- Periode --}}
                 <div class="flex flex-col gap-2 flex-1">
-                    <label class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Periode</label>
+                    <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Periode</label>
                     <select name="periode" id="sel-periode"
-                        class="border border-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-blue-400">
+                        class="border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-blue-400 cursor-pointer">
                         <option value="harian"   {{ $periode === 'harian'   ? 'selected' : '' }}>Harian</option>
                         <option value="mingguan" {{ $periode === 'mingguan' ? 'selected' : '' }}>Mingguan</option>
                         <option value="bulanan"  {{ $periode === 'bulanan'  ? 'selected' : '' }}>Bulanan</option>
@@ -53,19 +53,19 @@
 
                 {{-- Tanggal --}}
                 <div class="flex flex-col gap-2 flex-1">
-                    <label class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Tanggal</label>
+                    <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Tanggal</label>
                     <input type="date" name="tanggal" id="inp-tanggal" value="{{ $tanggal }}"
-                        class="border border-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-blue-400 w-full">
+                        class="border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-blue-400 w-full cursor-pointer">
                 </div>
 
                 {{-- Buttons --}}
                 <div class="flex gap-2 pb-[1px] ml-auto shrink-0">
                     <button type="submit"
-                        class="bg-red-600 hover:bg-red-700 text-white text-[13px] font-semibold px-5 py-[8px] rounded-lg transition-colors cursor-pointer whitespace-nowrap">
+                        class="bg-red-600 hover:bg-red-800 text-white text-[13px] font-semibold px-5 py-[8px] rounded-lg transition-colors cursor-pointer whitespace-nowrap">
                         Terapkan
                     </button>
                     <a href="{{ route('analisa-data.index') }}"
-                        class="bg-white hover:bg-slate-50 text-slate-700 text-[13px] font-semibold px-5 py-[8px] rounded-lg border border-slate-200 transition-colors no-underline whitespace-nowrap">
+                        class="hover:bg-slate-50 text-slate-700 text-[13px] font-semibold px-5 py-[8px] rounded-lg border border-slate-200 transition-colors no-underline whitespace-nowrap dark:text-slate-200 dark:border-slate-200">
                         Reset
                     </a>
                 </div>
@@ -95,9 +95,9 @@
     <div class="flex flex-col xl:flex-row gap-5">
 
         {{-- Chart --}}
-        <div class="flex-1 bg-white rounded-xl border border-slate-100 shadow-sm p-5">
+        <div class="flex-1 bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm p-5">
             <div class="text-center mb-1">
-                <div class="text-[20px] font-semibold text-slate-800">
+                <div class="text-[20px] font-semibold text-slate-800 dark:text-white">
                     Grafik {{ $paramLabel }} Ruangan {{ $selectedRoom?->name ?? '-' }}
                 </div>
                 <div class="text-[12px] text-slate-400">{{ $date->translatedFormat('d F Y') }}</div>
@@ -115,36 +115,77 @@
         <div class="w-full xl:w-[395px] flex flex-col gap-4 shrink-0">
 
             {{-- Batas Normal --}}
-            <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
-                <div class="text-[13px] font-semibold text-slate-700 mb-3">Batas Normal</div>
+            <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm p-4">
+                <div class="text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-3">Batas Normal</div>
+                @if($alertLimit)
                 <div class="space-y-2">
+                    {{-- Normal --}}
                     <div class="flex items-start gap-2">
-                        <img src="{{ asset('icons/normal.svg') }}" alt="Normal" class="w-5 h-5">
-                        <div class="text-[12px] text-slate-700">
-                            <span class="font-semibold">Normal</span>
-                            <span class="text-slate-600 ml-1">: {{ $th['normal_min'] }} – {{ $th['normal_max'] }}{{ $unit }}</span>
+                        <img src="{{ asset('icons/normal.svg') }}" alt="Normal" class="w-5 h-5 mt-0.5 shrink-0">
+                        <div class="text-[12px]">
+                            <span class="font-semibold text-slate-700 dark:text-slate-200">Normal</span>
+                            <span class="text-slate-500 dark:text-slate-400 ml-1">
+                                : 
+                                @if($alertLimit->normal_min !== null)
+                                    &lt;{{ $alertLimit->normal_min }}{{ $unit }}
+                                @endif
+                                @if($alertLimit->normal_min !== null && $alertLimit->normal_max !== null)
+                                    atau
+                                @endif
+                                @if($alertLimit->normal_max !== null)
+                                    &gt;{{ $alertLimit->normal_max }}{{ $unit }}
+                                @endif
+                            </span>
                         </div>
                     </div>
+                    {{-- Warning (Rendah + Tinggi digabung) --}}
                     <div class="flex items-start gap-2">
-                        <img src="{{ asset('icons/warning.svg') }}" alt="Warning" class="w-5 h-5">
-                        <div class="text-[12px] text-slate-700">
-                            <span class="font-semibold">Warning</span>
-                            <span class="text-slate-600 ml-1">: &lt;{{ $th['normal_min'] }}{{ $unit }} atau &gt;{{ $th['normal_max'] }}{{ $unit }}</span>
+                        <img src="{{ asset('icons/warning.svg') }}" alt="Warning" class="w-5 h-5 mt-0.5 shrink-0">
+                        <div class="text-[12px]">
+                            <span class="font-semibold text-slate-700 dark:text-slate-200">Warning</span>
+                            <span class="text-slate-500 dark:text-slate-400 ml-1">:
+                                @if($alertLimit && $alertLimit->warn_low_min !== null)
+                                    {{ $alertLimit->warn_low_min }}{{ $unit }} – {{ $alertLimit->warn_low_max }}{{ $unit }}
+                                @endif
+                                @if($alertLimit && $alertLimit->warn_low_min !== null && $alertLimit->warn_high_min !== null)
+                                    atau
+                                @endif
+                                @if($alertLimit && $alertLimit->warn_high_min !== null)
+                                    {{ $alertLimit->warn_high_min }}{{ $unit }} – {{ $alertLimit->warn_high_max }}{{ $unit }}
+                                @endif
+                            </span>
                         </div>
                     </div>
+
+                    {{-- Poor --}}
+                    @if($alertLimit->poor_low !== null || $alertLimit->poor_high !== null)
                     <div class="flex items-start gap-2">
-                        <img src="{{ asset('icons/poor.svg') }}" alt="Poor" class="w-5 h-5">
-                        <div class="text-[12px] text-slate-700">
-                            <span class="font-semibold">Poor</span>
-                            <span class="text-slate-600 ml-1">: &lt;{{ $th['warn_lower'] }}{{ $unit }} atau &gt;{{ $th['warn_upper'] }}{{ $unit }}</span>
+                        <img src="{{ asset('icons/poor.svg') }}" alt="Poor" class="w-5 h-5 mt-0.5 shrink-0">
+                        <div class="text-[12px]">
+                            <span class="font-semibold text-slate-700 dark:text-slate-200">Poor</span>
+                            <span class="text-slate-500 dark:text-slate-400 ml-1"> :
+                                @if($alertLimit->poor_low !== null)
+                                    &lt;{{ $alertLimit->poor_low }}{{ $unit }}
+                                @endif
+                                @if($alertLimit->poor_low !== null && $alertLimit->poor_high !== null)
+                                    atau
+                                @endif
+                                @if($alertLimit->poor_high !== null)
+                                    &gt;{{ $alertLimit->poor_high }}{{ $unit }}
+                                @endif
+                            </span>
                         </div>
                     </div>
+                    @endif
                 </div>
+                @else
+                <div class="text-[12px] text-slate-400 text-center py-3">Belum dikonfigurasi</div>
+                @endif
             </div>
 
             {{-- Peringatan Terkait --}}
-            <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-4 flex-1">
-                <div class="text-[13px] font-semibold text-slate-700 mb-3">Peringatan Terkait</div>
+            <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm p-4 flex-1">
+                <div class="text-[13px] font-semibold text-slate-700 dark:text-slate-200 mb-3">Peringatan Terkait</div>
                 @if($alerts->isEmpty())
                     <div class="text-[12px] text-slate-400 text-center py-4">Tidak ada peringatan</div>
                 @else
@@ -163,7 +204,7 @@
                             <div class="flex items-start justify-between gap-2">
                                 <div class="flex items-center gap-1.5 min-w-0">
                                     <span class="text-[14px] shrink-0">{{ $icon }}</span>
-                                    <span class="text-[12px] text-slate-700 truncate">{{ $alert->message ?? $alert->type }}</span>
+                                    <span class="text-[12px] text-slate-700 dark:text-slate-300 truncate">{{ $alert->message ?? $alert->type }}</span>
                                 </div>
                                 <span class="text-[10px] text-slate-400 shrink-0 whitespace-nowrap">
                                     {{ optional($alert->created_at)->format('d/m/Y H:i') }}
@@ -198,35 +239,35 @@
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         @foreach($statCards as $card)
-            <div class="bg-white rounded-xl border border-slate-100 shadow-sm px-5 py-4 flex flex-col gap-2">
+            <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm px-5 py-4 flex flex-col gap-2">
                 <div class="flex items-center gap-2">
-                    <img src="{{ $card['icon'] }}" alt="icon" class="w-6 h-6 shrink-0">
-                    <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide leading-tight">{{ $card['label'] }}</div>
+                    <img src="{{ $card['icon'] }}" alt="icon" class="w-6 h-6 shrink-0 dark:brightness-75 dark:invert">
+                    <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide leading-tight">{{ $card['label'] }}</div>
                 </div>
-                <div class="text-[22px] font-bold text-slate-800 leading-tight">{{ $card['value'] }}</div>
+                <div class="text-[22px] font-bold text-slate-800 dark:text-white leading-tight">{{ $card['value'] }}</div>
             </div>
         @endforeach
     </div>
 
     {{-- ── TABEL DATA ──────────────────────────────────────────────────────── --}}
-    <div class="bg-white rounded-xl border border-slate-100 shadow-sm">
-        <div class="px-5 py-4 border-b border-slate-100">
-            <span class="text-[14px] font-semibold text-slate-800">Tabel Data</span>
+    <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm">
+        <div class="px-5 py-4 border-b border-slate-100 dark:border-[#2d2d2d]">
+            <span class="text-[14px] font-semibold text-slate-800 dark:text-white">Tabel Data</span>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-[13px]">
                 <thead>
-                    <tr class="border-b border-slate-100">
-                        <th class="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Waktu</th>
-                        <th class="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Nilai</th>
-                        <th class="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+                    <tr class="border-b border-slate-100 dark:border-[#2d2d2d]">
+                        <th class="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Waktu</th>
+                        <th class="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Nilai</th>
+                        <th class="text-left px-5 py-3 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($tableData as $row)
-                        <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                            <td class="px-5 py-3 text-slate-600">{{ $row['waktu'] }}</td>
-                            <td class="px-5 py-3 text-slate-700 font-medium">
+                        <tr class="border-b border-slate-50 dark:border-[#2d2d2d] hover:bg-slate-50 dark:hover:bg-[#2a2a2a] transition-colors">
+                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">{{ $row['waktu'] }}</td>
+                            <td class="px-5 py-3 text-slate-700 dark:text-slate-200 font-medium">
                                 {{ $row['nilai'] }} {{ $unit }}
                             </td>
                             <td class="px-5 py-3">

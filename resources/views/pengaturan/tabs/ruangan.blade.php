@@ -1,7 +1,7 @@
 {{-- ═══ TAB RUANGAN ═══ --}}
 
 <div class="flex items-center justify-between mb-5">
-    <h2 class="text-[16px] font-bold text-slate-800">Daftar Ruangan</h2>
+    <h2 class="text-[16px] font-bold text-slate-800 dark:text-white">Daftar Ruangan</h2>
     <div class="flex items-center gap-3">
         {{-- Search --}}
         <form method="GET" action="{{ route('pengaturan.konfigurasi') }}" class="flex items-center">
@@ -11,7 +11,7 @@
                     <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
                 </svg>
                 <input type="text" name="search" value="{{ $search }}" placeholder="Cari ..."
-                    class="pl-8 pr-3 py-[7px] border border-slate-200 rounded-lg text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 w-44">
+                    class="pl-8 pr-3 py-[7px] border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 w-44">
             </div>
         </form>
         {{-- Tambah Ruangan --}}
@@ -26,7 +26,7 @@
 <div class="overflow-x-auto">
     <table class="w-full text-[13px]">
         <thead>
-            <tr class="bg-red-100 text-slate-800 text-left">
+            <tr class="bg-red-100 text-slate-800 text-left dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-white">
                 <th class="px-4 py-2.5 font-semibold rounded-l-lg">Nama Ruangan</th>
                 <th class="px-4 py-2.5 font-semibold">Kode Ruangan</th>
                 <th class="px-4 py-2.5 font-semibold">Status Monitoring</th>
@@ -41,9 +41,9 @@
                     $hasMonitoring = $room->sensors->count() > 0;
                     $isActive      = $room->is_active;
                 @endphp
-                <tr class="hover:bg-slate-50/60 transition-colors">
-                    <td class="px-4 py-2.5 text-slate-800 font-medium">{{ $room->name }}</td>
-                    <td class="px-4 py-2.5 text-slate-500">{{ $room->code ?? '-' }}</td>
+                <tr class="hover:bg-slate-50/60 dark:hover:bg-transparent transition-colors">
+                    <td class="px-4 py-2.5 text-slate-800 dark:text-slate-200 font-medium">{{ $room->name }}</td>
+                    <td class="px-4 py-2.5 text-slate-500 dark:text-slate-200">{{ $room->code ?? '-' }}</td>
                     <td class="px-4 py-2.5">
                         @if($hasMonitoring)
                             <span class="inline-flex items-center gap-1.5 text-green-600 font-medium">
@@ -57,7 +57,7 @@
                             </span>
                         @endif
                     </td>
-                    <td class="px-4 py-2.5 text-slate-500">{{ $room->sort_order ?: '-' }}</td>
+                    <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">{{ $room->sort_order ?: '-' }}</td>
                     <td class="px-4 py-2.5">
                         @if($isActive)
                             <span class="text-green-600 font-semibold text-[12px]">Aktif</span>
@@ -97,7 +97,7 @@
 
 {{-- Pagination --}}
 <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-50">
-    <span class="text-[12px] text-slate-400">
+    <span class="text-[12px] text-slate-400 dark:text-slate-500">
         Menampilkan {{ $rooms->firstItem() ?? 0 }} – {{ $rooms->lastItem() ?? 0 }} dari {{ $rooms->total() }} data
     </span>
     <div class="flex items-center gap-1">
@@ -116,7 +116,7 @@
             <a href="{{ $url }}&tab=ruangan&search={{ $search }}"
                 class="w-7 h-7 flex items-center justify-center rounded text-[12px] font-medium no-underline transition-colors
                     {{ $page == $rooms->currentPage()
-                        ? 'bg-red-700 text-white'
+                        ? 'bg-red-700 text-white dark:border-[#FDEBEB] dark:bg-[#FDEBEB] dark:text-black'
                         : 'text-slate-500 hover:bg-slate-100' }}">
                 {{ $page }}
             </a>
@@ -128,7 +128,7 @@
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
             </a>
         @else
-            <span class="w-7 h-7 flex items-center justify-center rounded text-slate-300 cursor-not-allowed">
+            <span class="w-7 h-7 flex items-center justify-center rounded text-slate-300 cursor-not-allowed ">
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
             </span>
         @endif
@@ -138,11 +138,11 @@
 {{-- ═══ MODAL TAMBAH / EDIT RUANGAN ═══ --}}
 @push('modals')
 <div id="roomModal" class="hidden fixed inset-0 bg-black/40 z-[1000] items-center justify-center">
-    <div class="bg-white rounded-xl shadow-2xl w-[480px] max-w-[95vw] overflow-hidden">
+    <div class="bg-white dark:bg-[#232323] rounded-xl shadow-2xl w-[480px] max-w-[95vw] overflow-hidden">
 
         {{-- Header --}}
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-            <h3 class="text-[15px] font-bold text-slate-800" id="roomModalTitle">Tambah Ruangan</h3>
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-[#2d2d2d]">
+            <h3 class="text-[15px] font-bold text-slate-800 dark:text-white" id="roomModalTitle">Tambah Ruangan</h3>
             <button onclick="closeRoomModal()" class="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer bg-transparent border-none p-1">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
@@ -154,30 +154,30 @@
 
             {{-- Nama Ruangan --}}
             <div>
-                <label class="block text-[11.5px] font-semibold text-slate-500 mb-1.5">Nama Ruangan <span class="text-red-500">*</span></label>
+                <label class="block text-[11.5px] font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Nama Ruangan <span class="text-red-500">*</span></label>
                 <input type="text" id="roomModalName" placeholder="Contoh: Ruang Rapat"
-                    class="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-red-400 box-border transition-colors">
+                    class="w-full px-3 py-2 border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg text-[13px] outline-none focus:border-red-400 box-border transition-colors">
             </div>
 
             {{-- Kode & Urutan Denah --}}
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-[11.5px] font-semibold text-slate-500 mb-1.5">Kode Ruangan <span class="text-red-500">*</span></label>
+                    <label class="block text-[11.5px] font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Kode Ruangan <span class="text-red-500">*</span></label>
                     <input type="text" id="roomModalCode" placeholder="RM-01"
-                        class="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-red-400 box-border uppercase transition-colors">
+                        class="w-full px-3 py-2 border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg text-[13px] outline-none focus:border-red-400 box-border uppercase transition-colors">
                 </div>
                 <div>
-                    <label class="block text-[11.5px] font-semibold text-slate-500 mb-1.5">Urutan Denah</label>
+                    <label class="block text-[11.5px] font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Urutan Denah</label>
                     <input type="number" id="roomModalOrder" placeholder="0" min="0"
-                        class="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-red-400 box-border transition-colors">
+                        class="w-full px-3 py-2 border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg text-[13px] outline-none focus:border-red-400 box-border transition-colors">
                     <p class="text-[10.5px] text-slate-400 mt-1">Urutan tampil di denah. 0 = otomatis.</p>
                 </div>
             </div>
 
             {{-- Status Monitoring (read-only info) --}}
-            <div class="bg-slate-50 rounded-lg px-4 py-3 flex items-center justify-between">
+            <div class="bg-slate-50 dark:bg-[#2a2a2a] rounded-lg px-4 py-3 flex items-center justify-between">
                 <div>
-                    <p class="text-[11.5px] font-semibold text-slate-500">Status Monitoring</p>
+                    <p class="text-[11.5px] font-semibold text-slate-500 dark:text-slate-400">Status Monitoring</p>
                     <p class="text-[11px] text-slate-400 mt-0.5">Otomatis dari jumlah sensor yang terhubung</p>
                 </div>
                 <span class="inline-flex items-center gap-1.5 text-slate-400 text-[12px] font-medium" id="roomModalMonitoringBadge">
@@ -189,7 +189,7 @@
             {{-- Status Aktif --}}
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-[11.5px] font-semibold text-slate-700">Status Ruangan</p>
+                    <p class="text-[11.5px] font-semibold text-slate-700 dark:text-slate-200">Status Ruangan</p>
                     <p class="text-[11px] text-slate-400 mt-0.5">Aktifkan untuk menampilkan ruangan di sistem</p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
@@ -205,9 +205,9 @@
         </div>
 
         {{-- Footer --}}
-        <div class="flex justify-end gap-2 px-6 py-4 border-t border-slate-100 bg-slate-50/60">
+        <div class="flex justify-end gap-2 px-6 py-4 border-t border-slate-100 dark:border-[#2d2d2d] bg-slate-50/60 dark:bg-[#1e1e1e]">
             <button onclick="closeRoomModal()"
-                class="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg text-[13px] hover:bg-slate-100 transition-colors cursor-pointer bg-white">
+                class="px-4 py-2 border border-slate-200 dark:border-[#3d3d3d] dark:text-slate-300 dark:bg-transparent text-slate-600 rounded-lg text-[13px] hover:bg-slate-100 dark:hover:bg-[#2a2a2a] transition-colors cursor-pointer bg-white">
                 Batal
             </button>
             <button onclick="saveRoom()"

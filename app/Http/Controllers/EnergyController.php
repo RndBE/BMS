@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alert;
+use App\Models\AlertLimit;
 use App\Models\SensorReading;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -12,7 +13,7 @@ class EnergyController extends Controller
 {
     public function index(Request $request)
     {
-        $parameter = $request->get('parameter', 'power'); // power atau energy
+        $parameter = $request->get('parameter', 'power'); // power, voltage, atau energy
         $periode   = $request->get('periode', 'harian');
         $tanggal   = $request->get('tanggal', Carbon::today()->format('d/m/Y'));
 
@@ -35,6 +36,11 @@ class EnergyController extends Controller
                 $date->copy()->endOfMonth(),
                 '%Y-%m-%d',
             ],
+            'tahunan' => [
+                $date->copy()->startOfYear(),
+                $date->copy()->endOfYear(),
+                '%Y-%m',
+            ],
             default => [  // harian
                 $date->copy()->startOfDay(),
                 $date->copy()->endOfDay(),
@@ -45,7 +51,7 @@ class EnergyController extends Controller
         // Pemetaan parameter ke kolom sensor_readings
         // power  → sensor4 (Daya W)
         // energy → sensor3 (Energi kWh)
-        $columnMap = ['power' => 'sensor4', 'energy' => 'sensor3'];
+        $columnMap = ['power' => 'sensor4', 'voltage' => 'sensor3', 'energy' => 'sensor3'];
         $column    = $columnMap[$parameter] ?? 'sensor4';
 
         // ── Chart Data: akumulasi seluruh gedung ──────────────────────────────────────────
@@ -67,8 +73,9 @@ class EnergyController extends Controller
 
         // ── Thresholds per parameter (skala gedung) ───────────────────────────
         $thresholds = [
-            'power'  => ['normal_min' => 0, 'normal_max' => 10,  'warn_lower' => 0, 'warn_upper' => 15],  // dalam kW
-            'energy' => ['normal_min' => 0, 'normal_max' => 100, 'warn_lower' => 0, 'warn_upper' => 150],
+            'power'   => ['normal_min' => 0, 'normal_max' => 10,  'warn_lower' => 0, 'warn_upper' => 15],
+            'voltage' => ['normal_min' => 210, 'normal_max' => 230, 'warn_lower' => 200, 'warn_upper' => 240],
+            'energy'  => ['normal_min' => 0, 'normal_max' => 100, 'warn_lower' => 0, 'warn_upper' => 150],
         ];
         $th = $thresholds[$parameter] ?? $thresholds['power'];
 
@@ -116,24 +123,31 @@ class EnergyController extends Controller
             ) outer_q
         ", [$todayFrom, $todayTo])->avg_load / 1000, 1);
 
-        $parameterLabels = ['power' => 'Daya', 'energy' => 'Energi'];
-        $parameterUnits  = ['power' => 'kW',   'energy' => 'kWh'];
+        $parameterLabels = ['power' => 'Daya', 'voltage' => 'Tegangan', 'energy' => 'Energi'];
+        $parameterUnits  = ['power' => 'kW',   'voltage' => 'V',        'energy' => 'kWh'];
         $unit            = $parameterUnits[$parameter] ?? 'kW';
         $paramLabel      = $parameterLabels[$parameter] ?? 'Daya';
 
-        // ── Batas Normal tampilan sidebar ─────────────────────────────────────
-        $batasNormal = match ($parameter) {
-            'energy' => [
-                ['label' => 'Normal',  'desc' => '< 100 kWh',  'status' => 'normal'],
-                ['label' => 'Warning', 'desc' => '100–150 kWh','status' => 'warning'],
-                ['label' => 'Poor',    'desc' => '> 150 kWh',  'status' => 'poor'],
-            ],
-            default => [
-                ['label' => 'Normal',  'desc' => '< 10 kW',  'status' => 'normal'],
-                ['label' => 'Warning', 'desc' => '10–15 kW', 'status' => 'warning'],
-                ['label' => 'Poor',    'desc' => '> 15 kW',  'status' => 'poor'],
-            ],
-        };
+        // ── Map parameter energi → parameter_key di AlertLimit ─────────────
+        $paramKeyMap = [
+            'power'   => 'daya',
+            'voltage' => 'tegangan',
+            'energy'  => 'energi',
+        ];
+        $limitsFromDb = AlertLimit::all()->keyBy('parameter_key');
+        $alertLimit   = $limitsFromDb->get($paramKeyMap[$parameter] ?? 'daya');
+
+        // Fallback $thresholds untuk tabel status (backward compat)
+        if ($alertLimit) {
+            $th = [
+                'normal_min' => $alertLimit->normal_min ?? 0,
+                'normal_max' => $alertLimit->normal_max ?? 10,
+                'warn_lower' => $alertLimit->warn_low_min ?? 0,
+                'warn_upper' => $alertLimit->warn_high_max ?? 15,
+            ];
+        } else {
+            $th = $thresholds[$parameter] ?? $thresholds['power'];
+        }
 
         // ── Alerts terkait (seluruh gedung) ───────────────────────────────────
         $alerts = Alert::with('room')->latest()->limit(6)->get();
@@ -165,7 +179,7 @@ class EnergyController extends Controller
             'parameterLabels', 'parameterUnits',
             'unit', 'paramLabel', 'th',
             'currentPower', 'energyToday', 'peakPower', 'avgLoad',
-            'batasNormal', 'alerts', 'tableData'
+            'alertLimit', 'alerts', 'tableData'
         ));
     }
 }
