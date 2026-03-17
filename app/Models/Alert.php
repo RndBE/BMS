@@ -2,18 +2,24 @@
 
 namespace App\Models;
 
+use App\Models\AlertRule;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Alert extends Model
 {
-    protected $fillable = ['room_id', 'type', 'message', 'is_read'];
+    protected $fillable = ['room_id', 'alert_rule_id', 'type', 'message', 'nilai', 'is_read'];
 
     protected $casts = ['is_read' => 'boolean'];
 
     public function room(): BelongsTo
     {
         return $this->belongsTo(Room::class);
+    }
+
+    public function alertRule(): BelongsTo
+    {
+        return $this->belongsTo(AlertRule::class);
     }
 
     public function getIconAttribute(): string

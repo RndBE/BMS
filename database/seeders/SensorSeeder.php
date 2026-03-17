@@ -14,25 +14,21 @@ class SensorSeeder extends Seeder
         // Ambil sensor groups berdasarkan kode
         $groups = SensorGroup::pluck('id', 'kode_sensor');
 
-        $typeMap = [
-            'SG-TEMP' => ['type' => 'temperature', 'unit' => '°C'],
-            'SG-HUM'  => ['type' => 'humidity',    'unit' => '%'],
-            'SG-ENER' => ['type' => 'energy',      'unit' => 'kWh'],
-            'SG-PWR'  => ['type' => 'power',       'unit' => 'W'],
-        ];
-
+        // Satu sensor per ruangan (sensor multi-parameter sudah dihandle oleh SensorParameter)
         $rooms = Room::all();
 
         foreach ($rooms as $room) {
-            foreach ($typeMap as $kode => $meta) {
-                Sensor::create([
-                    'room_id'         => $room->id,
-                    'sensor_group_id' => $groups[$kode] ?? null,
-                    'type'            => $meta['type'],
-                    'unit'            => $meta['unit'],
-                    'is_active'       => true,
-                ]);
+            // Cek apakah room sudah punya sensor, skip jika sudah ada
+            if (Sensor::where('room_id', $room->id)->exists()) {
+                continue;
             }
+
+            Sensor::create([
+                'room_id'         => $room->id,
+                'sensor_group_id' => $groups['SG-TEMP'] ?? ($groups->first() ?? null),
+                'tipe_sensor'     => 'Multi-Parameter Sensor',
+                'is_active'       => true,
+            ]);
         }
     }
 }

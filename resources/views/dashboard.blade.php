@@ -2,7 +2,7 @@
 
 @section('content')
 <!-- SUMMARY CARDS -->
-<div class="grid grid-cols-6 gap-3.5 mb-5">
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3.5 mb-5">
     <div class="bg-white rounded-xl px-4 py-3.5 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
         <div class="text-[13px] text-slate-900 font-medium mb-2 flex items-center gap-1.5">
             <img src="{{ asset('icons/status.svg') }}" alt="Normal" class="w-7 h-7">
@@ -64,7 +64,7 @@
 </div>
 
 <!-- MAIN CONTENT -->
-<div class="grid grid-cols-[1fr_280px] gap-4">
+<div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
 
     <!-- FLOOR PLAN — Fabric.js canvas (read-only, from manajemen denah) -->
     <div class="bg-white rounded-xl p-4 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
@@ -79,7 +79,7 @@
 
         @if($displayFloor)
             <!-- Canvas rendered from editor canvas_data + room markers -->
-            <div class="w-full rounded-lg overflow-hidden bg-slate-100 relative" id="dashCanvasWrapper" style="min-height: 200px;">
+            <div class="w-full rounded-lg overflow-hidden bg-slate-100 relative" id="dashCanvasWrapper" style="min-height: 400px;">
                 <canvas id="dash-canvas"></canvas>
                 <div id="dashCanvasHint" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 text-[13px]">
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-2 opacity-40 animate-spin" style="animation-duration:2s"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>
@@ -87,17 +87,17 @@
                 </div>
 
                 {{-- Status legend overlay (bottom-left) --}}
-                <div class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-xl shadow-sm border border-slate-100 px-5 py-5 z-10">
-                    <div class="text-[16px] font-semibold text-slate-600 mb-1.5">Status Ruangan</div>
+                <div class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-xl shadow-sm border border-slate-100 px-3.5 py-3 z-10">
+                    <div class="text-[12px] font-semibold text-slate-600 mb-1.5">Status Ruangan</div>
                     <div class="flex flex-col gap-1">
-                        <div class="flex items-center gap-1.5 text-[16px] text-slate-900">
-                            <img src="{{ asset('icons/normal.svg') }}" alt="Normal" class="w-5 h-5"> Normal
+                        <div class="flex items-center gap-1.5 text-[12px] text-slate-900">
+                            <img src="{{ asset('icons/normal.svg') }}" alt="Normal" class="w-4 h-4"> Normal
                         </div>
-                        <div class="flex items-center gap-1.5 text-[16px] text-slate-900">
-                            <img src="{{ asset('icons/warning.svg') }}" alt="Warning" class="w-5 h-5"> Warning
+                        <div class="flex items-center gap-1.5 text-[12px] text-slate-900">
+                            <img src="{{ asset('icons/warning.svg') }}" alt="Warning" class="w-4 h-4"> Warning
                         </div>
-                        <div class="flex items-center gap-1.5 text-[16px] text-slate-900">
-                            <img src="{{ asset('icons/poor.svg') }}" alt="Poor" class="w-5 h-5"> Poor
+                        <div class="flex items-center gap-1.5 text-[12px] text-slate-900">
+                            <img src="{{ asset('icons/poor.svg') }}" alt="Poor" class="w-4 h-4"> Poor
                         </div>
                     </div>
                 </div>
@@ -129,41 +129,48 @@
             <div class="text-[14px] font-semibold text-slate-800 mb-3.5">Peringatan Terbaru</div>
             @forelse($recentAlerts as $alert)
                 @php
-                    $alertIcon = match($alert->type) {
-                        'sensor_offline' => 'sensor-offline',
-                        'high_temp'      => 'suhu-tinggi',
-                        'ac_off'         => 'freeze',
-                        'high_power'     => 'daya-tinggi',
-                        default          => 'alert-triangle',
+                    $paramKey = $alert->alertRule?->parameter_key ?? '';
+                    $kateg    = $alert->alertRule?->kategori ?? '';
+
+                    // Ikon berdasarkan parameter_key lalu kategori
+                    $alertIcon = match(true) {
+                        str_contains($paramKey, 'suhu') || str_contains($paramKey, 'temp')  => 'suhu-tinggi',
+                        str_contains($paramKey, 'daya') || str_contains($paramKey, 'power')
+                            || str_contains($paramKey, 'tegangan')                           => 'daya-tinggi',
+                        $kateg === 'Perangkat'                                               => 'freeze',
+                        $kateg === 'Sensor' || str_contains($paramKey, 'sensor')             => 'sensor-offline',
+                        // legacy types
+                        $alert->type === 'sensor_offline'                                   => 'sensor-offline',
+                        $alert->type === 'high_temp'                                        => 'suhu-tinggi',
+                        $alert->type === 'ac_off'                                           => 'freeze',
+                        $alert->type === 'high_power'                                       => 'daya-tinggi',
+                        default                                                             => 'alert-triangle',
                     };
-                    $alertBg = match($alert->type) {
-                        'sensor_offline' => 'bg-slate-100 text-slate-500',
-                        'high_temp'      => 'bg-amber-50 text-amber-600',
-                        'ac_off'         => 'bg-blue-50 text-blue-500',
-                        'high_power'     => 'bg-yellow-50 text-yellow-600',
-                        default          => 'bg-slate-100 text-slate-500',
-                    };
+
+                    $alertTitle = $alert->alertRule?->name
+                        ?? ($alert->message ? \Str::limit($alert->message, 35) : ucfirst(str_replace('_', ' ', $alert->type)));
                 @endphp
                 <div class="flex items-center gap-2.5 py-2.5 border-b border-slate-50 last:border-0">
-                    <!-- <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {{ $alertBg }}"> -->
                     <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
                         <img src="{{ asset('icons/' . $alertIcon . '.svg') }}"
                             onerror="this.src='{{ asset('icons/status.svg') }}'"
-                            alt="{{ $alert->type }}" class="w-5 h-5">
+                            alt="{{ $alertTitle }}" class="w-5 h-5">
                     </div>
                     <div class="flex-1 min-w-0">
-                        <div class="text-[13px] font-semibold text-slate-800 truncate">{{ $alert->message }}</div>
-                        <div class="text-[11px] text-slate-400">{{ $alert->room->name ?? '-' }}</div>
+                        <div class="text-[13px] font-semibold text-slate-800 truncate">{{ $alertTitle }}</div>
+                        <div class="text-[11px] text-slate-400">{{ $alert->room?->name ?? '-' }}</div>
                     </div>
                     <div class="text-[11px] text-slate-400 whitespace-nowrap">{{ $alert->created_at->format('H:i') }}</div>
                 </div>
+
             @empty
                 <div class="text-center text-slate-400 text-[12px] py-4">Tidak ada peringatan</div>
             @endforelse
-            <div class="flex items-center justify-end gap-1 text-[12px] text-[#4f7dfc] mt-2.5 cursor-pointer font-medium">
+            <a href="{{ route('log-peringatan.index') }}"
+                class="flex items-center justify-end gap-1 text-[12px] text-[#4f7dfc] mt-2.5 cursor-pointer font-medium no-underline hover:text-blue-700 transition-colors">
                 Lihat Semua
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-            </div>
+            </a>
         </div>
     </div>
 </div>
@@ -196,8 +203,9 @@ const STATUS_COLORS   = { normal: '#22c55e', warning: '#f59e0b', poor: '#ef4444'
 <script>
 /* ═══ DASHBOARD FABRIC.JS CANVAS (Read-Only, Scaled to Fit) ═══ */
 let dashCanvas;
-let _natW = 900, _natH = 560; // natural canvas size from editor
+let _natW = 900, _natH = 560;
 let _zoom = 1;
+const _iconCache = {}; // icon URL → fabric.Image, avoids re-fetch on resize
 
 window.addEventListener('load', initDashCanvas);
 
@@ -233,8 +241,7 @@ function initDashCanvas() {
 
     // ── Load drawing shapes (natural coords, viewport transform handles scaling) ──
     if (CANVAS_DATA) {
-        const cleanJson = CANVAS_DATA
-            .replace(/"textBaseline"\s*:\s*"alphabetical"/g, '"textBaseline":"alphabetic"');
+        const cleanJson = CANVAS_DATA.replaceAll('\"alphabetical\"', '\"alphabetic\"');
         dashCanvas.loadFromJSON(cleanJson, () => {
             dashCanvas.getObjects().forEach(obj => {
                 obj.set({ selectable: false, evented: false, hoverCursor: 'default' });
@@ -248,6 +255,33 @@ function initDashCanvas() {
 
     document.getElementById('dashCanvasHint')?.remove();
     feather.replace();
+
+    // ResizeObserver: fires instantly on ANY wrapper size change
+    // (window resize, sidebar expand/collapse animation, etc.)
+    const _ro = new ResizeObserver(() => resizeCanvas());
+    _ro.observe(wrapper);
+}
+
+function resizeCanvas() {
+    const wrapper = document.getElementById('dashCanvasWrapper');
+    if (!wrapper || !dashCanvas) return;
+    const newW = wrapper.clientWidth;
+    if (Math.abs(newW - dashCanvas.getWidth()) < 1) return; // skip sub-pixel changes
+
+    // 1. Update canvas dimensions + viewport transform (fast, no JSON parse)
+    _zoom = newW / _natW;
+    const newH = Math.round(_natH * _zoom);
+    dashCanvas.setDimensions({ width: newW, height: newH });
+    dashCanvas.setViewportTransform([_zoom, 0, 0, _zoom, 0, 0]);
+    wrapper.style.height = newH + 'px';
+
+    // 2. Remove old marker groups
+    dashCanvas.getObjects('group')
+        .filter(o => o.data?.roomId)
+        .forEach(o => dashCanvas.remove(o));
+
+    // 3. Re-add markers with new _zoom (icons from cache — no network request)
+    addRoomMarkers();
 }
 
 function loadBgAndMarkers() {
@@ -273,6 +307,19 @@ function loadBgAndMarkers() {
     }
 }
 
+
+// Icon cache helper: fetch once, clone on re-use (resize doesn't hit network)
+function getIcon(url, callback) {
+    if (_iconCache[url]) {
+        _iconCache[url].clone(cloned => callback(cloned));
+    } else {
+        fabric.Image.fromURL(url, img => {
+            _iconCache[url] = img;
+            img.clone(cloned => callback(cloned));
+        }, { crossOrigin: 'anonymous' });
+    }
+}
+
 const DASH_STATUS_ICONS = {
     normal:  '{{ asset('icons/normal.svg') }}',
     warning: '{{ asset('icons/warning.svg') }}',
@@ -285,13 +332,19 @@ const DASH_STATUS_BG = {
 };
 
 function addRoomMarkers() {
-    // Marker di natural coords — viewport transform handles scaling ke display
-    // Counter-scale dimensi dengan 1/_zoom agar ukuran marker tetap konstan di layar
+    // Ukuran marker adaptif: lebih besar di layar lebar, proporsional ke zoom
     const inv      = 1 / _zoom;
-    const sqSize   = 36 * inv;   // 36px di layar
-    const iconSize = 24 * inv;   // 24px di layar
-    const fSize    = 11 * inv;   // 11px font
-    const labelTop = 28 * inv;
+
+    // Base size ditentukan dari display width (semakin lebar canvas, sedikit lebih besar)
+    const dispW    = document.getElementById('dashCanvasWrapper')?.clientWidth || 900;
+    const baseSq   = dispW >= 1024 ? 40 : (dispW >= 768 ? 36 : 30);
+    const baseIcon = dispW >= 1024 ? 26 : (dispW >= 768 ? 22 : 18);
+    const baseFont = dispW >= 1024 ? 11 : 10;
+
+    const sqSize   = baseSq   * inv;
+    const iconSize = baseIcon * inv;
+    const fSize    = baseFont * inv;
+    const labelTop = (baseSq - 2) * inv;
 
     FLOOR_ROOMS.forEach(room => {
         // Posisi dalam natural coords (viewport transform scale ke display)
@@ -314,7 +367,7 @@ function addRoomMarkers() {
             top: labelTop,
         });
 
-        fabric.Image.fromURL(iconUrl, function(icon) {
+        getIcon(iconUrl, function(icon) {
             icon.set({
                 scaleX: iconSize / icon.width,
                 scaleY: iconSize / icon.height,
@@ -342,7 +395,7 @@ function addRoomMarkers() {
 
             dashCanvas.add(group);
             dashCanvas.renderAll();
-        }, { crossOrigin: 'anonymous' });
+        });  // end getIcon
     });
 }
 
@@ -400,7 +453,8 @@ function renderRoomDetail(room) {
             ${detailRow('❄️ Status AC', `<span class="${acColor} font-bold">${room.ac_status}</span>`)}
             ${detailRow('📡 Sensor', sensorTxt)}
         </div>
-        <button class="block w-full py-2.5 bg-slate-800 hover:bg-[#4f7dfc] text-white border-none rounded-lg text-[13px] font-semibold cursor-pointer text-center mt-4 transition-colors">
+        <button onclick="window.location.href='{{ route('analisa-data.index') }}?room_id=' + ${room.id}"
+            class="block w-full py-2.5 bg-slate-800 hover:bg-[#4f7dfc] text-white border-none rounded-lg text-[13px] font-semibold cursor-pointer text-center mt-4 transition-colors">
             Analisa Data
         </button>
     `;
@@ -455,7 +509,7 @@ function moveTooltip(event) {
 </script>
 
 @if($refreshInterval > 0)
-<div id="refresh-badge"
+<!-- <div id="refresh-badge"
      style="position:fixed;bottom:16px;right:16px;background:#1e293b;color:#fff;font-size:11px;font-family:Inter,sans-serif;
             padding:5px 10px;border-radius:20px;opacity:.75;z-index:200;display:flex;align-items:center;gap:5px;">
     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -463,7 +517,7 @@ function moveTooltip(event) {
         <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
     </svg>
     Refresh dalam <strong id="refresh-count">{{ $refreshInterval }}</strong>s
-</div>
+</div> -->
 <script>
 (function () {
     const total = {{ $refreshInterval }};

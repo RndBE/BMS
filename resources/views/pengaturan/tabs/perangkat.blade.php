@@ -28,7 +28,7 @@
 <div class="overflow-x-auto">
     <table class="w-full text-[13px]">
         <thead>
-            <tr class="bg-red-50 text-slate-600 text-left">
+            <tr class="bg-red-100 text-slate-800 text-left">
                 <th class="px-4 py-2.5 font-semibold rounded-l-lg">Nama Perangkat</th>
                 <th class="px-4 py-2.5 font-semibold">Jenis</th>
                 <th class="px-4 py-2.5 font-semibold">Ruangan</th>
@@ -88,26 +88,31 @@
                     {{-- Aksi --}}
                     <td class="px-4 py-2.5">
                         <div class="flex items-center justify-center gap-2">
-                            {{-- Toggle ON/OFF --}}
-                            <button title="{{ $unit->is_active ? 'Matikan' : 'Aktifkan' }}"
-                                onclick="toggleAcStatus({{ $unit->id }}, {{ $unit->is_active ? 'true' : 'false' }})"
-                                class="text-slate-400 {{ $unit->is_active ? 'hover:text-red-600' : 'hover:text-green-600' }} transition-colors cursor-pointer">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                    <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/>
-                                    <line x1="12" y1="2" x2="12" y2="12"/>
-                                </svg>
+                            {{-- Detail --}}
+                            <button title="Detail"
+                                onclick="openAcDetail(
+                                    '{{ addslashes($unit->name) }}',
+                                    {{ $unit->room_id }},
+                                    '{{ addslashes($unit->room?->name ?? '-') }}',
+                                    {{ $unit->power_kw }},
+                                    {{ $unit->is_active ? 1 : 0 }},
+                                    {{ $unit->room?->is_active ? 1 : 0 }},
+                                    '{{ $unit->updated_at?->format('d M Y, H:i') ?? '-' }}'
+                                )"
+                                class="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer">
+                                <img src="{{ asset('icons/detail.svg') }}" alt="Detail" class="w-7 h-7">
                             </button>
                             {{-- Edit --}}
                             <button title="Edit"
                                 onclick="openAcModal({{ $unit->id }}, '{{ addslashes($unit->name) }}', {{ $unit->room_id }}, {{ $unit->power_kw }}, {{ $unit->is_active ? 1 : 0 }})"
                                 class="text-slate-400 hover:text-blue-600 transition-colors cursor-pointer">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                <img src="{{ asset('icons/edit.svg') }}" alt="Edit" class="w-7 h-7">
                             </button>
                             {{-- Hapus --}}
                             <button title="Hapus"
                                 onclick="deleteAcUnit({{ $unit->id }}, '{{ addslashes($unit->name) }}')"
                                 class="text-slate-400 hover:text-red-600 transition-colors cursor-pointer">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                                <img src="{{ asset('icons/hapus.svg') }}" alt="Hapus" class="w-7 h-7">
                             </button>
                         </div>
                     </td>
@@ -171,6 +176,60 @@
 
 {{-- ═══ MODAL TAMBAH / EDIT PERANGKAT ═══ --}}
 @push('modals')
+
+{{-- ── Detail Perangkat Modal ────────────────────────────────────────────── --}}
+<div id="acDetailModal" class="hidden fixed inset-0 bg-black/40 z-[1001] items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-2xl w-[440px] max-w-[95vw] mx-auto overflow-hidden relative">
+
+        {{-- Close --}}
+        <button onclick="closeAcDetail()"
+            class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer border-none bg-transparent z-10">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+
+        {{-- Header --}}
+        <div class="px-7 pt-6 pb-4 border-b border-slate-100">
+            <h3 class="text-[18px] font-bold text-slate-800">Detail Perangkat</h3>
+        </div>
+
+        {{-- Body --}}
+        <div class="px-7 py-5 flex flex-col gap-4">
+
+            {{-- Row 1: Nama Perangkat + Jenis --}}
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <p class="text-[9.5px] font-bold uppercase tracking-widest text-slate-400 mb-1">Nama Perangkat</p>
+                    <p id="acdName" class="text-[13px] font-bold text-slate-800">—</p>
+                </div>
+                <div>
+                    <p class="text-[9.5px] font-bold uppercase tracking-widest text-slate-400 mb-1">Jenis</p>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-[12px] font-semibold">AC</span>
+                </div>
+                <div>
+                    <p class="text-[9.5px] font-bold uppercase tracking-widest text-slate-400 mb-1">Ruangan</p>
+                    <p id="acdRoom" class="text-[13px] font-semibold text-slate-700">—</p>
+                </div>
+            </div>
+
+            {{-- Row 2: Ruangan + Monitoring --}}
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <p class="text-[9.5px] font-bold uppercase tracking-widest text-slate-400 mb-1">Monitoring</p>
+                    <div id="acdMonitoring">—</div>
+                </div>
+                <div>
+                    <p class="text-[9.5px] font-bold uppercase tracking-widest text-slate-400 mb-1">Status Perangkat</p>
+                    <div id="acdStatus">—</div>
+                </div>
+                <div>
+                    <p class="text-[9.5px] font-bold uppercase tracking-widest text-slate-400 mb-1">Update Terakhir</p>
+                    <p id="acdUpdated" class="text-[12px] text-slate-800">—</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="acModal" class="hidden fixed inset-0 bg-black/40 z-[1000] items-center justify-center">
     <div class="bg-white rounded-xl shadow-2xl w-[460px] max-w-[95vw] overflow-hidden">
 
@@ -367,5 +426,36 @@ function showAcToast(msg) {
     clearTimeout(t._tmr);
     t._tmr = setTimeout(() => t.classList.add('hidden'), 2800);
 }
+
+// ── Detail Perangkat Modal ────────────────────────────────────────────────────
+function openAcDetail(name, roomId, roomName, power, isActive, roomActive, updatedAt) {
+    document.getElementById('acdName').textContent    = name || '—';
+    document.getElementById('acdRoom').textContent    = roomName || '—';
+    document.getElementById('acdUpdated').textContent = updatedAt || '—';
+
+    // Monitoring badge
+    document.getElementById('acdMonitoring').innerHTML = roomActive
+        ? '<span class="inline-flex items-center gap-1.5 text-[12px] font-semibold text-green-600"><span class="w-2 h-2 rounded-full bg-green-500"></span>Aktif</span>'
+        : '<span class="inline-flex items-center gap-1.5 text-[12px] font-semibold text-slate-400"><span class="w-2 h-2 rounded-full bg-slate-400"></span>Nonaktif</span>';
+
+    // Status badge
+    document.getElementById('acdStatus').innerHTML = isActive
+        ? '<span class="inline-flex items-center px-3 py-0.5 rounded-full text-[11.5px] font-bold bg-green-500 text-white">ON</span>'
+        : '<span class="inline-flex items-center px-3 py-0.5 rounded-full text-[11.5px] font-bold bg-slate-700 text-white">OFF</span>';
+
+    const modal = document.getElementById('acDetailModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeAcDetail() {
+    const modal = document.getElementById('acDetailModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+document.getElementById('acDetailModal').addEventListener('click', function(e) {
+    if (e.target === this) closeAcDetail();
+});
 </script>
 @endpush

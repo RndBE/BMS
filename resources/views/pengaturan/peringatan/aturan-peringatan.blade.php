@@ -1,0 +1,392 @@
+{{-- Tab: Aturan Peringatan --}}
+<div class="flex justify-between items-center mb-5">
+    <p class="text-[16px] font-bold text-slate-800">Daftar Peringatan</p>
+    <div class="flex items-center gap-3">
+        {{-- Search --}}
+        <div class="relative">
+            <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400"
+                 fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input type="text" id="search-rule" placeholder="Cari peringatan..."
+                class="pl-8 pr-3 py-[7px] border border-slate-200 bg-white rounded-lg text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 transition-colors w-52">
+        </div>
+        <button id="btn-add-rule"
+                class="flex items-center gap-2 px-4 py-[7px] bg-red-700 text-white text-[12.5px] font-semibold rounded-lg hover:bg-red-800 transition-colors shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Tambah Peringatan
+        </button>
+    </div>
+</div>
+
+{{-- Rules Table --}}
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    @if($rules->isEmpty())
+        <div class="py-16 flex flex-col items-center gap-3 text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2" class="text-slate-300"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+            <p class="text-[13px] font-medium">Belum ada aturan peringatan</p>
+            <p class="text-[12px]">Klik "Tambah Peringatan" untuk membuat aturan baru.</p>
+        </div>
+    @else
+        <table class="w-full text-[13px]" id="tbl-rules">
+            <thead class="bg-red-50 border-b border-red-100">
+                <tr>
+                    <th class="px-5 py-3 text-left font-semibold text-slate-800">Nama Peringatan</th>
+                    <th class="px-5 py-3 text-left font-semibold text-slate-800">Kategori</th>
+                    <th class="px-5 py-3 text-center font-semibold text-slate-800">Aktif</th>
+                    <th class="px-5 py-3 text-left font-semibold text-slate-800">Durasi Tunda</th>
+                    <th class="px-5 py-3 text-left font-semibold text-slate-800">Status</th>
+                    <th class="px-5 py-3 text-right font-semibold text-slate-800">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="rules-tbody">
+                @foreach($rules as $rule)
+                @php
+                    $paramLabels = [
+                        'suhu' => 'Suhu', 'kelembaban' => 'Kelembaban',
+                        'co2' => 'CO₂', 'daya' => 'Daya', 'tegangan' => 'Tegangan',
+                    ];
+                    $paramLabel = $paramLabels[$rule->parameter_key] ?? $rule->parameter_key;
+                    $units = ['suhu' => '°C', 'kelembaban' => '%', 'co2' => 'ppm', 'daya' => 'kW', 'tegangan' => 'V'];
+                    $unit = $units[$rule->parameter_key] ?? '';
+                @endphp
+                <tr class="rule-row border-b border-slate-100 hover:bg-slate-50 transition-colors" data-id="{{ $rule->id }}"
+                    data-name="{{ $rule->name }}">
+                    <td class="px-5 py-3">
+                        <p class="font-semibold text-slate-800">{{ $rule->name }}</p>
+                        <p class="text-[11.5px] text-slate-400 mt-0.5">Pemicu: {{ $paramLabel }} {{ $rule->condition }} {{ $rule->threshold }}{{ $unit }}</p>
+                    </td>
+                    <td class="px-5 py-3">
+                        @if($rule->kategori)
+                            <span class="text-[12px] text-blue-500 font-medium hover:underline cursor-pointer">{{ $rule->kategori }}</span>
+                        @else
+                            <span class="text-[12px] text-slate-300">—</span>
+                        @endif
+                    </td>
+                    <td class="px-5 py-3 text-center">
+                        <button onclick="toggleRule({{ $rule->id }}, this)"
+                                class="w-10 h-5 rounded-full transition-colors relative {{ $rule->is_active ? 'bg-green-500' : 'bg-slate-300' }}"
+                                data-active="{{ $rule->is_active ? '1' : '0' }}">
+                            <span class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all {{ $rule->is_active ? 'left-5' : 'left-0.5' }}"></span>
+                        </button>
+                    </td>
+                    <td class="px-5 py-3 text-slate-600">
+                        {{ $rule->durasi_tunda ? $rule->durasi_tunda . ' menit' : '—' }}
+                    </td>
+                    <td class="px-5 py-3">
+                        <span class="inline-flex items-center gap-1 text-[12px] font-medium
+                            {{ $rule->severity === 'critical' ? 'text-red-600' : 'text-orange-500' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                            {{ ucfirst($rule->severity) }}
+                        </span>
+                    </td>
+                    <td class="px-5 py-3 text-right">
+                        <button class="btn-edit-rule p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
+                                data-id="{{ $rule->id }}"
+                                data-name="{{ $rule->name }}"
+                                data-kategori="{{ $rule->kategori }}"
+                                data-parameter_key="{{ $rule->parameter_key }}"
+                                data-condition="{{ $rule->condition }}"
+                                data-threshold="{{ $rule->threshold }}"
+                                data-severity="{{ $rule->severity }}"
+                                data-notification_channel="{{ $rule->notification_channel }}"
+                                data-durasi_tunda="{{ $rule->durasi_tunda }}"
+                                data-room_ids="{{ json_encode($rule->room_ids ?? []) }}"
+                                data-is_active="{{ $rule->is_active ? '1' : '0' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        </button>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
+</div>
+
+{{-- Modal Tambah/Edit Aturan --}}
+<div id="modal-rule" class="hidden fixed inset-0 bg-black/40 z-[200] flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 sticky top-0 bg-white z-10">
+            <h2 id="modal-rule-title" class="text-[16px] font-bold text-slate-800">Tambah Peringatan</h2>
+            <button onclick="closeRuleModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <form id="form-rule" class="px-6 py-5 space-y-4">
+            <input type="hidden" id="rule-id">
+
+            {{-- Row 1: Nama + Kategori --}}
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-[12px] font-medium text-slate-600 mb-1.5">Nama Peringatan</label>
+                    <input id="rule-name" type="text" placeholder="e.g. Suhu Tinggi"
+                        class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors">
+                </div>
+                <div>
+                    <label class="block text-[12px] font-medium text-slate-600 mb-1.5">Kategori</label>
+                    <select id="rule-kategori" class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors bg-white">
+                        <option value="">-- Pilih Kategori --</option>
+                        <option value="Kenyamanan">Kenyamanan</option>
+                        <option value="Keamanan">Keamanan</option>
+                        <option value="Efisiensi">Efisiensi</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+            </div>
+
+            {{-- Ruangan --}}
+            <div>
+                <label class="block text-[12px] font-medium text-slate-600 mb-2">Ruangan</label>
+                <div class="grid grid-cols-2 gap-2 max-h-36 overflow-y-auto pr-1">
+                    @foreach($rooms as $room)
+                    <label class="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
+                        <input type="checkbox" class="rule-room-chk w-3.5 h-3.5 accent-red-600 shrink-0"
+                               value="{{ $room->id }}">
+                        <span class="text-[12.5px] text-slate-700 truncate">{{ $room->name }}</span>
+                    </label>
+                    @endforeach
+                    @if($rooms->isEmpty())
+                        <p class="text-[12px] text-slate-400 col-span-2">Tidak ada ruangan tersedia.</p>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Status Keaktifan --}}
+            <div class="flex items-center justify-between py-1">
+                <label class="text-[12.5px] font-medium text-slate-600">Status Keaktifan</label>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input id="rule-active" type="checkbox" class="sr-only peer" checked>
+                    <div class="w-10 h-5 bg-slate-200 rounded-full peer peer-checked:bg-green-500 transition-colors"></div>
+                    <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-all peer-checked:translate-x-5"></span>
+                </label>
+            </div>
+
+            {{-- Durasi Tunda + Status --}}
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-[12px] font-medium text-slate-600 mb-1.5">Durasi Tunda</label>
+                    <div class="relative">
+                        <input id="rule-durasi" type="number" min="0" placeholder="e.g. 15"
+                               class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 pr-14 text-[13px] focus:outline-none focus:border-red-400 transition-colors">
+                        <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-[12px] text-slate-400 select-none">menit</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[12px] font-medium text-slate-600 mb-1.5">Status</label>
+                    <select id="rule-severity" class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors bg-white">
+                        <option value="warning">Warning</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+            </div>
+
+            {{-- Parameter + Operator + Nilai --}}
+            <div>
+                <label class="block text-[12px] font-medium text-slate-600 mb-1.5">Parameter, Operator & Nilai</label>
+                <div class="flex items-center gap-2">
+                    <select id="rule-param" class="flex-1 border border-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors bg-white">
+                        <option value="suhu">Suhu</option>
+                        <option value="kelembaban">Kelembaban</option>
+                        <option value="co2">CO₂</option>
+                        <option value="daya">Daya</option>
+                        <option value="tegangan">Tegangan</option>
+                    </select>
+                    <select id="rule-condition" class="w-24 border border-slate-200 rounded-lg px-3 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors bg-white">
+                        <option value=">">&gt;</option>
+                        <option value="<">&lt;</option>
+                        <option value=">=">&ge;</option>
+                        <option value="<=">&le;</option>
+                    </select>
+                    <div class="relative w-32">
+                        <input id="rule-threshold" type="number" step="any" placeholder="28"
+                               class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 pr-10 text-[13px] focus:outline-none focus:border-red-400 transition-colors">
+                        <span id="rule-unit" class="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-slate-400 select-none">°C</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="rule-error" class="hidden text-[12px] text-red-500 bg-red-50 rounded-lg px-3 py-2"></div>
+
+            <div class="flex justify-end gap-3 pt-2 border-t border-slate-100">
+                <button type="button" onclick="closeRuleModal()"
+                        class="px-5 py-2.5 rounded-lg border border-slate-300 text-[13px] font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                    Batal
+                </button>
+                <button type="submit"
+                        class="px-7 py-2.5 bg-red-700 text-white text-[13px] font-semibold rounded-lg hover:bg-red-800 transition-colors shadow-sm">
+                    Simpan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Toast --}}
+<div id="toast-rule" class="hidden fixed bottom-6 right-6 z-50 bg-green-600 text-white text-[13px] font-medium px-5 py-3 rounded-xl shadow-lg">
+    Berhasil disimpan.
+</div>
+
+@push('scripts')
+<script>
+(function () {
+    const modal     = document.getElementById('modal-rule');
+    const form      = document.getElementById('form-rule');
+    const toast     = document.getElementById('toast-rule');
+    const errBox    = document.getElementById('rule-error');
+    let   editingId = null;
+
+    // Unit map
+    const units = { suhu: '°C', kelembaban: '%', co2: 'ppm', daya: 'kW', tegangan: 'V' };
+    document.getElementById('rule-param').addEventListener('change', function () {
+        document.getElementById('rule-unit').textContent = units[this.value] ?? '';
+    });
+
+    // ── Helpers ──
+    function showToast(msg, ok = true) {
+        toast.textContent = msg;
+        toast.classList.remove('hidden', 'bg-green-600', 'bg-red-600');
+        toast.classList.add(ok ? 'bg-green-600' : 'bg-red-600');
+        setTimeout(() => toast.classList.add('hidden'), 3000);
+    }
+
+    function openModal()  { modal.classList.remove('hidden'); }
+    window.closeRuleModal = function () { modal.classList.add('hidden'); };
+
+    function setRoomCheckboxes(ids) {
+        document.querySelectorAll('.rule-room-chk').forEach(chk => {
+            chk.checked = ids.includes(parseInt(chk.value));
+        });
+    }
+
+    // ── Open Add Modal ──
+    document.getElementById('btn-add-rule').addEventListener('click', () => {
+        editingId = null;
+        document.getElementById('modal-rule-title').textContent = 'Tambah Peringatan';
+        form.reset();
+        document.getElementById('rule-active').checked = true;
+        document.getElementById('rule-unit').textContent = '°C';
+        setRoomCheckboxes([]);
+        errBox.classList.add('hidden');
+        openModal();
+    });
+
+    // ── Open Edit Modal ──
+    document.querySelectorAll('.btn-edit-rule').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const d = btn.dataset;
+            editingId = d.id;
+            document.getElementById('modal-rule-title').textContent = 'Edit Peringatan';
+            document.getElementById('rule-name').value         = d.name;
+            document.getElementById('rule-kategori').value     = d.kategori || '';
+            document.getElementById('rule-param').value        = d.parameter_key;
+            document.getElementById('rule-condition').value    = d.condition;
+            document.getElementById('rule-threshold').value    = d.threshold;
+            document.getElementById('rule-severity').value     = d.severity;
+            document.getElementById('rule-durasi').value       = d.durasi_tunda || '';
+            document.getElementById('rule-active').checked     = d.is_active === '1';
+            document.getElementById('rule-unit').textContent   = units[d.parameter_key] ?? '';
+            const roomIds = JSON.parse(d.room_ids || '[]').map(Number);
+            setRoomCheckboxes(roomIds);
+            errBox.classList.add('hidden');
+            openModal();
+        });
+    });
+
+    // ── Search ──
+    document.getElementById('search-rule')?.addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        document.querySelectorAll('.rule-row').forEach(row => {
+            const name = row.dataset.name.toLowerCase();
+            row.style.display = name.includes(q) ? '' : 'none';
+        });
+    });
+
+    // ── Form Submit ──
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errBox.classList.add('hidden');
+
+        const roomIds = [...document.querySelectorAll('.rule-room-chk:checked')].map(c => parseInt(c.value));
+
+        const body = {
+            name:                 document.getElementById('rule-name').value,
+            kategori:             document.getElementById('rule-kategori').value,
+            parameter_key:        document.getElementById('rule-param').value,
+            condition:            document.getElementById('rule-condition').value,
+            threshold:            document.getElementById('rule-threshold').value,
+            severity:             document.getElementById('rule-severity').value,
+            durasi_tunda:         document.getElementById('rule-durasi').value || null,
+            room_ids:             roomIds,
+            is_active:            document.getElementById('rule-active').checked ? 1 : 0,
+        };
+
+        const url    = editingId
+            ? `/pengaturan/peringatan/rules/${editingId}`
+            : '{{ route('pengaturan.peringatan.rules.store') }}';
+        const method = editingId ? 'PUT' : 'POST';
+
+        const res  = await fetch(url, {
+            method,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify(body),
+        });
+        const json = await res.json();
+
+        if (!res.ok) {
+            const msgs = json.errors ? Object.values(json.errors).flat().join(' ') : 'Terjadi kesalahan.';
+            errBox.textContent = msgs;
+            errBox.classList.remove('hidden');
+            return;
+        }
+
+        closeRuleModal();
+        showToast('Peringatan berhasil disimpan.');
+        setTimeout(() => location.reload(), 800);
+    });
+
+    // ── Delete (via delete button if added later) ──
+    window.deleteRule = async function (id) {
+        if (!confirm('Hapus aturan ini?')) return;
+        const res  = await fetch(`/pengaturan/peringatan/rules/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                'Accept': 'application/json',
+            },
+        });
+        const json = await res.json();
+        if (json.success) {
+            showToast('Aturan dihapus.');
+            setTimeout(() => location.reload(), 600);
+        }
+    };
+
+    // ── Toggle ──
+    window.toggleRule = async function (id, btn) {
+        const res  = await fetch(`/pengaturan/peringatan/rules/${id}/toggle`, {
+            method: 'PATCH',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                'Accept': 'application/json',
+            },
+        });
+        const json = await res.json();
+        if (json.success) {
+            const active = json.is_active;
+            btn.dataset.active = active ? '1' : '0';
+            btn.classList.toggle('bg-green-500', active);
+            btn.classList.toggle('bg-slate-300', !active);
+            btn.querySelector('span').classList.toggle('left-5', active);
+            btn.querySelector('span').classList.toggle('left-0.5', !active);
+        }
+    };
+
+    // ── Close on backdrop ──
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeRuleModal(); });
+})();
+</script>
+@endpush

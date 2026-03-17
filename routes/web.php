@@ -7,6 +7,8 @@ use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnergyController;
 use App\Http\Controllers\PengaturanController;
+use App\Http\Controllers\PeringatanController;
+use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -41,8 +43,38 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/pengaturan/acunits/{acUnit}', [PengaturanController::class, 'acDestroy'])->name('pengaturan.acunits.destroy');
     Route::patch('/pengaturan/acunits/{acUnit}/toggle', [PengaturanController::class, 'acToggle'])->name('pengaturan.acunits.toggle');
 
+    // Peringatan
+    Route::get('/pengaturan/peringatan', [PeringatanController::class, 'index'])->name('pengaturan.peringatan');
+
+    // Log Peringatan (standalone sidebar page)
+    Route::get('/log-peringatan', [PeringatanController::class, 'logIndex'])->name('log-peringatan.index');
+    Route::post('/pengaturan/peringatan/batas-normal', [PeringatanController::class, 'batasNormalSave'])->name('pengaturan.peringatan.batas-normal.save');
+    Route::post('/pengaturan/peringatan/batas-normal/reset', [PeringatanController::class, 'batasNormalReset'])->name('pengaturan.peringatan.batas-normal.reset');
+    Route::post('/pengaturan/peringatan/rules', [PeringatanController::class, 'rulesStore'])->name('pengaturan.peringatan.rules.store');
+    Route::put('/pengaturan/peringatan/rules/{alertRule}', [PeringatanController::class, 'rulesUpdate'])->name('pengaturan.peringatan.rules.update');
+    Route::delete('/pengaturan/peringatan/rules/{alertRule}', [PeringatanController::class, 'rulesDestroy'])->name('pengaturan.peringatan.rules.destroy');
+    Route::patch('/pengaturan/peringatan/rules/{alertRule}/toggle', [PeringatanController::class, 'rulesToggle'])->name('pengaturan.peringatan.rules.toggle');
+
+    // Log Peringatan
+    Route::patch('/pengaturan/peringatan/log/{alert}/read',  [PeringatanController::class, 'logMarkRead'])->name('pengaturan.peringatan.log.read');
+    Route::patch('/pengaturan/peringatan/log/read-all',      [PeringatanController::class, 'logMarkAllRead'])->name('pengaturan.peringatan.log.read-all');
+    Route::delete('/pengaturan/peringatan/log/{alert}',      [PeringatanController::class, 'logDestroy'])->name('pengaturan.peringatan.log.destroy');
+    Route::delete('/pengaturan/peringatan/log',              [PeringatanController::class, 'logClear'])->name('pengaturan.peringatan.log.clear');
+
     // Room detail API for AJAX tooltip click
     Route::get('/api/rooms/{id}', [DashboardController::class, 'roomDetail'])->name('rooms.detail');
+
+    // Pengguna (User Management)
+    Route::get('/pengaturan/pengguna', [PenggunaController::class, 'index'])->name('pengaturan.pengguna');
+    Route::post('/pengaturan/pengguna/users', [PenggunaController::class, 'userStore'])->name('pengaturan.pengguna.users.store');
+    Route::put('/pengaturan/pengguna/users/{user}', [PenggunaController::class, 'userUpdate'])->name('pengaturan.pengguna.users.update');
+    Route::delete('/pengaturan/pengguna/users/{user}', [PenggunaController::class, 'userDestroy'])->name('pengaturan.pengguna.users.destroy');
+    Route::post('/pengaturan/pengguna/roles', [PenggunaController::class, 'roleStore'])->name('pengaturan.pengguna.roles.store');
+    Route::put('/pengaturan/pengguna/roles/{role}', [PenggunaController::class, 'roleUpdate'])->name('pengaturan.pengguna.roles.update');
+    Route::delete('/pengaturan/pengguna/roles/{role}', [PenggunaController::class, 'roleDestroy'])->name('pengaturan.pengguna.roles.destroy');
+    Route::post('/pengaturan/pengguna/permissions', [PenggunaController::class, 'permissionStore'])->name('pengaturan.pengguna.permissions.store');
+    Route::put('/pengaturan/pengguna/permissions/{permission}', [PenggunaController::class, 'permissionUpdate'])->name('pengaturan.pengguna.permissions.update');
+    Route::delete('/pengaturan/pengguna/permissions/{permission}', [PenggunaController::class, 'permissionDestroy'])->name('pengaturan.pengguna.permissions.destroy');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -50,8 +82,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// ─── Admin Routes (superadmin only) ──────────────────────────────────────────
-Route::middleware(['auth', 'role:superadmin'])->prefix('admin')->name('admin.')->group(function () {
+// ─── Admin Routes (permission-based) ─────────────────────────────────────────
+Route::middleware(['auth', 'permission:kelola_denah'])->prefix('admin')->name('admin.')->group(function () {
 
     // Buildings CRUD
     Route::get('buildings', [BuildingController::class, 'index'])->name('buildings.index');

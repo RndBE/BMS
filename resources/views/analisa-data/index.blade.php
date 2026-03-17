@@ -15,7 +15,7 @@
     {{-- ── FILTER BAR ─────────────────────────────────────────────────────── --}}
     <form method="GET" action="{{ route('analisa-data.index') }}" id="filterForm">
         <div class="bg-white rounded-xl border border-slate-100 shadow-sm px-5 py-4">
-            <div class="flex gap-4 items-end w-full">
+            <div class="flex flex-wrap gap-3 items-end w-full">
                 {{-- Ruangan --}}
                 <div class="flex flex-col gap-2 flex-1">
                     <label class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Ruangan</label>
@@ -54,28 +54,18 @@
                 {{-- Tanggal --}}
                 <div class="flex flex-col gap-2 flex-1">
                     <label class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Tanggal</label>
-                    <div class="relative">
-                        <input type="text" name="tanggal" id="inp-tanggal" value="{{ $tanggal }}"
-                            placeholder="dd/mm/yyyy"
-                            class="border border-slate-200 rounded-lg pl-3 pr-9 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-blue-400 w-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2"
-                            class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                            <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
-                            <line x1="3" y1="10" x2="21" y2="10"/>
-                        </svg>
-                    </div>
+                    <input type="date" name="tanggal" id="inp-tanggal" value="{{ $tanggal }}"
+                        class="border border-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-blue-400 w-full">
                 </div>
 
                 {{-- Buttons --}}
-                <div class="flex gap-2 pb-[1px] ml-auto">
+                <div class="flex gap-2 pb-[1px] ml-auto shrink-0">
                     <button type="submit"
-                        class="bg-red-600 hover:bg-red-700 text-white text-[13px] font-semibold px-16 py-[8px] rounded-lg transition-colors cursor-pointer">
+                        class="bg-red-600 hover:bg-red-700 text-white text-[13px] font-semibold px-5 py-[8px] rounded-lg transition-colors cursor-pointer whitespace-nowrap">
                         Terapkan
                     </button>
                     <a href="{{ route('analisa-data.index') }}"
-                        class="bg-white hover:bg-slate-50 text-slate-700 text-[13px] font-semibold px-16 py-[8px] rounded-lg border border-slate-200 transition-colors no-underline">
+                        class="bg-white hover:bg-slate-50 text-slate-700 text-[13px] font-semibold px-5 py-[8px] rounded-lg border border-slate-200 transition-colors no-underline whitespace-nowrap">
                         Reset
                     </a>
                 </div>
@@ -102,7 +92,7 @@
         $color = $colorMap[$parameter] ?? $colorMap['temperature'];
     @endphp
 
-    <div class="flex gap-5">
+    <div class="flex flex-col xl:flex-row gap-5">
 
         {{-- Chart --}}
         <div class="flex-1 bg-white rounded-xl border border-slate-100 shadow-sm p-5">
@@ -122,7 +112,7 @@
         </div>
 
         {{-- Side Panel --}}
-        <div class="w-[395px] flex flex-col gap-4 shrink-0">
+        <div class="w-full xl:w-[395px] flex flex-col gap-4 shrink-0">
 
             {{-- Batas Normal --}}
             <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
@@ -206,12 +196,14 @@
         ];
     @endphp
 
-    <div class="grid grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         @foreach($statCards as $card)
-            <div class="bg-white rounded-xl border border-slate-100 shadow-sm px-5 py-4 flex items-center gap-4">
-                <img src="{{ $card['icon'] }}" alt="icon" class="w-10 h-10 shrink-0">
-                <div class="text-[18px] text-slate-950 font-bold">{{ $card['label'] }}</div>
-                <div class="text-[25px] font-bold text-slate-800 leading-tight ml-auto">{{ $card['value'] }}</div>
+            <div class="bg-white rounded-xl border border-slate-100 shadow-sm px-5 py-4 flex flex-col gap-2">
+                <div class="flex items-center gap-2">
+                    <img src="{{ $card['icon'] }}" alt="icon" class="w-6 h-6 shrink-0">
+                    <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide leading-tight">{{ $card['label'] }}</div>
+                </div>
+                <div class="text-[22px] font-bold text-slate-800 leading-tight">{{ $card['value'] }}</div>
             </div>
         @endforeach
     </div>

@@ -27,8 +27,8 @@
 <div class="overflow-x-auto">
     <table class="w-full text-[13px]">
         <thead>
-            <tr class="bg-red-50 text-slate-600 text-left">
-                <th class="px-4 py-2.5 font-semibold rounded-l-lg">Gambar Sensor</th>
+            <tr class="bg-red-100 text-slate-800 text-left">
+                <th class="px-4 py-2.5 font-semibold rounded-l-lg text-center">Gambar Sensor</th>
                 <th class="px-4 py-2.5 font-semibold">Nama Sensor</th>
                 <th class="px-4 py-2.5 font-semibold">Tipe Sensor</th>
                 <th class="px-4 py-2.5 font-semibold">Ruangan</th>
@@ -43,11 +43,8 @@
                     $grupNama = $sensor->sensorGroup?->nama_sensor ?? '-';
                     $grupKode = $sensor->sensorGroup?->kode_sensor ?? '-';
 
-                    // Tipe sensor: dari field tipe_sensor sensor, atau type enum sebagai fallback
-                    $tipeSensor = $sensor->tipe_sensor
-                                ?: ($sensor->type
-                                    ? ucfirst($sensor->type) . ' Sensor'
-                                    : null);
+                    // Tipe sensor: dari field tipe_sensor saja
+                    $tipeSensor = $sensor->tipe_sensor ?: null;
 
                     // Parameter dari room (max 3 ditampilkan, sisanya +N)
                     $params = $sensor->room?->parameters ?? collect();
@@ -69,15 +66,15 @@
                 <tr class="hover:bg-slate-50/60 transition-colors">
 
                     {{-- Gambar Sensor --}}
-                    <td class="px-4 py-3">
-                        <div class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden">
+                    <td class="px-4 py-3 text-center">
+                        <div class="w-16 h-16 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden mx-auto">
                             @if($sensor->gambar)
                                 <img src="{{ Storage::url($sensor->gambar) }}"
                                      alt="{{ $grupNama }}"
                                      class="w-full h-full object-cover">
                             @else
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
-                                     stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" class="text-slate-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                     stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" class="text-slate-300">
                                     <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
                                     <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
                                     <line x1="12" y1="19" x2="12" y2="22"/>
@@ -89,10 +86,7 @@
                     {{-- Nama Sensor --}}
                     <td class="px-4 py-3">
                         <p class="font-semibold text-slate-800">{{ $grupNama }}</p>
-                        <p class="text-[11px] text-slate-400 mt-0.5">
-                            ID: {{ $grupKode }}
-                            @if($sensor->unit) · {{ $sensor->unit }} @endif
-                        </p>
+                        <p class="text-[11px] text-slate-400 mt-0.5">ID: {{ $grupKode }}</p>
                     </td>
 
                     {{-- Tipe Sensor --}}
@@ -147,18 +141,18 @@
                     {{-- Aksi --}}
                     <td class="px-4 py-3">
                         <div class="flex items-center justify-center gap-2">
-                            <button title="Detail" class="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                            <button title="Detail" onclick="openSensorDetail({{ $sensor->id }})" class="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer">
+                                <img src="{{ asset('icons/detail.svg') }}" alt="Detail" class="w-7 h-7">
                             </button>
                             <button title="Edit"
                                 onclick="openSensorModal({{ $sensor->id }})"
                                 class="text-slate-400 hover:text-blue-600 transition-colors cursor-pointer">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                <img src="{{ asset('icons/edit.svg') }}" alt="Edit" class="w-7 h-7">
                             </button>
                             <button title="Hapus"
                                 onclick="deleteSensor({{ $sensor->id }}, '{{ addslashes($sensor->sensorGroup?->nama_sensor ?? 'Sensor') }}')"
                                 class="text-slate-400 hover:text-red-600 transition-colors cursor-pointer">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                                <img src="{{ asset('icons/hapus.svg') }}" alt="Hapus" class="w-7 h-7">
                             </button>
                         </div>
                     </td>
@@ -226,6 +220,70 @@
 
 {{-- ═══ MODAL TAMBAH / EDIT SENSOR ═══ --}}
 @push('modals')
+
+{{-- ── Detail Modal ─────────────────────────────────────────────────────── --}}
+<div id="sensorDetailModal" class="hidden fixed inset-0 bg-black/40 z-[1001] items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-2xl w-[520px] max-w-[95vw] mx-auto overflow-hidden relative">
+
+        {{-- Close --}}
+        <button onclick="closeSensorDetail()"
+            class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer border-none bg-transparent z-10">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+
+        {{-- Title --}}
+        <div class="px-7 pt-6 pb-1">
+            <h3 class="text-[15px] font-bold text-slate-800">Detail Sensor</h3>
+        </div>
+
+        {{-- Body --}}
+        <div class="flex gap-5 px-7 py-5 pb-7">
+
+            {{-- Gambar (diisi JS via openSensorDetail) --}}
+            <div class="shrink-0 w-[140px] h-[140px] rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center">
+                <img id="sdImg" src="" alt="" class="w-full h-full object-cover hidden">
+                <svg id="sdImgFallback" xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none"
+                     stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24" class="text-slate-300">
+                    <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="22"/>
+                </svg>
+            </div>
+
+            {{-- Info --}}
+            <div class="flex-1 min-w-0 flex flex-col gap-4 justify-center">
+
+                {{-- Nama --}}
+                <div>
+                    <p class="text-[9.5px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Nama Sensor</p>
+                    <p id="sdName" class="text-[15px] font-bold text-slate-800 leading-tight">—</p>
+                    <p id="sdCode" class="text-[12px] text-slate-400 mt-0.5">—</p>
+                </div>
+
+                {{-- Tipe + Ruangan --}}
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <p class="text-[9.5px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Tipe Sensor</p>
+                        <p id="sdTipe" class="text-[13px] font-semibold text-slate-700">—</p>
+                    </div>
+                    <div>
+                        <p class="text-[9.5px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Ruangan</p>
+                        <p id="sdRoom" class="text-[13px] font-semibold text-slate-700">—</p>
+                    </div>
+                </div>
+
+                {{-- Parameter --}}
+                <div>
+                    <p class="text-[9.5px] font-bold uppercase tracking-widest text-slate-400 mb-1.5">Parameter</p>
+                    <div id="sdParams" class="flex flex-wrap gap-1.5">
+                        <span class="text-[12px] text-slate-400">—</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="sensorModal" class="hidden fixed inset-0 bg-black/40 z-[1000] items-center justify-center overflow-y-auto">
     <div class="bg-white rounded-xl shadow-2xl w-[560px] max-w-[95vw] my-6 mx-auto overflow-hidden">
 
@@ -241,25 +299,57 @@
         <div class="px-6 py-5 flex flex-col gap-4 max-h-[80vh] overflow-y-auto">
             <input type="hidden" id="sensorModalId">
 
-            {{-- Upload Gambar Sensor --}}
             <div>
                 <label class="block text-[11.5px] font-semibold text-slate-500 mb-2">Unggah Gambar Sensor</label>
+
+                {{-- Drop Zone --}}
                 <div id="sensorDropZone"
-                     class="border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-red-300 hover:bg-red-50/30 transition-colors"
+                     class="border-2 border-dashed border-slate-200 rounded-xl p-5 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-red-300 hover:bg-red-50/30 transition-colors"
                      onclick="document.getElementById('sensorGambarInput').click()">
-                    <div id="sensorDropPreview" class="hidden w-20 h-20 rounded-lg overflow-hidden mb-1">
-                        <img id="sensorDropPreviewImg" src="" alt="" class="w-full h-full object-cover">
-                    </div>
-                    <div id="sensorDropIcon" class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" class="text-red-400">
-                            <rect x="3" y="3" width="18" height="18" rx="2"/>
-                            <path d="M3 16l5-5 4 4 3-3 6 6"/>
-                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" class="text-red-400">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
                         </svg>
                     </div>
-                    <p class="text-[12.5px] font-medium text-slate-600 text-center">Tarik file ke sini atau klik untuk upload</p>
-                    <p class="text-[11px] text-slate-400">JPG, JPEG, atau PNG. Maksimal 2 MB.</p>
+                    <p class="text-[12.5px] font-medium text-slate-600">Tarik file ke sini atau klik untuk upload</p>
+                    <p class="text-[11px] text-slate-400">JPG, JPEG, atau PNG · Maks. 2 MB</p>
                     <input type="file" id="sensorGambarInput" accept="image/jpg,image/jpeg,image/png" class="hidden">
+                </div>
+
+                {{-- File Item (muncul setelah file dipilih) --}}
+                <div id="sensorFileItem" class="hidden mt-3 border border-slate-200 rounded-xl overflow-hidden">
+                    <div class="flex items-center gap-3 px-4 py-3">
+                        {{-- Thumbnail --}}
+                        <div class="w-9 h-9 rounded-lg bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
+                            <img id="sensorFileThumbnail" src="" alt="" class="w-full h-full object-cover">
+                        </div>
+                        {{-- Info --}}
+                        <div class="flex-1 min-w-0">
+                            <p id="sensorFileName" class="text-[12.5px] font-semibold text-slate-800 truncate">-</p>
+                            <div class="flex items-center gap-1.5 mt-0.5">
+                                <p id="sensorFileSize" class="text-[11px] text-slate-400">0 KB</p>
+                                <span class="text-slate-300 text-[10px]">•</span>
+                                <p id="sensorFileStatus" class="text-[11px] text-slate-400 flex items-center gap-1">
+                                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                    Siap diupload
+                                </p>
+                            </div>
+                            {{-- Progress bar --}}
+                            <div class="mt-1.5 h-1 bg-slate-100 rounded-full overflow-hidden">
+                                <div id="sensorFileProgress"
+                                     class="h-full bg-red-600 rounded-full transition-all duration-300"
+                                     style="width:0%">
+                                </div>
+                            </div>
+                        </div>
+                        {{-- Remove --}}
+                        <button type="button" onclick="removeSensorFile()"
+                            class="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -376,9 +466,11 @@ function openSensorModal(id = null) {
     _editSensorId = id;
     document.getElementById('sensorModalId').value = id || '';
     document.getElementById('sensorParamTableBody').innerHTML = '';
-    document.getElementById('sensorDropPreview').classList.add('hidden');
-    document.getElementById('sensorDropIcon').classList.remove('hidden');
     document.getElementById('sensorGambarInput').value = '';
+    // Reset upload UI
+    document.getElementById('sensorFileItem').classList.add('hidden');
+    document.getElementById('sensorDropZone').classList.remove('hidden');
+    document.getElementById('sensorFileProgress').style.width = '0%';
 
     if (!id) {
         // ── MODE TAMBAH ──
@@ -410,11 +502,17 @@ function openSensorModal(id = null) {
             document.getElementById('sensorModalActiveLabel').textContent = data.is_active ? 'Aktif' : 'Nonaktif';
             document.getElementById('sensorModalSaveBtn').textContent = 'Simpan';
 
-            // Gambar preview
+            // Gambar existing: tampilkan di file-item sebagai preview
             if (data.gambar_url) {
-                document.getElementById('sensorDropPreviewImg').src = data.gambar_url;
-                document.getElementById('sensorDropPreview').classList.remove('hidden');
-                document.getElementById('sensorDropIcon').classList.add('hidden');
+                const fname = data.gambar_url.split('/').pop();
+                document.getElementById('sensorFileThumbnail').src  = data.gambar_url;
+                document.getElementById('sensorFileName').textContent = fname;
+                document.getElementById('sensorFileSize').textContent  = 'Gambar tersimpan';
+                document.getElementById('sensorFileStatus').innerHTML  =
+                    '<span class="inline-block w-1.5 h-1.5 rounded-full bg-green-500"></span> Terpasang';
+                document.getElementById('sensorFileProgress').style.width = '100%';
+                document.getElementById('sensorFileItem').classList.remove('hidden');
+                document.getElementById('sensorDropZone').classList.add('hidden');
             }
 
             // Prefill rows parameter
@@ -465,7 +563,6 @@ function addParamRow(nama = '', kolom = '', satuan = '') {
                 <select class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-[12px] outline-none focus:border-red-400 appearance-none bg-white cursor-pointer param-kolom">
                     ${colOptions}
                 </select>
-                <svg class="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
         </td>
         <td class="px-3 py-1.5">
@@ -555,15 +652,56 @@ function deleteSensor(id, nama) {
     .catch(() => showSensorToast('Gagal menghapus sensor.'));
 }
 
-// Preview gambar saat file dipilih
+// Helpers: format bytes
+function fmtBytes(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function removeSensorFile() {
+    document.getElementById('sensorGambarInput').value = '';
+    document.getElementById('sensorFileItem').classList.add('hidden');
+    document.getElementById('sensorDropZone').classList.remove('hidden');
+    // Reset progress
+    document.getElementById('sensorFileProgress').style.width = '0%';
+}
+
+// File selected: show file-item with animated progress
 document.getElementById('sensorGambarInput').addEventListener('change', function () {
     const file = this.files[0];
     if (!file) return;
+
+    const totalKB = Math.round(file.size / 1024);
+    document.getElementById('sensorFileName').textContent  = file.name;
+    document.getElementById('sensorFileSize').textContent  = '0 KB of ' + fmtBytes(file.size);
+    document.getElementById('sensorFileStatus').innerHTML  =
+        '<span class="inline-block w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> Menggunggah...';
+    document.getElementById('sensorFileProgress').style.width = '0%';
+    document.getElementById('sensorFileItem').classList.remove('hidden');
+    document.getElementById('sensorDropZone').classList.add('hidden');
+
+    // Animate progress while FileReader loads
+    const bar = document.getElementById('sensorFileProgress');
+    const sizeEl = document.getElementById('sensorFileSize');
+    const statusEl = document.getElementById('sensorFileStatus');
+    let prog = 0;
+    const step = Math.max(1, Math.round(totalKB / 20));
+    const iv = setInterval(() => {
+        prog = Math.min(prog + step + Math.random() * step, totalKB * 0.85);
+        const pct = Math.min((prog / totalKB) * 100, 85);
+        bar.style.width = pct + '%';
+        sizeEl.textContent = Math.round(prog) + ' KB of ' + fmtBytes(file.size);
+    }, 80);
+
     const reader = new FileReader();
     reader.onload = (e) => {
-        document.getElementById('sensorDropPreviewImg').src = e.target.result;
-        document.getElementById('sensorDropPreview').classList.remove('hidden');
-        document.getElementById('sensorDropIcon').classList.add('hidden');
+        clearInterval(iv);
+        bar.style.width = '100%';
+        sizeEl.textContent = fmtBytes(file.size) + ' of ' + fmtBytes(file.size);
+        statusEl.innerHTML = '<span class="inline-block w-1.5 h-1.5 rounded-full bg-green-500"></span> Selesai';
+        // Set thumbnail
+        document.getElementById('sensorFileThumbnail').src = e.target.result;
     };
     reader.readAsDataURL(file);
 });
@@ -601,5 +739,82 @@ function showSensorToast(msg) {
     clearTimeout(t._tmr);
     t._tmr = setTimeout(() => t.classList.add('hidden'), 2800);
 }
+
+// ── Detail Sensor Modal ───────────────────────────────────────────────────────
+const PARAM_BADGE_COLORS = {
+    'suhu':       'bg-orange-50 text-orange-600 ring-1 ring-orange-200',
+    'temperature':'bg-orange-50 text-orange-600 ring-1 ring-orange-200',
+    'kelembaban': 'bg-blue-50 text-blue-600 ring-1 ring-blue-200',
+    'humidity':   'bg-blue-50 text-blue-600 ring-1 ring-blue-200',
+    'energi':     'bg-yellow-50 text-yellow-600 ring-1 ring-yellow-200',
+    'daya':       'bg-purple-50 text-purple-600 ring-1 ring-purple-200',
+    'co₂':        'bg-green-50 text-green-600 ring-1 ring-green-200',
+    'co2':        'bg-green-50 text-green-600 ring-1 ring-green-200',
+    'tegangan':   'bg-red-50 text-red-600 ring-1 ring-red-200',
+    'arus':       'bg-sky-50 text-sky-600 ring-1 ring-sky-200',
+};
+
+function openSensorDetail(id) {
+    const modal = document.getElementById('sensorDetailModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    // Reset state
+    document.getElementById('sdImg').classList.add('hidden');
+    document.getElementById('sdImgFallback').classList.remove('hidden');
+    document.getElementById('sdName').textContent  = 'Memuat...';
+    document.getElementById('sdCode').textContent  = '—';
+    document.getElementById('sdTipe').textContent  = '—';
+    document.getElementById('sdRoom').textContent  = '—';
+    document.getElementById('sdParams').innerHTML  = '<span class="text-[12px] text-slate-400">Memuat...</span>';
+
+    fetch(SENSOR_ROUTES.show.replace('__ID__', id), {
+        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': SENSOR_CSRF }
+    })
+    .then(r => r.json())
+    .then(data => {
+        // Image
+        if (data.gambar_url) {
+            document.getElementById('sdImg').src = data.gambar_url;
+            document.getElementById('sdImg').classList.remove('hidden');
+            document.getElementById('sdImgFallback').classList.add('hidden');
+        } else {
+            document.getElementById('sdImg').classList.add('hidden');
+            document.getElementById('sdImgFallback').classList.remove('hidden');
+        }
+
+        // Langsung dari API — tidak perlu scraping select
+        document.getElementById('sdName').textContent = data.sensor_group_name || '—';
+        document.getElementById('sdCode').textContent = data.sensor_group_code ? 'ID: ' + data.sensor_group_code : '';
+        document.getElementById('sdTipe').textContent = data.tipe_sensor || '—';
+        document.getElementById('sdRoom').textContent = data.room_name || '—';
+
+        // Parameters
+        const params = data.parameters || [];
+        if (params.length === 0) {
+            document.getElementById('sdParams').innerHTML = '<span class="text-[12px] text-slate-400">Tidak ada parameter</span>';
+        } else {
+            document.getElementById('sdParams').innerHTML = params.map(p => {
+                const key = p.nama_parameter.toLowerCase();
+                const cls = PARAM_BADGE_COLORS[key] || 'bg-slate-100 text-slate-600 ring-1 ring-slate-200';
+                return `<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[12px] font-semibold ${cls}">${p.nama_parameter}</span>`;
+            }).join('');
+        }
+    })
+    .catch(() => {
+        document.getElementById('sdName').textContent = 'Gagal memuat data';
+    });
+}
+
+function closeSensorDetail() {
+    const modal = document.getElementById('sensorDetailModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+// Close detail modal on backdrop click
+document.getElementById('sensorDetailModal').addEventListener('click', function(e) {
+    if (e.target === this) closeSensorDetail();
+});
 </script>
 @endpush

@@ -26,7 +26,7 @@
 <div class="overflow-x-auto">
     <table class="w-full text-[13px]">
         <thead>
-            <tr class="bg-red-50 text-slate-600 text-left">
+            <tr class="bg-red-100 text-slate-800 text-left">
                 <th class="px-4 py-2.5 font-semibold rounded-l-lg">Nama Ruangan</th>
                 <th class="px-4 py-2.5 font-semibold">Kode Ruangan</th>
                 <th class="px-4 py-2.5 font-semibold">Status Monitoring</th>
@@ -69,19 +69,19 @@
                         <div class="flex items-center justify-center gap-2">
                             {{-- Detail --}}
                             <button title="Detail" class="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                                <img src="{{ asset('icons/detail.svg') }}" alt="Detail" class="w-7 h-7">
                             </button>
                             {{-- Edit --}}
                             <button title="Edit"
                                 onclick="openRoomModal({{ $room->id }}, '{{ addslashes($room->name) }}', '{{ addslashes($room->code) }}', {{ $room->sort_order }}, {{ $room->is_active ? 1 : 0 }}, {{ $room->sensors->count() > 0 ? 1 : 0 }})"
                                 class="text-slate-400 hover:text-blue-600 transition-colors cursor-pointer">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                <img src="{{ asset('icons/edit.svg') }}" alt="Edit" class="w-7 h-7">
                             </button>
                             {{-- Hapus --}}
                             <button title="Hapus"
                                 onclick="deleteRoom({{ $room->id }}, '{{ addslashes($room->name) }}')"
                                 class="text-slate-400 hover:text-red-600 transition-colors cursor-pointer">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                                <img src="{{ asset('icons/hapus.svg') }}" alt="Hapus" class="w-7 h-7">
                             </button>
                         </div>
                     </td>

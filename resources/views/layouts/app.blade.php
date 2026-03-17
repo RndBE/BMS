@@ -11,12 +11,14 @@
     <script src="https://unpkg.com/feather-icons"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
-        /* Sidebar & layout transition */
+        /* ── Base sidebar & layout transition ── */
         #sidebar       { transition: width .25s ease, transform .25s ease; width: 220px; }
         #topbar        { transition: left .25s ease; left: 220px; }
         #main-content  { transition: margin-left .25s ease; margin-left: 220px; }
         #sidebar-labels { transition: opacity .15s ease, width .25s ease; }
+        #sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 99; }
 
+        /* Desktop collapse */
         body.sidebar-collapsed #sidebar        { width: 64px; }
         body.sidebar-collapsed #topbar         { left: 64px; }
         body.sidebar-collapsed #main-content   { margin-left: 64px; }
@@ -28,13 +30,38 @@
         body.sidebar-collapsed .nav-item svg,
         body.sidebar-collapsed .nav-item i     { margin: 0 auto; }
 
+        /* ── Tablet (768–1023px): auto-collapse to icons ── */
+        @media (min-width: 768px) and (max-width: 1023px) {
+            #sidebar      { width: 64px; }
+            #topbar       { left: 64px !important; }
+            #main-content { margin-left: 64px !important; }
+            .sidebar-label, .sidebar-logo-text, .sidebar-section-label { display: none !important; }
+            .nav-item { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
+        }
 
+        /* ── Mobile (< 768px): sidebar overlay ── */
+        @media (max-width: 767px) {
+            #sidebar      { width: 220px; transform: translateX(-100%); }
+            #topbar       { left: 0 !important; right: 0; }
+            #main-content { margin-left: 0 !important; padding: 1rem; }
+            body.sidebar-open #sidebar { transform: translateX(0); }
+            body.sidebar-open #sidebar-backdrop { display: block; }
+            body.sidebar-collapsed #sidebar { width: 220px; transform: translateX(-100%); }
+        }
+
+        /* Icon putih saat nav-item aktif */
+        .nav-item.bg-red-700 img,
+        #pengaturan-sub a.bg-red-700 img,
+        #sidebar a.bg-red-700 img { filter: brightness(0) invert(1); }
     </style>
 </head>
 <body class="font-['Inter'] bg-slate-100 flex min-h-screen">
 
+<!-- MOBILE BACKDROP -->
+<div id="sidebar-backdrop" onclick="closeSidebar()"></div>
+
 <!-- SIDEBAR -->
-<aside id="sidebar" class="min-h-screen bg-[#FFFFFF] flex flex-col fixed top-0 left-0 z-[100] overflow-hidden">
+<aside id="sidebar" class="h-screen bg-[#FFFFFF] flex flex-col fixed top-0 left-0 z-[100] overflow-hidden">
     <!-- Logo -->
     <div class="px-4 py-[18px] border-b border-slate-100 flex items-center gap-2.5 shrink-0">
         <img src="{{ asset('images/beacon-logo.png') }}" alt="Beacon Logo" class="w-[34px] h-[34px] shrink-0 object-contain">
@@ -44,7 +71,7 @@
         </div>
     </div>
 
-    <nav class="py-4 flex-1">
+    <nav class="py-4 flex-1 overflow-y-auto">
         <a href="{{ route('dashboard') }}" class="nav-item flex items-center gap-3 px-5 py-[11px] no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 {{ request()->routeIs('dashboard') ? 'bg-red-700 text-white' : 'text-slate-500' }}">
             <img src="{{ asset('icons/dashboard.svg') }}" alt="Dashboard" class="w-[18px] h-[18px] shrink-0">
             <span class="sidebar-label">Dashboard</span>
@@ -57,7 +84,7 @@
             <img src="{{ asset('icons/energi-bar.svg') }}" alt="Energi" class="w-[18px] h-[18px] shrink-0">
             <span class="sidebar-label">Energi</span>
         </a>
-        <a href="#" class="nav-item flex items-center gap-3 px-5 py-[11px] text-slate-500 no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:text-slate-900 hover:bg-slate-100">
+        <a href="{{ route('log-peringatan.index') }}" class="nav-item flex items-center gap-3 px-5 py-[11px] no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 {{ request()->routeIs('log-peringatan.*') ? 'bg-red-700 text-white' : 'text-slate-500' }}">
             <img src="{{ asset('icons/log.svg') }}" alt="Log Peringatan" class="w-[18px] h-[18px] shrink-0">
             <span class="sidebar-label">Log Peringatan</span>
         </a>
@@ -79,8 +106,8 @@
                     $subMenus = [
                         ['label' => 'Umum',        'route' => 'pengaturan.umum',        'img' => 'umum.svg'],
                         ['label' => 'Konfigurasi', 'route' => 'pengaturan.konfigurasi', 'img' => 'konfig.svg'],
-                        ['label' => 'Peringatan',  'route' => '',                        'img' => 'peringatan.svg'],
-                        ['label' => 'Pengguna',    'route' => '',                        'img' => 'pengguna.svg'],
+                        ['label' => 'Peringatan',  'route' => 'pengaturan.peringatan',   'img' => 'peringatan.svg'],
+                        ['label' => 'Pengguna',    'route' => 'pengaturan.pengguna',    'img' => 'pengguna.svg'],
                     ];
                 @endphp
                 @foreach($subMenus as $sub)
@@ -101,13 +128,13 @@
             </div>
         </div>
 
-        @if(auth()->user()->hasRole('superadmin'))
+        @can('kelola_denah')
         <div class="sidebar-section-label mx-5 mt-3 mb-1.5 text-[10px] font-semibold text-slate-400 tracking-[.8px] uppercase whitespace-nowrap overflow-hidden">Admin</div>
         <a href="{{ route('admin.buildings.index') }}" class="nav-item flex items-center gap-3 px-5 py-[11px] no-underline text-[13.5px] font-medium relative transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 {{ request()->routeIs('admin.*') ? 'bg-red-700 text-white' : 'text-slate-500' }}">
             <img src="{{ asset('icons/pengaturan.svg') }}" alt="Manajemen Denah" class="w-[18px] h-[18px] shrink-0">
             <span class="sidebar-label">Manajemen Denah</span>
         </a>
-        @endif
+        @endcan
     </nav>
 </aside>
 
@@ -129,7 +156,7 @@
     </div>
 
     <div class="flex items-center gap-4">
-        <div class="flex items-center gap-2 bg-slate-100 rounded-lg px-3.5 py-[7px] border border-slate-200">
+        <div class="hidden sm:flex items-center gap-2 bg-slate-100 rounded-lg px-3.5 py-[7px] border border-slate-200">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input type="text" placeholder="Cari ..." class="border-none bg-transparent outline-none text-[13px] text-slate-500 w-40">
         </div>
@@ -142,7 +169,7 @@
                 <div class="w-[34px] h-[34px] rounded-full bg-[#4f7dfc] flex items-center justify-center text-white text-[13px] font-semibold">
                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                 </div>
-                <div class="text-left">
+                <div class="hidden sm:block text-left">
                     <div class="text-[13px] font-medium text-slate-700">{{ auth()->user()->name }}</div>
                     <div class="text-[11px] text-slate-400">{{ auth()->user()->email }}</div>
                 </div>
@@ -179,10 +206,26 @@
     // ── Sidebar Toggle ──
     const SIDEBAR_KEY = 'bms_sidebar_collapsed';
 
+    function isMobile() { return window.innerWidth < 768; }
+    function isTablet() { return window.innerWidth >= 768 && window.innerWidth < 1024; }
+
     function toggleSidebar() {
-        const collapsed = document.body.classList.toggle('sidebar-collapsed');
-        localStorage.setItem(SIDEBAR_KEY, collapsed ? '1' : '0');
-        updateToggleIcon(collapsed);
+        if (isMobile()) {
+            // Mobile: overlay toggle (no persist, no icon change)
+            document.body.classList.toggle('sidebar-open');
+        } else if (isTablet()) {
+            // Tablet: we don't persist, just do nothing special
+            // Tablet sidebar is always icon-only via CSS
+        } else {
+            // Desktop: collapse/expand with persist
+            const collapsed = document.body.classList.toggle('sidebar-collapsed');
+            localStorage.setItem(SIDEBAR_KEY, collapsed ? '1' : '0');
+            updateToggleIcon(collapsed);
+        }
+    }
+
+    function closeSidebar() {
+        document.body.classList.remove('sidebar-open');
     }
 
     function updateToggleIcon(collapsed) {
@@ -190,8 +233,13 @@
         document.getElementById('toggleIconClose').classList.toggle('hidden', !collapsed);
     }
 
-    // Restore state on page load
-    if (localStorage.getItem(SIDEBAR_KEY) === '1') {
+    // Close sidebar on resize to desktop
+    window.addEventListener('resize', () => {
+        if (!isMobile()) document.body.classList.remove('sidebar-open');
+    });
+
+    // Restore desktop collapse state on page load
+    if (!isMobile() && !isTablet() && localStorage.getItem(SIDEBAR_KEY) === '1') {
         document.body.classList.add('sidebar-collapsed');
         updateToggleIcon(true);
     }

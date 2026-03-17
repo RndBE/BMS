@@ -39,8 +39,9 @@ class AnalysisController extends Controller
         // Default: room pertama, parameter temperature, default_range dari setting, hari ini
         $selectedRoomId = $request->get('room_id', $rooms->first()?->id);
         $parameter      = $request->get('parameter', 'temperature');
-        $periode        = $request->get('periode', $defaultRange);   // ← pakai setting
-        $tanggal        = $request->get('tanggal', now()->setTimezone($timezone)->format($phpDateFormat));
+        $periode        = $request->get('periode', $defaultRange);
+        // Tanggal selalu Y-m-d karena type="date" HTML selalu kirim format ini
+        $tanggal        = $request->get('tanggal', now()->setTimezone($timezone)->format('Y-m-d'));
 
         // Pemetaan parameter (nama display) → kolom sensor_readings
         // sensor1=Suhu, sensor2=Kelembaban, sensor3=Energi, sensor4=Daya, sensor5=CO₂
@@ -56,13 +57,14 @@ class AnalysisController extends Controller
 
         $selectedRoom = $rooms->find($selectedRoomId);
 
-        // Parse tanggal sesuai format dari setting
+        // Parse tanggal — selalu Y-m-d (dari type="date" input)
         try {
-            $date = Carbon::createFromFormat($phpDateFormat, $tanggal)
+            $date = Carbon::createFromFormat('Y-m-d', $tanggal)
                         ->setTimezone($timezone)
                         ->startOfDay();
         } catch (\Exception $e) {
             $date = Carbon::today()->setTimezone($timezone)->startOfDay();
+            $tanggal = $date->format('Y-m-d');
         }
 
         // Format jam dari setting Umum (24 atau 12)

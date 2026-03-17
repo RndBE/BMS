@@ -11,12 +11,11 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create roles
-        $superadminRole = Role::firstOrCreate(['name' => 'superadmin', 'guard_name' => 'web']);
-        Role::firstOrCreate(['name' => 'admin',      'guard_name' => 'web']);
-        Role::firstOrCreate(['name' => 'user',       'guard_name' => 'web']);
+        // 1. Permissions & Roles MUST run first
+        $this->call(PermissionSeeder::class);
 
-        // Superadmin user
+        // 2. Superadmin user
+        $superadminRole = Role::where('name', 'superadmin')->first();
         $user = User::updateOrCreate(
             ['email' => 'superadmin@gmail.com'],
             [
@@ -25,18 +24,22 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
-        $user->syncRoles([$superadminRole]);
+        if ($superadminRole) {
+            $user->syncRoles([$superadminRole]);
+        }
 
-        // BMS data seeders (order matters for FK constraints)
+        // 3. BMS data seeders (order matters for FK constraints)
         $this->call([
-            RoomSeeder::class,
+            BuildingSeeder::class,       // buildings first (floors depend on it)
+            RoomSeeder::class,           // rooms depend on floors
             SensorGroupSeeder::class,
             SensorSeeder::class,
             SensorParameterSeeder::class,
             SensorReadingSeeder::class,
             AcUnitSeeder::class,
             AlertSeeder::class,
-            BuildingSeeder::class,
+            AlertLimitSeeder::class,     // batas normal peringatan
+            AlertRuleSeeder::class,      // aturan peringatan
             SettingSeeder::class,
         ]);
     }

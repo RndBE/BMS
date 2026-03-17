@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'whatsapp' => [
+        'url'   => env('WHATSAPP_API_URL', 'http://72.60.78.159:3000/send-message'),
+        'phone' => env('WHATSAPP_DEFAULT_PHONE', ''),
+    ],
+
 ];

@@ -142,13 +142,16 @@ class PengaturanController extends Controller
     {
         $sensor->load(['sensorGroup', 'room.parameters']);
         return response()->json([
-            'id'              => $sensor->id,
-            'room_id'         => $sensor->room_id,
-            'sensor_group_id' => $sensor->sensor_group_id,
-            'tipe_sensor'     => $sensor->tipe_sensor,
-            'is_active'       => $sensor->is_active,
-            'gambar_url'      => $sensor->gambar ? Storage::disk('public')->url($sensor->gambar) : null,
-            'parameters'      => $sensor->room?->parameters?->map(fn($p) => [
+            'id'                 => $sensor->id,
+            'room_id'            => $sensor->room_id,
+            'room_name'          => $sensor->room?->name ?? '—',
+            'sensor_group_id'    => $sensor->sensor_group_id,
+            'sensor_group_name'  => $sensor->sensorGroup?->nama_sensor ?? '—',
+            'sensor_group_code'  => $sensor->sensorGroup?->kode_sensor ?? '',
+            'tipe_sensor'        => $sensor->tipe_sensor,
+            'is_active'          => $sensor->is_active,
+            'gambar_url'         => $sensor->gambar ? asset('storage/' . $sensor->gambar) : null,
+            'parameters'         => $sensor->room?->parameters?->map(fn($p) => [
                 'nama_parameter' => $p->nama_parameter,
                 'kolom_reading'  => $p->kolom_reading,
                 'unit'           => $p->unit,
@@ -183,14 +186,23 @@ class PengaturanController extends Controller
             'is_active'       => $request->boolean('is_active', true),
         ]);
 
-        // Simpan parameters ke sensor_parameters (per room)
-        if ($request->has('parameters')) {
-            foreach ($request->parameters as $i => $param) {
-                SensorParameter::updateOrCreate(
-                    ['room_id' => $request->room_id, 'kolom_reading' => $param['kolom_reading']],
-                    ['nama_parameter' => $param['nama_parameter'], 'unit' => $param['unit'] ?? null, 'sort_order' => $i + 1]
-                );
-            }
+        // Sync parameters untuk room: overwrite semua
+        $submitted = collect($request->input('parameters', []))
+            ->filter(fn($p) => !empty($p['kolom_reading']) && !empty($p['nama_parameter']));
+
+        $submittedKoloms = $submitted->pluck('kolom_reading')->all();
+
+        // Hapus parameter yang tidak ada di submit
+        SensorParameter::where('room_id', $request->room_id)
+            ->whereNotIn('kolom_reading', $submittedKoloms)
+            ->delete();
+
+        // Upsert parameter yang ada di submit
+        foreach ($submitted as $i => $param) {
+            SensorParameter::updateOrCreate(
+                ['room_id' => $request->room_id, 'kolom_reading' => $param['kolom_reading']],
+                ['nama_parameter' => $param['nama_parameter'], 'unit' => $param['unit'] ?? null, 'sort_order' => $i + 1]
+            );
         }
 
         return response()->json(['success' => true, 'sensor' => $sensor->load(['room', 'sensorGroup'])]);
@@ -224,13 +236,30 @@ class PengaturanController extends Controller
             'is_active'       => $request->boolean('is_active', true),
         ]);
 
-        if ($request->has('parameters')) {
-            foreach ($request->parameters as $i => $param) {
-                SensorParameter::updateOrCreate(
-                    ['room_id' => $request->room_id, 'kolom_reading' => $param['kolom_reading']],
-                    ['nama_parameter' => $param['nama_parameter'], 'unit' => $param['unit'] ?? null, 'sort_order' => $i + 1]
-                );
-            }
+        // Sync parameters: hapus yang dibuang, upsert yang dikirim
+        $submitted = collect($request->input('parameters', []))
+            ->filter(fn($p) => !empty($p['kolom_reading']) && !empty($p['nama_parameter']));
+
+        $submittedKoloms = $submitted->pluck('kolom_reading')->all();
+        $newRoomId = $request->room_id;
+        $oldRoomId = $sensor->getOriginal('room_id'); // room sebelum update
+
+        // Jika room berubah, bersihkan parameter room lama yang tidak lagi dipakai
+        if ($oldRoomId && $oldRoomId != $newRoomId) {
+            SensorParameter::where('room_id', $oldRoomId)->delete();
+        }
+
+        // Hapus parameter yang dihilangkan dari list
+        SensorParameter::where('room_id', $newRoomId)
+            ->whereNotIn('kolom_reading', $submittedKoloms)
+            ->delete();
+
+        // Upsert parameter yang ada di submit
+        foreach ($submitted as $i => $param) {
+            SensorParameter::updateOrCreate(
+                ['room_id' => $newRoomId, 'kolom_reading' => $param['kolom_reading']],
+                ['nama_parameter' => $param['nama_parameter'], 'unit' => $param['unit'] ?? null, 'sort_order' => $i + 1]
+            );
         }
 
         return response()->json(['success' => true, 'sensor' => $sensor->fresh()->load(['room', 'sensorGroup'])]);

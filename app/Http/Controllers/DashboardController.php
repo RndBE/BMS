@@ -44,7 +44,7 @@ class DashboardController extends Controller
         $currentPower = AcUnit::where('is_active', true)->sum('power_kw');
         $energyToday  = round($currentPower * 11.5, 1);
 
-        $recentAlerts = Alert::with('room')->latest()->limit(4)->get();
+        $recentAlerts = Alert::with(['room', 'alertRule'])->latest()->limit(4)->get();
 
         // Load floor untuk denah
         $displayFloor = Floor::with(['building', 'rooms.acUnits'])
