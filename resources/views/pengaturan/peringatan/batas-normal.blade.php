@@ -13,10 +13,10 @@
         $i       = $loop->index;
         $isBound = in_array($key, ['co2', 'daya']); // single-bound (< normal_max, > poor_high)
     @endphp
-    <div class="rounded-xl border border-slate-200 dark:border-[#3d3d3d] bg-slate-50/60 dark:bg-[#2a2a2a] p-5">
+    <div class="rounded-xl border border-slate-200 dark:border-[#1D1D1D] bg-slate-50/60 dark:bg-[#2a2a2a] p-5">
 
         {{-- Card header --}}
-        <div class="flex items-center gap-2.5 mb-4 pb-3 border-b border-slate-200/80 dark:border-[#3d3d3d]">
+        <div class="flex items-center gap-2.5 mb-4 pb-3 border-b border-slate-200/80 dark:border-[#1D1D1D]">
             @if($limit->icon_type === 'img')
                 <img src="{{ asset($limit->icon) }}" alt="{{ $limit->label }}" class="w-7 h-7 shrink-0">
             @else
@@ -36,12 +36,12 @@
                 </span>
 
                 @if($isBound)
-                    <div class="relative flex-1">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[12px] text-slate-800 font-medium select-none">&lt;</span>
+                    <div class="flex flex-1 rounded-lg overflow-hidden border border-slate-200 dark:border-[#3d3d3d]">
+                        <span class="flex items-center justify-center px-2.5 bg-slate-100 dark:bg-[#2d2d2d] text-[12px] font-semibold text-slate-600 dark:text-slate-300 select-none shrink-0 border-r border-slate-200 dark:border-[#3d3d3d]">&lt;</span>
                         <input type="number" step="any"
                             name="limits[{{ $i }}][normal_max]"
                             value="{{ old("limits.{$i}.normal_max", $limit->normal_max) }}"
-                            class="w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#1e1e1e] dark:text-slate-200 bg-white rounded-lg pl-7 pr-3 py-2 text-[13px] text-slate-700 focus:outline-none focus:border-red-400 transition-colors">
+                            class="flex-1 min-w-0 bg-white border-white dark:bg-[#1e1e1e] dark:border-[#3d3d3d] dark:text-slate-200 px-3 py-2 text-[13px] text-slate-700 focus:outline-none transition-colors">
                     </div>
                 @else
                     <input type="number" step="any"
@@ -87,7 +87,7 @@
                             value="{{ old("limits.{$i}.warn_low_max", $limit->warn_low_max) }}"
                             class="flex-1 min-w-0 border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#1e1e1e] dark:text-slate-200 bg-white rounded-lg px-3 py-2 text-[13px] text-slate-700 focus:outline-none focus:border-red-400 transition-colors">
                     </div>
-                    <span class="text-[12px] text-slate-800 shrink-0 font-light px-0.5">/</span>
+                    <span class="text-[12px] text-slate-800 shrink-0 font-light px-0.5 dark:text-slate-200">/</span>
                     <div class="flex-1 flex items-center gap-2 min-w-0">
                         <input type="number" step="any"
                             name="limits[{{ $i }}][warn_high_min]"
@@ -110,29 +110,29 @@
                 </span>
 
                 @if($isBound)
-                    <div class="relative flex-1">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[12px] text-slate-800 font-medium select-none">&gt;</span>
+                    <div class="flex flex-1 rounded-lg overflow-hidden border border-slate-200 dark:border-[#3d3d3d]">
+                        <span class="flex items-center justify-center px-2.5 bg-slate-100 dark:bg-[#2d2d2d] text-[12px] font-semibold text-slate-600 dark:text-slate-300 select-none shrink-0 border-r border-slate-200 dark:border-[#3d3d3d]">&gt;</span>
                         <input type="number" step="any"
                             name="limits[{{ $i }}][poor_high]"
                             value="{{ old("limits.{$i}.poor_high", $limit->poor_high) }}"
-                            class="w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#1e1e1e] dark:text-slate-200 bg-white rounded-lg pl-7 pr-3 py-2 text-[13px] text-slate-700 focus:outline-none focus:border-red-400 transition-colors">
+                            class="flex-1 min-w-0 bg-white border-white dark:bg-[#1e1e1e] dark:border-[#3d3d3d] dark:text-slate-200 px-3 py-2 text-[13px] text-slate-700 focus:outline-none transition-colors">
                     </div>
                 @else
                     {{-- e.g. < 21 / > 28 --}}
-                    <div class="relative flex-1">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[12px] text-slate-800 font-medium select-none">&lt;</span>
+                    <div class="flex flex-1 rounded-lg overflow-hidden border border-slate-200 dark:border-[#3d3d3d]">
+                        <span class="flex items-center justify-center px-2.5 bg-slate-100 dark:bg-[#2d2d2d] text-[12px] font-semibold text-slate-600 dark:text-slate-300 select-none shrink-0 border-r border-slate-200 dark:border-[#3d3d3d]">&lt;</span>
                         <input type="number" step="any"
                             name="limits[{{ $i }}][poor_low]"
                             value="{{ old("limits.{$i}.poor_low", $limit->poor_low) }}"
-                            class="w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#1e1e1e] dark:text-slate-200 bg-white rounded-lg pl-7 pr-3 py-2 text-[13px] text-slate-700 focus:outline-none focus:border-red-400 transition-colors">
+                            class="flex-1 min-w-0 bg-white border-white dark:bg-[#1e1e1e] dark:border-[#3d3d3d] dark:text-slate-200 px-3 py-2 text-[13px] text-slate-700 focus:outline-none transition-colors">
                     </div>
-                    <span class="text-[12px] text-slate-800 shrink-0 font-light px-0.5">/</span>
-                    <div class="relative flex-1">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[12px] text-slate-800 font-medium select-none">&gt;</span>
+                    <span class="text-[12px] text-slate-800 shrink-0 font-light px-0.5 dark:text-slate-200">/</span>
+                    <div class="flex flex-1 rounded-lg overflow-hidden border border-slate-200 dark:border-[#3d3d3d]">
+                        <span class="flex items-center justify-center px-2.5 bg-slate-100 dark:bg-[#2d2d2d] text-[12px] font-semibold text-slate-600 dark:text-slate-300 select-none shrink-0 border-r border-slate-200 dark:border-[#3d3d3d]">&gt;</span>
                         <input type="number" step="any"
                             name="limits[{{ $i }}][poor_high]"
                             value="{{ old("limits.{$i}.poor_high", $limit->poor_high) }}"
-                            class="w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#1e1e1e] dark:text-slate-200 bg-white rounded-lg pl-7 pr-3 py-2 text-[13px] text-slate-700 focus:outline-none focus:border-red-400 transition-colors">
+                            class="flex-1 min-w-0 bg-white border-white dark:bg-[#1e1e1e] dark:border-[#3d3d3d] dark:text-slate-200 px-3 py-2 text-[13px] text-slate-700 focus:outline-none transition-colors">
                     </div>
                 @endif
             </div>
@@ -145,7 +145,7 @@
 {{-- Action Buttons — inside the card, bottom-right --}}
 <div class="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-[#2d2d2d]">
     <button type="button" id="btn-reset-batas"
-            class="px-6 py-2.5 rounded-lg border border-slate-300 dark:border-[#3d3d3d] dark:text-slate-300 dark:hover:bg-[#2a2a2a] text-[13px] font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+            class="px-6 py-2.5 rounded-lg border border-slate-300 dark:border-[#FFFFFF] dark:text-[#FFFFFF] dark:hover:bg-[#2a2a2a] text-[13px] font-medium text-slate-600 hover:bg-slate-50 transition-colors">
         Reset
     </button>
     <button type="submit"

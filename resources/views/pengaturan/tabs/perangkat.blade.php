@@ -16,8 +16,8 @@
             </div>
         </form>
         {{-- Tambah Perangkat --}}
-        <button onclick="openAcModal()"
-            class="flex items-center gap-1.5 bg-red-700 hover:bg-red-800 text-white text-[12.5px] font-semibold px-4 py-[8px] rounded-lg transition-colors cursor-pointer">
+        <button type="button" onclick="openAcModal()"
+            class="flex items-center gap-1.5 bg-red-700 hover:bg-red-800 text-white text-[12.5px] font-semibold px-4 py-[7px] rounded-lg transition-colors cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Tambah Perangkat
         </button>
@@ -28,7 +28,7 @@
 <div class="overflow-x-auto">
     <table class="w-full text-[13px]">
         <thead>
-            <tr class="bg-red-100 text-slate-800 text-left dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-white">
+            <tr class="bg-red-100 text-slate-800 text-left dark:bg-[#1D1D1D] dark:text-white">
                 <th class="px-4 py-2.5 font-semibold rounded-l-lg">Nama Perangkat</th>
                 <th class="px-4 py-2.5 font-semibold">Jenis</th>
                 <th class="px-4 py-2.5 font-semibold">Ruangan</th>
@@ -37,7 +37,7 @@
                 <th class="px-4 py-2.5 font-semibold text-center rounded-r-lg">Aksi</th>
             </tr>
         </thead>
-        <tbody class="divide-y divide-slate-50">
+        <tbody class="divide-y divide-slate-50 dark:divide-[#1D1D1D]">
             @forelse($acUnits as $unit)
                 <tr class="hover:bg-slate-50/60 dark:hover:bg-transparent transition-colors">
 
@@ -136,7 +136,7 @@
 
 {{-- Pagination --}}
 @if($acUnits instanceof \Illuminate\Pagination\LengthAwarePaginator)
-<div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-50">
+<div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-50 dark:border-[#1D1D1D]">
     <span class="text-[12px] text-slate-400">
         Menampilkan {{ $acUnits->firstItem() ?? 0 }} – {{ $acUnits->lastItem() ?? 0 }} dari {{ $acUnits->total() }} data
     </span>
@@ -231,11 +231,11 @@
 </div>
 
 <div id="acModal" class="hidden fixed inset-0 bg-black/40 z-[1000] items-center justify-center">
-    <div class="bg-white rounded-xl shadow-2xl w-[460px] max-w-[95vw] overflow-hidden">
+    <div class="bg-white rounded-xl shadow-2xl w-[460px] max-w-[95vw] overflow-hidden dark:bg-[#232323] dark:border-[#232323] dark:text-slate-200">
 
         {{-- Header --}}
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-            <h3 class="text-[15px] font-bold text-slate-800" id="acModalTitle">Tambah Perangkat</h3>
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-[#1D1D1D]">
+            <h3 class="text-[15px] font-bold text-slate-800 dark:text-slate-200" id="acModalTitle">Tambah Perangkat</h3>
             <button onclick="closeAcModal()" class="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer bg-transparent border-none p-1">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
@@ -247,17 +247,17 @@
 
             {{-- Nama Perangkat --}}
             <div>
-                <label class="block text-[11.5px] font-semibold text-slate-500 mb-1.5">Nama Perangkat <span class="text-red-500">*</span></label>
+                <label class="block text-[11.5px] font-semibold text-slate-500 mb-1.5 dark:text-slate-200">Nama Perangkat <span class="text-red-500">*</span></label>
                 <input type="text" id="acModalName" placeholder="Contoh: AC Software"
-                    class="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-red-400 box-border transition-colors">
+                    class="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-red-400 box-border transition-colors dark:bg-[#3C3D3F] dark:border-[#3C3D3F] dark:text-slate-200">
             </div>
 
             {{-- Ruangan & Daya --}}
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-[11.5px] font-semibold text-slate-500 mb-1.5">Ruangan <span class="text-red-500">*</span></label>
+                    <label class="block text-[11.5px] font-semibold text-slate-500 mb-1.5 dark:text-slate-200">Ruangan <span class="text-red-500">*</span></label>
                     <select id="acModalRoomId"
-                        class="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-700 outline-none focus:border-red-400 box-border transition-colors bg-white">
+                        class="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-700 outline-none focus:border-red-400 box-border transition-colors bg-white dark:bg-[#3C3D3F] dark:border-[#3C3D3F] dark:text-slate-200">
                         <option value="">-- Pilih Ruangan --</option>
                         @foreach($allRooms as $r)
                             <option value="{{ $r->id }}">{{ $r->name }}</option>
@@ -265,17 +265,17 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-[11.5px] font-semibold text-slate-500 mb-1.5">Daya (kW)</label>
+                    <label class="block text-[11.5px] font-semibold text-slate-500 mb-1.5 dark:text-slate-200">Daya (kW)</label>
                     <input type="number" id="acModalPower" placeholder="0.00" min="0" step="0.01"
-                        class="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-red-400 box-border transition-colors">
+                        class="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-red-400 box-border transition-colors dark:bg-[#3C3D3F] dark:border-[#3C3D3F] dark:text-slate-200">
                 </div>
             </div>
 
             {{-- Status Perangkat --}}
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-[11.5px] font-semibold text-slate-700">Status Perangkat</p>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Aktifkan / matikan perangkat</p>
+                    <p class="text-[11.5px] font-semibold text-slate-700 dark:text-slate-200">Status Perangkat</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5 dark:text-slate-200">Aktifkan / matikan perangkat</p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" id="acModalActive" class="sr-only peer">
@@ -290,9 +290,9 @@
         </div>
 
         {{-- Footer --}}
-        <div class="flex justify-end gap-2 px-6 py-4 border-t border-slate-100 bg-slate-50/60">
+        <div class="flex justify-end gap-2 px-6 py-4 border-t border-slate-100 bg-slate-50/60 dark:bg-[#232323] dark:border-[#232323] dark:text-slate-200">
             <button onclick="closeAcModal()"
-                class="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg text-[13px] hover:bg-slate-100 transition-colors cursor-pointer bg-white">
+                class="px-4 py-2 border border-slate-200 text-slate-600 dark:border-[#FFFFFF] dark:text-[#FFFFFF] dark:bg-transparent rounded-lg text-[13px] hover:bg-slate-100 transition-colors cursor-pointer bg-white">
                 Batal
             </button>
             <button onclick="saveAcUnit()"
@@ -305,6 +305,32 @@
 
 {{-- Toast --}}
 <div id="ac-toast" class="fixed bottom-6 right-6 bg-slate-800 text-white px-[18px] py-2.5 rounded-xl text-[13px] z-[9999] hidden shadow-xl"></div>
+
+{{-- Modal Konfirmasi Hapus Perangkat --}}
+<div id="modal-delete-ac" class="hidden fixed inset-0 bg-black/50 z-[1100] flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#232323] rounded-2xl shadow-2xl w-full max-w-sm text-center overflow-hidden">
+        <div class="px-8 pt-8 pb-6">
+            <div class="flex justify-center mb-4">
+                <img src="{{ asset('icons/delete.svg') }}" alt="Hapus" class="w-12 h-12">
+            </div>
+            <h3 class="text-[16px] font-bold text-slate-800 dark:text-white mb-2">Hapus Perangkat</h3>
+            <p class="text-[13px] text-slate-500 dark:text-slate-400">
+                Anda yakin ingin menghapus perangkat <strong id="delete-ac-name" class="text-slate-700 dark:text-slate-200"></strong>?
+                <br>Tindakan ini tidak dapat dibatalkan.
+            </p>
+        </div>
+        <div class="flex justify-center gap-3 px-8 pb-7">
+            <button onclick="closeDeleteAcModal()"
+                class="px-7 py-2.5 rounded-lg border border-slate-300 dark:border-[#FFFFFF] dark:text-[#FFFFFF] text-[13px] font-medium text-slate-600 hover:bg-slate-50 dark:hover:bg-[#2a2a2a] transition-colors cursor-pointer bg-white dark:bg-transparent">
+                Batal
+            </button>
+            <button onclick="confirmDeleteAcUnit()"
+                class="px-7 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[13px] font-semibold transition-colors cursor-pointer">
+                Hapus
+            </button>
+        </div>
+    </div>
+</div>
 
 <script>
 const AC_ROUTES = {
@@ -394,21 +420,39 @@ function toggleAcStatus(id, isCurrentlyOn) {
     .catch(() => showAcToast('Gagal mengubah status perangkat.'));
 }
 
+let _deleteAcId = null;
+
 function deleteAcUnit(id, name) {
-    if (!confirm('Hapus perangkat "' + name + '"? Tindakan ini tidak dapat dibatalkan.')) return;
-    fetch(AC_ROUTES.destroy.replace('__ID__', id), {
+    _deleteAcId = id;
+    document.getElementById('delete-ac-name').textContent = name;
+    document.getElementById('modal-delete-ac').classList.remove('hidden');
+}
+
+function closeDeleteAcModal() {
+    _deleteAcId = null;
+    document.getElementById('modal-delete-ac').classList.add('hidden');
+}
+
+function confirmDeleteAcUnit() {
+    if (!_deleteAcId) return;
+    fetch(AC_ROUTES.destroy.replace('__ID__', _deleteAcId), {
         method: 'DELETE',
         headers: { 'X-CSRF-TOKEN': AC_CSRF, 'Accept': 'application/json' },
     })
     .then(r => r.json())
     .then(data => {
+        closeDeleteAcModal();
         if (data.success) {
             showAcToast('Perangkat dihapus ✓');
             setTimeout(() => location.reload(), 900);
         }
     })
-    .catch(() => showAcToast('Gagal menghapus perangkat.'));
+    .catch(() => { closeDeleteAcModal(); showAcToast('Gagal menghapus perangkat.'); });
 }
+
+document.getElementById('modal-delete-ac').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteAcModal();
+});
 
 // Toggle label ON/OFF
 document.getElementById('acModalActive').addEventListener('change', function () {

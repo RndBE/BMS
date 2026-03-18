@@ -10,12 +10,12 @@
                 <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
                 </svg>
-                <input type="text" name="search" value="{{ $search }}" placeholder="Cari ..."
+                <input type="text" name="search" value="{{ $search }}" placeholder="Cari Ruangan..."
                     class="pl-8 pr-3 py-[7px] border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 w-44">
             </div>
         </form>
         {{-- Tambah Ruangan --}}
-        <button onclick="openRoomModal()" class="flex items-center gap-1.5 bg-red-700 hover:bg-red-800 text-white text-[12.5px] font-semibold px-4 py-[8px] rounded-lg transition-colors cursor-pointer">
+        <button type="button" onclick="openRoomModal()" class="flex items-center gap-1.5 bg-red-700 hover:bg-red-800 text-white text-[12.5px] font-semibold px-4 py-[7px] rounded-lg transition-colors cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Tambah Ruangan
         </button>
@@ -26,7 +26,7 @@
 <div class="overflow-x-auto">
     <table class="w-full text-[13px]">
         <thead>
-            <tr class="bg-red-100 text-slate-800 text-left dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-white">
+            <tr class="bg-red-100 text-slate-800 text-left dark:bg-[#1D1D1D] dark:text-white">
                 <th class="px-4 py-2.5 font-semibold rounded-l-lg">Nama Ruangan</th>
                 <th class="px-4 py-2.5 font-semibold">Kode Ruangan</th>
                 <th class="px-4 py-2.5 font-semibold">Status Monitoring</th>
@@ -35,7 +35,7 @@
                 <th class="px-4 py-2.5 font-semibold text-center rounded-r-lg">Aksi</th>
             </tr>
         </thead>
-        <tbody class="divide-y divide-slate-50">
+        <tbody class="divide-y divide-slate-50 dark:divide-[#1D1D1D]">
             @forelse($rooms as $room)
                 @php
                     $hasMonitoring = $room->sensors->count() > 0;
@@ -67,10 +67,6 @@
                     </td>
                     <td class="px-4 py-2.5">
                         <div class="flex items-center justify-center gap-2">
-                            {{-- Detail --}}
-                            <button title="Detail" class="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer">
-                                <img src="{{ asset('icons/detail.svg') }}" alt="Detail" class="w-7 h-7">
-                            </button>
                             {{-- Edit --}}
                             <button title="Edit"
                                 onclick="openRoomModal({{ $room->id }}, '{{ addslashes($room->name) }}', '{{ addslashes($room->code) }}', {{ $room->sort_order }}, {{ $room->is_active ? 1 : 0 }}, {{ $room->sensors->count() > 0 ? 1 : 0 }})"
@@ -96,7 +92,7 @@
 </div>
 
 {{-- Pagination --}}
-<div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-50">
+<div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-50 dark:border-[#1D1D1D]">
     <span class="text-[12px] text-slate-400 dark:text-slate-500">
         Menampilkan {{ $rooms->firstItem() ?? 0 }} – {{ $rooms->lastItem() ?? 0 }} dari {{ $rooms->total() }} data
     </span>
@@ -207,7 +203,7 @@
         {{-- Footer --}}
         <div class="flex justify-end gap-2 px-6 py-4 border-t border-slate-100 dark:border-[#2d2d2d] bg-slate-50/60 dark:bg-[#1e1e1e]">
             <button onclick="closeRoomModal()"
-                class="px-4 py-2 border border-slate-200 dark:border-[#3d3d3d] dark:text-slate-300 dark:bg-transparent text-slate-600 rounded-lg text-[13px] hover:bg-slate-100 dark:hover:bg-[#2a2a2a] transition-colors cursor-pointer bg-white">
+                class="px-4 py-2 border border-slate-200 dark:border-[#FFFFFF] dark:text-[#FFFFFF] dark:bg-transparent text-slate-600 rounded-lg text-[13px] hover:bg-slate-100 dark:hover:bg-[#2a2a2a] transition-colors cursor-pointer bg-white">
                 Batal
             </button>
             <button onclick="saveRoom()"
@@ -220,6 +216,32 @@
 
 {{-- Toast --}}
 <div id="konfig-toast" class="fixed bottom-6 right-6 bg-slate-800 text-white px-[18px] py-2.5 rounded-xl text-[13px] z-[9999] hidden shadow-xl"></div>
+
+{{-- Modal Konfirmasi Hapus Ruangan --}}
+<div id="modal-delete-room" class="hidden fixed inset-0 bg-black/50 z-[1100] flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#232323] rounded-2xl shadow-2xl w-full max-w-sm text-center overflow-hidden">
+        <div class="px-8 pt-8 pb-6">
+            <div class="flex justify-center mb-4">
+                <img src="{{ asset('icons/delete.svg') }}" alt="Hapus" class="w-12 h-12">
+            </div>
+            <h3 class="text-[16px] font-bold text-slate-800 dark:text-white mb-2">Hapus Ruangan</h3>
+            <p class="text-[13px] text-slate-500 dark:text-slate-400">
+                Anda yakin ingin menghapus ruangan <strong id="delete-room-name" class="text-slate-700 dark:text-slate-200"></strong>?
+                <br>Tindakan ini tidak dapat dibatalkan.
+            </p>
+        </div>
+        <div class="flex justify-center gap-3 px-8 pb-7">
+            <button onclick="closeDeleteRoomModal()"
+                class="px-7 py-2.5 rounded-lg border border-slate-300 dark:border-[#FFFFFF] dark:text-[#FFFFFF] text-[13px] font-medium text-slate-600 hover:bg-slate-50 dark:hover:bg-[#2a2a2a] transition-colors cursor-pointer bg-white dark:bg-transparent">
+                Batal
+            </button>
+            <button onclick="confirmDeleteRoom()"
+                class="px-7 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[13px] font-semibold transition-colors cursor-pointer">
+                Hapus
+            </button>
+        </div>
+    </div>
+</div>
 
 <script>
 const KONFIG_ROUTES = {
@@ -305,21 +327,39 @@ function saveRoom() {
     });
 }
 
+let _deleteRoomId = null;
+
 function deleteRoom(id, name) {
-    if (!confirm('Hapus ruangan "' + name + '"? Tindakan ini tidak dapat dibatalkan.')) return;
-    fetch(KONFIG_ROUTES.destroy.replace('__ID__', id), {
+    _deleteRoomId = id;
+    document.getElementById('delete-room-name').textContent = name;
+    document.getElementById('modal-delete-room').classList.remove('hidden');
+}
+
+function closeDeleteRoomModal() {
+    _deleteRoomId = null;
+    document.getElementById('modal-delete-room').classList.add('hidden');
+}
+
+function confirmDeleteRoom() {
+    if (!_deleteRoomId) return;
+    fetch(KONFIG_ROUTES.destroy.replace('__ID__', _deleteRoomId), {
         method: 'DELETE',
         headers: { 'X-CSRF-TOKEN': KONFIG_CSRF, 'Accept': 'application/json' },
     })
     .then(r => r.json())
     .then(data => {
+        closeDeleteRoomModal();
         if (data.success) {
             showKonfigToast('Ruangan dihapus ✓');
             setTimeout(() => location.reload(), 900);
         }
     })
-    .catch(() => showKonfigToast('Gagal menghapus ruangan.'));
+    .catch(() => { closeDeleteRoomModal(); showKonfigToast('Gagal menghapus ruangan.'); });
 }
+
+document.getElementById('modal-delete-room').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteRoomModal();
+});
 
 document.getElementById('roomModalActive').addEventListener('change', function() {
     document.getElementById('roomModalActiveLabel').textContent = this.checked ? 'Aktif' : 'Nonaktif';

@@ -105,7 +105,7 @@
             {{-- Action buttons --}}
             <div class="flex justify-end gap-3">
                 <button type="reset"
-                    class="px-10 py-[9px] rounded-lg border border-slate-200 dark:border-[#3d3d3d] dark:text-slate-300 dark:hover:bg-[#2a2a2a] text-[13px] font-semibold text-slate-700 bg-white dark:bg-transparent hover:bg-slate-50 transition-colors cursor-pointer">
+                    class="px-10 py-[9px] rounded-lg border border-slate-200 dark:border-[#FFFFFF] dark:text-[#FFFFFF] dark:hover:bg-[#2a2a2a] text-[13px] font-semibold text-slate-700 bg-white dark:bg-transparent hover:bg-slate-50 transition-colors cursor-pointer">
                     Reset
                 </button>
                 <button type="submit"

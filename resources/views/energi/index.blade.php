@@ -72,7 +72,7 @@
     </div>
 
     {{-- Side Panel --}}
-    <div class="w-[270px] flex flex-col gap-4 shrink-0">
+    <div class="w-[270px] flex flex-col gap-4 shrink-0 overflow-hidden">
 
         {{-- Batas Normal --}}
         <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm px-5 py-4">
@@ -142,24 +142,35 @@
             @endif
         </div>
 
-
         {{-- Peringatan Terkait --}}
-        <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm flex-1 flex flex-col overflow-hidden" style="max-height:260px;">
+        <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm flex-1 flex flex-col overflow-hidden">
             <div class="px-5 pt-4 pb-2 border-b border-slate-50 dark:border-[#2d2d2d] shrink-0">
                 <div class="text-[13px] font-semibold text-slate-800 dark:text-white">Peringatan Terkait</div>
             </div>
-            <div class="overflow-y-auto flex-1 px-5">
+            <div class="overflow-y-auto flex-1 min-h-0 px-5">
                 @forelse($alerts as $alert)
                     @php
-                        $alertIcon = match($alert->type) {
-                            'high_power' => 'daya-tinggi',
-                            'high_temp'  => 'suhu-tinggi',
-                            default      => 'status',
-                        };
+                        $iconTypeMap = [
+                            'high_temp'     => 'suhu-tinggi',
+                            'low_temp'      => 'suhu',
+                            'high_humidity' => 'kelembapan',
+                            'low_humidity'  => 'kelembapan',
+                            'co2_tinggi'    => 'co2',
+                            'co2_rendah'    => 'co2',
+                            'high_power'    => 'daya-tinggi',
+                            'low_power'     => 'daya',
+                            'high_voltage'  => 'tegangan',
+                            'low_voltage'   => 'tegangan',
+                            'sensor_offline'=> 'sensor-offline',
+                            'ac_off'        => 'freeze',
+                            'critical'      => 'poor',
+                            'warning'       => 'warning',
+                        ];
+                        $alertIcon = $iconTypeMap[$alert->type] ?? 'warning';
                     @endphp
                     <div class="flex items-center gap-2.5 py-2 border-b border-slate-50 dark:border-[#2d2d2d] last:border-0">
                         <img src="{{ asset('icons/' . $alertIcon . '.svg') }}"
-                             onerror="this.src='{{ asset('icons/status.svg') }}'"
+                            onerror="this.src='{{ asset('icons/status.svg') }}'"
                              class="w-5 h-5 shrink-0">
                         <div class="flex-1 min-w-0">
                             <div class="text-[12px] font-semibold text-slate-800 dark:text-slate-200 truncate">{{ $alert->message }}</div>

@@ -2,6 +2,15 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    {{-- Anti-flash: deteksi tema sebelum content dirender --}}
+    <script>
+        (function() {
+            var saved = localStorage.getItem('bms_theme');
+            if (saved === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>BMS – {{ config('app.name') }}</title>
@@ -9,7 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/feather-icons"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <style>
         /* ── Base sidebar & layout transition ── */
         #sidebar       { transition: width .25s ease, transform .25s ease; width: 220px; }
@@ -78,11 +87,7 @@
 <aside id="sidebar" class="h-screen bg-white dark:bg-[#1D1D1D] flex flex-col fixed top-0 left-0 z-[100] overflow-hidden border-r border-slate-100 dark:border-[#222]">
     <!-- Logo -->
     <div class="px-4 py-[18px] border-b border-slate-100 dark:border-[#222] flex items-center gap-2.5 shrink-0">
-        <img src="{{ asset('images/beacon-logo.png') }}" alt="Beacon Logo" class="w-[34px] h-[34px] shrink-0 object-contain">
-        <div class="sidebar-logo-text overflow-hidden">
-            <div class="text-slate-800 dark:text-white font-bold text-[13px] whitespace-nowrap">BMS</div>
-            <div class="text-[10px] font-semibold tracking-[1px] text-slate-400 dark:text-slate-500 uppercase whitespace-nowrap">Beacon Engineering</div>
-        </div>
+        <img src="{{ asset('images/beacon-logo.png') }}" alt="Beacon Logo" class="w-[86px] h-[34px] shrink-0 object-contain">
     </div>
 
     <nav class="py-4 flex-1 overflow-y-auto">
@@ -195,7 +200,7 @@
     </div>
 
     <div class="flex items-center gap-4">
-        <div class="hidden sm:flex items-center gap-2 bg-slate-100 dark:bg-[#2a2a2a] rounded-lg px-3.5 py-[7px] border border-slate-200 dark:border-[#333]">
+        <div class="hidden sm:flex items-center gap-2 bg-slate-100 dark:bg-[#2a2a2a] rounded-lg px-4 py-[1px] border border-slate-200 dark:border-[#333]">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input type="text" placeholder="Cari ..." class="border-none bg-transparent outline-none text-[13px] text-slate-500 dark:text-slate-300 placeholder-slate-400 w-40">
         </div>
@@ -210,10 +215,22 @@
             <svg id="themeIconMoon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-500"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
 
-        <div class="relative w-9 h-9 bg-slate-100 dark:bg-[#2a2a2a] rounded-full border border-slate-200 dark:border-[#333] flex items-center justify-center cursor-pointer">
+        @can('lihat_log')
+        <a href="{{ route('log-peringatan.index') }}"
+            title="Log Peringatan"
+            class="relative w-9 h-9 bg-slate-100 dark:bg-[#2a2a2a] rounded-full border border-slate-200 dark:border-[#333] flex items-center justify-center hover:bg-slate-200 dark:hover:bg-[#333] transition-colors no-underline">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-500 dark:text-slate-400"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            <span class="absolute top-[7px] right-[7px] w-2 h-2 bg-red-500 rounded-full border-[1.5px] border-white dark:border-[#2a2a2a]"></span>
+            {{-- Badge selalu ada di DOM supaya JS bisa update tanpa refresh --}}
+            <span id="alert-badge"
+                class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-[3px] bg-red-500 rounded-full border-2 border-white dark:border-[#1D1D1D] flex items-center justify-center text-white text-[9px] font-bold leading-none {{ $unreadAlertCount > 0 ? '' : 'hidden' }}">
+                {{ $unreadAlertCount > 99 ? '99+' : $unreadAlertCount }}
+            </span>
+        </a>
+        @else
+        <div class="relative w-9 h-9 bg-slate-100 dark:bg-[#2a2a2a] rounded-full border border-slate-200 dark:border-[#333] flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-500 dark:text-slate-400"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         </div>
+        @endcan
         <div class="relative" x-data="{ open: false }">
             <button @click="open = !open" class="flex items-center gap-2.5 cursor-pointer bg-transparent border-none p-0">
                 <div class="w-[34px] h-[34px] rounded-full bg-[#4f7dfc] flex items-center justify-center text-white text-[13px] font-semibold">
@@ -268,11 +285,10 @@
         applyTheme(!isDark);
     }
 
-    // Apply saved theme on load (BEFORE paint to avoid flash)
+    // Apply saved theme on load
     (function () {
         const saved = localStorage.getItem(THEME_KEY);
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        applyTheme(saved === 'dark' || (!saved && prefersDark));
+        applyTheme(saved === 'dark');
     })();
 
     // ── Sidebar Toggle ──
@@ -317,8 +333,6 @@
     }
 
     // ── Pengaturan Accordion ──
-    const PENG_KEY = 'bms_pengaturan_open';
-
     function togglePengaturan() {
         const sub     = document.getElementById('pengaturan-sub');
         const chevron = document.getElementById('pengaturan-chevron');
@@ -327,25 +341,36 @@
         if (isOpen) {
             sub.style.maxHeight = '0';
             chevron.style.transform = 'rotate(0deg)';
-            localStorage.setItem(PENG_KEY, '0');
         } else {
             sub.style.maxHeight = sub.scrollHeight + 'px';
             chevron.style.transform = 'rotate(180deg)';
-            localStorage.setItem(PENG_KEY, '1');
         }
     }
 
-    // Restore accordion state — dari localStorage ATAU jika sedang di halaman pengaturan
+    // Buka accordion otomatis hanya jika sedang di halaman pengaturan
     const isPengaturanPage = window.location.pathname.startsWith('/pengaturan');
-    if (localStorage.getItem(PENG_KEY) === '1' || isPengaturanPage) {
+    if (isPengaturanPage) {
         const sub     = document.getElementById('pengaturan-sub');
         const chevron = document.getElementById('pengaturan-chevron');
         if (sub) {
             sub.style.maxHeight = sub.scrollHeight + 'px';
             chevron.style.transform = 'rotate(180deg)';
-            if (isPengaturanPage) localStorage.setItem(PENG_KEY, '1');
         }
     }
+</script>
+<script>
+    // Global: dipanggil dari halaman log-peringatan saat alert ditandai dibaca
+    window.decrementAlertBadge = function() {
+        const badge = document.getElementById('alert-badge');
+        if (!badge) return;
+        let count = parseInt(badge.textContent.trim()) || 0;
+        count = Math.max(0, count - 1);
+        if (count === 0) {
+            badge.classList.add('hidden');
+        } else {
+            badge.textContent = count > 99 ? '99+' : count;
+        }
+    };
 </script>
 @stack('modals')
 @stack('scripts')

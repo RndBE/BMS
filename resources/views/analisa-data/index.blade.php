@@ -193,17 +193,32 @@
                         @foreach($alerts as $alert)
                             @php
                                 $iconMap = [
-                                    'sensor_offline' => '📡',
-                                    'high_temp'      => '🌡️',
-                                    'high_humidity'  => '💧',
-                                    'ac_off'         => '❄️',
-                                    'high_power'     => '⚡',
+                                    // Suhu
+                                    'high_temp'      => asset('icons/suhu-tinggi.svg'),
+                                    'low_temp'       => asset('icons/suhu.svg'),
+                                    // Kelembaban
+                                    'high_humidity'  => asset('icons/kelembapan.svg'),
+                                    'low_humidity'   => asset('icons/kelembapan.svg'),
+                                    // CO2
+                                    'co2_tinggi'     => asset('icons/co2.svg'),
+                                    'co2_rendah'     => asset('icons/co2.svg'),
+                                    // Daya / Energi
+                                    'high_power'     => asset('icons/daya-tinggi.svg'),
+                                    'low_power'      => asset('icons/daya.svg'),
+                                    // Tegangan
+                                    'high_voltage'   => asset('icons/tegangan.svg'),
+                                    'low_voltage'    => asset('icons/tegangan.svg'),
+                                    // Lainnya
+                                    'sensor_offline' => asset('icons/sensor-offline.svg'),
+                                    'ac_off'         => asset('icons/freeze.svg'),
+                                    'critical'       => asset('icons/poor.svg'),
+                                    'warning'        => asset('icons/warning.svg'),
                                 ];
-                                $icon = $iconMap[$alert->type] ?? '⚠️';
+                                $iconSrc = $iconMap[$alert->type] ?? asset('icons/warning.svg');
                             @endphp
                             <div class="flex items-start justify-between gap-2">
                                 <div class="flex items-center gap-1.5 min-w-0">
-                                    <span class="text-[14px] shrink-0">{{ $icon }}</span>
+                                    <img src="{{ $iconSrc }}" alt="{{ $alert->type }}" class="w-5 h-5 shrink-0">
                                     <span class="text-[12px] text-slate-700 dark:text-slate-300 truncate">{{ $alert->message ?? $alert->type }}</span>
                                 </div>
                                 <span class="text-[10px] text-slate-400 shrink-0 whitespace-nowrap">

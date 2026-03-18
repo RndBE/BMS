@@ -94,8 +94,22 @@ class CheckAlertRulesCommand extends Command
             return 0;
         }
 
-        // Buat pesan alert
-        $roomName = \App\Models\Room::find($roomId)?->name ?? "Room #{$roomId}";
+        // Pesan singkat untuk disimpan di DB (tampil di app)
+        $roomName     = \App\Models\Room::find($roomId)?->name ?? "Room #{$roomId}";
+        $shortMessage = $rule->name;
+
+        // Tentukan type berdasarkan parameter_key + condition
+        $typeMap = [
+            'suhu'       => ['>' => 'high_temp',     '<' => 'low_temp'],
+            'kelembaban' => ['>' => 'high_humidity',  '<' => 'low_humidity'],
+            'co2'        => ['>' => 'co2_tinggi',     '<' => 'co2_rendah'],
+            'daya'       => ['>' => 'high_power',     '<' => 'low_power'],
+            'tegangan'   => ['>' => 'high_voltage',   '<' => 'low_voltage'],
+        ];
+        $alertType = $typeMap[$rule->parameter_key][$rule->condition]
+                     ?? ($rule->severity === 'critical' ? 'critical' : 'warning');
+
+        // Pesan lengkap untuk notifikasi WhatsApp
         $pesan = "[BMS ALERT - {$rule->severity}] {$rule->name}\n" .
                  "Ruangan : {$roomName}\n" .
                  "Parameter : {$param->nama_parameter}\n" .
@@ -107,8 +121,8 @@ class CheckAlertRulesCommand extends Command
         Alert::create([
             'room_id'       => $roomId,
             'alert_rule_id' => $rule->id,
-            'type'          => $rule->severity === 'critical' ? 'critical' : 'warning',
-            'message'       => $pesan,
+            'type'          => $alertType,
+            'message'       => $shortMessage,
             'nilai'         => $nilai,
             'is_read'       => false,
         ]);

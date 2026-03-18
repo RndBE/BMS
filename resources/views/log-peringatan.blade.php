@@ -87,6 +87,18 @@ function logBadge(string $type): string {
         </form>
     </div>
 
+    {{-- Action bar: tampil hanya jika ada yang belum dibaca --}}
+    @if($alerts->getCollection()->contains(fn($a) => !$a->is_read))
+    <div id="action-bar-unread" class="flex justify-end px-5 py-2 border-b border-slate-100 dark:border-[#2d2d2d]">
+        <button type="button" onclick="markAllRead()"
+            id="btn-mark-all-read"
+            class="flex items-center gap-1.5 text-[12px] font-medium text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer bg-transparent border-none px-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 12 4 10"/><line x1="4" y1="20" x2="20" y2="20"/></svg>
+            Tandai Semua Dibaca
+        </button>
+    </div>
+    @endif
+
     {{-- ── Table ── --}}
     <div class="overflow-x-auto">
         <table class="w-full text-[13px]">
@@ -107,19 +119,21 @@ function logBadge(string $type): string {
                         $ruleKat   = $alert->alertRule?->kategori ?? '';
                         $katClass  = $kategoriColor[$ruleKat] ?? 'text-slate-500 bg-slate-100';
                     @endphp
-                    <tr class="hover:bg-slate-50/60 dark:hover:bg-[#2a2a2a] transition-colors {{ !$alert->is_read ? 'font-medium' : '' }}">
+                    <tr id="alert-row-{{ $alert->id }}" class="hover:bg-slate-50/60 dark:hover:bg-[#2a2a2a] transition-colors">
 
-                        <td class="px-5 py-3 text-slate-500 dark:text-slate-400 whitespace-nowrap text-[12.5px] ">
-                            {{ $alert->created_at->format('H:i') }}
+                        <td class="px-5 py-3 text-slate-500 dark:text-slate-400 whitespace-nowrap text-[12.5px]">
+                            <div class="flex items-center gap-2">
+                                @if(!$alert->is_read)
+                                <span id="dot-{{ $alert->id }}" class="w-2 h-2 rounded-full bg-red-500 shrink-0"></span>
+                                @else
+                                <span id="dot-{{ $alert->id }}" class="w-2 h-2 shrink-0"></span>
+                                @endif
+                                {{ $alert->created_at->format('H:i') }}
+                            </div>
                         </td>
 
                         <td class="px-5 py-3 text-slate-800 dark:text-slate-200">
-                            <span class="flex items-center gap-2">
-                                <!-- @if(!$alert->is_read)
-                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"></span>
-                                @endif -->
-                                {{ $ruleName }}
-                            </span>
+                            {{ $ruleName }}
                         </td>
 
                         <td class="px-5 py-3">
@@ -286,6 +300,7 @@ const LOG_ALERTS = {
         condition: @json($alert->alertRule?->condition ?? ''),
         waktu:     @json($alert->created_at->format('H:i, d/m/Y')),
         durasi:    @json($alert->created_at->diffForHumans(null, true)),
+        is_read:   {{ $alert->is_read ? 'true' : 'false' }},
     },
 @endforeach
 };
@@ -300,6 +315,27 @@ const KAT_COLORS = {
 function openLogDetail(id) {
     const a = LOG_ALERTS[id];
     if (!a) return;
+
+    // Mark as read (dot hilang)
+    if (!a.is_read) {
+        a.is_read = true;
+        const dot = document.getElementById('dot-' + id);
+        if (dot) {
+            dot.className = 'w-2 h-2 shrink-0'; // hapus warna merah
+        }
+        // AJAX mark read
+        fetch(`/log-peringatan/${id}/read`, {
+            method: 'PATCH',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                'Accept': 'application/json'
+            }
+        }).then(r => {
+            if (r.ok && typeof window.decrementAlertBadge === 'function') {
+                window.decrementAlertBadge();
+            }
+        }).catch(() => {});
+    }
 
     // Badge
     document.getElementById('drawerBadge').innerHTML = a.type === 'critical'
@@ -333,6 +369,30 @@ function closeLogDetail() {
 
 // ESC key closes drawer
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLogDetail(); });
+
+function markAllRead() {
+    fetch('/log-peringatan/read-all', {
+        method: 'PATCH',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+            'Accept': 'application/json'
+        }
+    }).then(r => {
+        if (!r.ok) return;
+        // Semua dot hilang
+        document.querySelectorAll('[id^="dot-"]').forEach(dot => {
+            dot.className = 'w-2 h-2 shrink-0';
+        });
+        // Update LOG_ALERTS is_read
+        Object.values(LOG_ALERTS).forEach(a => { a.is_read = true; });
+        // Badge topbar → 0
+        const badge = document.getElementById('alert-badge');
+        if (badge) badge.classList.add('hidden');
+        // Sembunyikan tombol
+        const btn = document.getElementById('btn-mark-all-read');
+        if (btn) btn.closest('div').classList.add('hidden');
+    }).catch(() => {});
+}
 </script>
 @endpush
 

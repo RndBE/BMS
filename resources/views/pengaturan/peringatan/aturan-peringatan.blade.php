@@ -20,7 +20,7 @@
 </div>
 
 {{-- Rules Table --}}
-<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-white">
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden dark:border-[#1D1D1D] dark:bg-[#2a2a2a] dark:text-white">
     @if($rules->isEmpty())
         <div class="py-16 flex flex-col items-center gap-3 text-slate-400">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2" class="text-slate-300"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
@@ -29,7 +29,7 @@
         </div>
     @else
         <table class="w-full text-[13px]" id="tbl-rules">
-            <thead class="bg-red-50 border-b border-red-100 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] ">
+            <thead class="bg-red-50 border-b border-red-100 dark:border-[#1D1D1D] dark:bg-[#1D1D1D] ">
                 <tr>
                     <th class="px-5 py-3 text-left font-semibold text-slate-800 dark:text-slate-200">Nama Peringatan</th>
                     <th class="px-5 py-3 text-left font-semibold text-slate-800 dark:text-slate-200">Kategori</th>
@@ -39,7 +39,7 @@
                     <th class="px-5 py-3 text-right font-semibold text-slate-800 dark:text-slate-200">Aksi</th>
                 </tr>
             </thead>
-            <tbody id="rules-tbody">
+            <tbody id="rules-tbody" class="divide-y divide-slate-50 dark:divide-[#1D1D1D]">
                 @foreach($rules as $rule)
                 @php
                     $paramLabels = [
@@ -50,7 +50,7 @@
                     $units = ['suhu' => '°C', 'kelembaban' => '%', 'co2' => 'ppm', 'daya' => 'kW', 'tegangan' => 'V'];
                     $unit = $units[$rule->parameter_key] ?? '';
                 @endphp
-                <tr class="rule-row border-b border-slate-100 hover:bg-slate-50 dark:hover:bg-transparent transition-colors" data-id="{{ $rule->id }}"
+                <tr class="rule-row hover:bg-slate-50 dark:bg-[#232323] dark:hover:bg-transparent transition-colors" data-id="{{ $rule->id }}"
                     data-name="{{ $rule->name }}">
                     <td class="px-5 py-3">
                         <p class="font-semibold text-slate-800 dark:text-slate-200">{{ $rule->name }}</p>
@@ -81,7 +81,7 @@
                         </span>
                     </td>
                     <td class="px-5 py-3 text-right">
-                        <button class="btn-edit-rule p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
+                        <button class="btn-edit-rule text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
                                 data-id="{{ $rule->id }}"
                                 data-name="{{ $rule->name }}"
                                 data-kategori="{{ $rule->kategori }}"
@@ -118,12 +118,12 @@
             {{-- Row 1: Nama + Kategori --}}
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-400 mb-1.5">Nama Peringatan</label>
+                    <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-200 mb-1.5">Nama Peringatan</label>
                     <input id="rule-name" type="text" placeholder="e.g. Suhu Tinggi"
                         class="w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors">
                 </div>
                 <div>
-                    <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-400 mb-1.5">Kategori</label>
+                    <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-200 mb-1.5">Kategori</label>
                     <select id="rule-kategori" class="w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors bg-white">
                         <option value="">-- Pilih Kategori --</option>
                         <option value="Kenyamanan">Kenyamanan</option>
@@ -136,7 +136,7 @@
 
             {{-- Ruangan --}}
             <div>
-                <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-400 mb-2">Ruangan</label>
+                <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-200 mb-2">Ruangan</label>
                 <div class="grid grid-cols-2 gap-2 max-h-36 overflow-y-auto pr-1">
                     @foreach($rooms as $room)
                     <label class="flex items-center gap-2 px-3 py-2 border border-slate-200 dark:border-[#3d3d3d] dark:hover:bg-[#2a2a2a] rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
@@ -146,14 +146,14 @@
                     </label>
                     @endforeach
                     @if($rooms->isEmpty())
-                        <p class="text-[12px] text-slate-400 col-span-2">Tidak ada ruangan tersedia.</p>
+                        <p class="text-[12px] text-slate-200 col-span-2">Tidak ada ruangan tersedia.</p>
                     @endif
                 </div>
             </div>
 
             {{-- Status Keaktifan --}}
             <div class="flex items-center justify-between py-1">
-                <label class="text-[12.5px] font-medium text-slate-600 dark:text-slate-400">Status Keaktifan</label>
+                <label class="text-[12.5px] font-medium text-slate-600 dark:text-slate-200">Status Keaktifan</label>
                 <label class="relative inline-flex items-center cursor-pointer">
                     <input id="rule-active" type="checkbox" class="sr-only peer" checked>
                     <div class="w-10 h-5 bg-slate-200 rounded-full peer peer-checked:bg-green-500 transition-colors"></div>
@@ -164,15 +164,15 @@
             {{-- Durasi Tunda + Status --}}
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-400 mb-1.5">Durasi Tunda</label>
+                    <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-200 mb-1.5">Durasi Tunda</label>
                     <div class="relative">
                         <input id="rule-durasi" type="number" min="0" placeholder="e.g. 15"
                                class="w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3.5 py-2.5 pr-14 text-[13px] focus:outline-none focus:border-red-400 transition-colors">
-                        <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-[12px] text-slate-400 select-none">menit</span>
+                        <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-[12px] text-slate-200 select-none">menit</span>
                     </div>
                 </div>
                 <div>
-                    <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-400 mb-1.5">Status</label>
+                    <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-200 mb-1.5">Status</label>
                     <select id="rule-severity" class="w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors bg-white">
                         <option value="warning">Warning</option>
                         <option value="critical">Critical</option>
@@ -184,7 +184,7 @@
             <div>
                 <label class="block text-[12px] font-medium text-slate-600 mb-1.5">Parameter, Operator & Nilai</label>
                 <div class="flex items-center gap-2">
-                    <select id="rule-param" class="flex-1 border border-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors bg-white">
+                    <select id="rule-param" class="flex-1 border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors bg-white">
                         <option value="suhu">Suhu</option>
                         <option value="kelembaban">Kelembaban</option>
                         <option value="co2">CO₂</option>

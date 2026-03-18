@@ -15,8 +15,8 @@
                     class="pl-8 pr-3 py-[7px] border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] rounded-lg text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 w-52">
             </div>
         </form>
-        <button id="btn-add-user"
-            class="flex items-center gap-1.5 bg-red-700 hover:bg-red-800 text-white text-[12.5px] font-semibold px-4 py-[8px] rounded-lg transition-colors cursor-pointer">
+        <button type="button" id="btn-add-user"
+            class="flex items-center gap-1.5 bg-red-700 hover:bg-red-800 text-white text-[12.5px] font-semibold px-4 py-[7px] rounded-lg transition-colors cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Tambah User
         </button>
@@ -24,9 +24,9 @@
 </div>
 
 {{-- Table --}}
-<div class="rounded-xl border border-slate-200 overflow-hidden">
+<div class="rounded-xl border border-slate-200 overflow-hidden dark:border-[#1D1D1D]">
     <table class="w-full text-[13px]">
-        <thead class="bg-red-100 border-b border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a]">
+        <thead class="bg-red-100 border-b border-slate-200 dark:border-[#1D1D1D] dark:bg-[#1D1D1D]">
             <tr>
                 <th class="px-5 py-3 text-left font-semibold text-slate-800 w-8 dark:text-slate-200">No</th>
                 <th class="px-5 py-3 text-left font-semibold text-slate-800 dark:text-slate-200">Nama</th>
@@ -35,9 +35,9 @@
                 <th class="px-5 py-3 text-right font-semibold text-slate-800 dark:text-slate-200">Aksi</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y divide-slate-50 dark:divide-[#1D1D1D]">
             @forelse($users as $user)
-            <tr class="border-b border-slate-100 hover:bg-slate-50/60 dark:hover:bg-transparent transition-colors">
+            <tr class="hover:bg-slate-50/60 dark:hover:bg-transparent transition-colors">
                 <td class="px-5 py-3 text-slate-400 dark:text-slate-200">{{ $users->firstItem() + $loop->index }}</td>
                 <td class="px-5 py-3">
                     <div class="flex items-center gap-2.5">
@@ -61,7 +61,7 @@
                 </td>
                 <td class="px-5 py-3 text-right">
                     <div class="flex items-center justify-end gap-1.5">
-                        <button class="btn-edit-user p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
+                        <button class="btn-edit-user text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
                                 data-id="{{ $user->id }}"
                                 data-name="{{ $user->name }}"
                                 data-email="{{ $user->email }}"
@@ -69,8 +69,8 @@
                             <img src="{{ asset('icons/edit.svg') }}" alt="Edit" class="w-7 h-7">
                         </button>
                         @if($user->id !== auth()->id())
-                        <button onclick="deleteUser({{ $user->id }})"
-                                class="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors">
+                        <button onclick="deleteUser({{ $user->id }}, '{{ addslashes($user->name) }}')"
+                                class="text-slate-400 hover:text-red-600 transition-colors cursor-pointer">
                             <img src="{{ asset('icons/hapus.svg') }}" alt="Hapus" class="w-7 h-7">
                         </button>
                         @endif
@@ -90,9 +90,44 @@
 </div>
 
 {{-- Pagination --}}
-@if($users->hasPages())
-<div class="mt-4">{{ $users->links() }}</div>
-@endif
+<div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-50 dark:border-[#1D1D1D]">
+    <span class="text-[12px] text-slate-400">
+        Menampilkan {{ $users->firstItem() ?? 0 }} – {{ $users->lastItem() ?? 0 }} dari {{ $users->total() }} data
+    </span>
+    <div class="flex items-center gap-1">
+        @if($users->onFirstPage())
+            <span class="w-7 h-7 flex items-center justify-center rounded text-slate-300 cursor-not-allowed">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            </span>
+        @else
+            <a href="{{ $users->previousPageUrl() }}&tab=user&search={{ $search }}"
+                class="w-7 h-7 flex items-center justify-center rounded text-slate-500 hover:bg-slate-100 no-underline transition-colors">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            </a>
+        @endif
+
+        @foreach($users->getUrlRange(1, $users->lastPage()) as $page => $url)
+            <a href="{{ $url }}&tab=user&search={{ $search }}"
+                class="w-7 h-7 flex items-center justify-center rounded text-[12px] font-medium no-underline transition-colors
+                    {{ $page == $users->currentPage()
+                        ? 'bg-red-700 text-white dark:border-[#FDEBEB] dark:bg-[#FDEBEB] dark:text-black'
+                        : 'text-slate-500 hover:bg-slate-100' }}">
+                {{ $page }}
+            </a>
+        @endforeach
+
+        @if($users->hasMorePages())
+            <a href="{{ $users->nextPageUrl() }}&tab=user&search={{ $search }}"
+                class="w-7 h-7 flex items-center justify-center rounded text-slate-500 hover:bg-slate-100 no-underline transition-colors">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+        @else
+            <span class="w-7 h-7 flex items-center justify-center rounded text-slate-300 cursor-not-allowed">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+            </span>
+        @endif
+    </div>
+</div>
 
 {{-- ═══════════════ MODAL TAMBAH/EDIT USER ═══════════════ --}}
 <div id="modal-user" class="hidden fixed inset-0 bg-black/40 z-[200] flex items-center justify-center p-4">
@@ -158,6 +193,36 @@
 
 {{-- Toast --}}
 <div id="toast-user" class="hidden fixed bottom-6 right-6 z-50 text-white text-[13px] font-medium px-5 py-3 rounded-xl shadow-lg"></div>
+
+{{-- Modal Konfirmasi Hapus User --}}
+<div id="modal-delete-user" class="hidden fixed inset-0 bg-black/50 z-[300] flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#232323] rounded-2xl shadow-2xl w-full max-w-sm text-center overflow-hidden">
+        <div class="px-8 pt-8 pb-6">
+            {{-- Icon tanpa background --}}
+            <div class="flex justify-center mb-4">
+                <img src="{{ asset('icons/delete.svg') }}" alt="Hapus" class="w-12 h-12">
+            </div>
+            {{-- Title --}}
+            <h3 class="text-[16px] font-bold text-slate-800 dark:text-white mb-2">Hapus User</h3>
+            {{-- Message --}}
+            <p class="text-[13px] text-slate-500 dark:text-slate-400">
+                Anda yakin ingin menghapus user <strong id="delete-user-name" class="text-slate-700 dark:text-slate-200"></strong>?
+                <br>Tindakan ini tidak dapat dibatalkan.
+            </p>
+        </div>
+        {{-- Footer --}}
+        <div class="flex justify-center gap-3 px-8 pb-7">
+            <button onclick="closeDeleteUserModal()"
+                class="px-7 py-2.5 rounded-lg border border-slate-300 dark:border-[#FFFFFF] dark:text-[#FFFFFF] text-[13px] font-medium text-slate-600 hover:bg-slate-50 dark:hover:bg-[#2a2a2a] transition-colors cursor-pointer bg-white dark:bg-transparent">
+                Batal
+            </button>
+            <button onclick="confirmDeleteUser()"
+                class="px-7 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[13px] font-semibold transition-colors cursor-pointer">
+                Hapus
+            </button>
+        </div>
+    </div>
+</div>
 
 @push('scripts')
 <script>
@@ -230,16 +295,34 @@
         setTimeout(() => location.reload(), 700);
     });
 
-    window.deleteUser = async (id) => {
-        if (!confirm('Hapus user ini?')) return;
-        const res  = await fetch(`/pengaturan/pengguna/users/${id}`, {
+    let   deletingId = null;
+
+    window.deleteUser = (id, name) => {
+        deletingId = id;
+        document.getElementById('delete-user-name').textContent = name;
+        document.getElementById('modal-delete-user').classList.remove('hidden');
+    };
+
+    window.closeDeleteUserModal = () => {
+        deletingId = null;
+        document.getElementById('modal-delete-user').classList.add('hidden');
+    };
+
+    window.confirmDeleteUser = async () => {
+        if (!deletingId) return;
+        const res  = await fetch(`/pengaturan/pengguna/users/${deletingId}`, {
             method: 'DELETE',
             headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' },
         });
         const json = await res.json();
+        closeDeleteUserModal();
         if (json.success) { showToast('User dihapus.'); setTimeout(() => location.reload(), 600); }
         else showToast(json.message || 'Gagal menghapus.', false);
     };
+
+    document.getElementById('modal-delete-user').addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteUserModal();
+    });
 
     modal.addEventListener('click', (e) => { if (e.target === modal) closeUserModal(); });
 })();

@@ -16,7 +16,7 @@
             </div>
         </form>
         {{-- Tambah Sensor --}}
-        <button onclick="openSensorModal()" class="flex items-center gap-1.5 bg-red-700 hover:bg-red-800 text-white text-[12.5px] font-semibold px-4 py-[8px] rounded-lg transition-colors cursor-pointer">
+        <button type="button" onclick="openSensorModal()" class="flex items-center gap-1.5 bg-red-700 hover:bg-red-800 text-white text-[12.5px] font-semibold px-4 py-[7px] rounded-lg transition-colors cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Tambah Sensor
         </button>
@@ -27,7 +27,7 @@
 <div class="overflow-x-auto">
     <table class="w-full text-[13px]">
         <thead>
-            <tr class="bg-red-100 text-slate-800 text-left dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-white">
+            <tr class="bg-red-100 text-slate-800 text-left dark:bg-[#1D1D1D] dark:text-white">
                 <th class="px-4 py-2.5 font-semibold rounded-l-lg text-center">Gambar Sensor</th>
                 <th class="px-4 py-2.5 font-semibold">Nama Sensor</th>
                 <th class="px-4 py-2.5 font-semibold">Tipe Sensor</th>
@@ -37,7 +37,7 @@
                 <th class="px-4 py-2.5 font-semibold text-center rounded-r-lg">Aksi</th>
             </tr>
         </thead>
-        <tbody class="divide-y divide-slate-50">
+        <tbody class="divide-y divide-slate-50 dark:divide-[#1D1D1D]">
             @forelse($sensors as $sensor)
                 @php
                     $grupNama = $sensor->sensorGroup?->nama_sensor ?? '-';
@@ -64,7 +64,6 @@
                     ];
                 @endphp
                 <tr class="hover:bg-slate-50/60 dark:hover:bg-transparent transition-colors">
-
                     {{-- Gambar Sensor --}}
                     <td class="px-4 py-3 text-center">
                         <div class="w-16 h-16 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden mx-auto">
@@ -178,7 +177,7 @@
 
 {{-- Pagination --}}
 @if($sensors instanceof \Illuminate\Pagination\LengthAwarePaginator)
-<div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-50">
+<div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-50 dark:border-[#1D1D1D]">
     <span class="text-[12px] text-slate-400">
         Menampilkan {{ $sensors->firstItem() ?? 0 }} – {{ $sensors->lastItem() ?? 0 }} dari {{ $sensors->total() }} data
     </span>
@@ -223,17 +222,17 @@
 
 {{-- ── Detail Modal ─────────────────────────────────────────────────────── --}}
 <div id="sensorDetailModal" class="hidden fixed inset-0 bg-black/40 z-[1001] items-center justify-center">
-    <div class="bg-white rounded-2xl shadow-2xl w-[520px] max-w-[95vw] mx-auto overflow-hidden relative">
+    <div class="bg-white rounded-2xl shadow-2xl w-[520px] max-w-[95vw] mx-auto overflow-hidden relative dark:border-[#3d3d3d] dark:bg-[#2a2a2a]">
 
         {{-- Close --}}
         <button onclick="closeSensorDetail()"
-            class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer border-none bg-transparent z-10">
+            class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer border-none bg-transparent z-10 dark:hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-700">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
 
         {{-- Title --}}
         <div class="px-7 pt-6 pb-1">
-            <h3 class="text-[15px] font-bold text-slate-800">Detail Sensor</h3>
+            <h3 class="text-[15px] font-bold text-slate-800 dark:text-white">Detail Sensor</h3>
         </div>
 
         {{-- Body --}}
@@ -251,12 +250,12 @@
             </div>
 
             {{-- Info --}}
-            <div class="flex-1 min-w-0 flex flex-col gap-4 justify-center">
+            <div class="flex-1 min-w-0 flex flex-col gap-4 justify-center ">
 
                 {{-- Nama --}}
                 <div>
                     <p class="text-[9.5px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Nama Sensor</p>
-                    <p id="sdName" class="text-[15px] font-bold text-slate-800 leading-tight">—</p>
+                    <p id="sdName" class="text-[15px] font-bold text-slate-800 leading-tight ">—</p>
                     <p id="sdCode" class="text-[12px] text-slate-400 mt-0.5">—</p>
                 </div>
 
@@ -285,11 +284,11 @@
 </div>
 
 <div id="sensorModal" class="hidden fixed inset-0 bg-black/40 z-[1000] items-center justify-center overflow-y-auto">
-    <div class="bg-white rounded-xl shadow-2xl w-[560px] max-w-[95vw] my-6 mx-auto overflow-hidden">
+    <div class="bg-white rounded-xl shadow-2xl w-[560px] max-w-[95vw] my-6 mx-auto overflow-hidden dark:border-[#232323] dark:bg-[#2a2a2a]">
 
         {{-- Header --}}
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-            <h3 class="text-[15px] font-bold text-slate-800" id="sensorModalTitle">Tambah Sensor</h3>
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-[#232323]">
+            <h3 class="text-[15px] font-bold text-slate-800 dark:text-white" id="sensorModalTitle">Tambah Sensor</h3>
             <button onclick="closeSensorModal()" class="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer bg-transparent border-none p-1">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
@@ -300,11 +299,11 @@
             <input type="hidden" id="sensorModalId">
 
             <div>
-                <label class="block text-[11.5px] font-semibold text-slate-500 mb-2">Unggah Gambar Sensor</label>
+                <label class="block text-[11.5px] font-semibold text-slate-500 mb-2 dark:text-slate-200">Unggah Gambar Sensor</label>
 
                 {{-- Drop Zone --}}
                 <div id="sensorDropZone"
-                     class="border-2 border-dashed border-slate-200 rounded-xl p-5 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-red-300 hover:bg-red-50/30 transition-colors"
+                     class="border-2 border-dashed border-slate-200 rounded-xl p-5 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-red-300 hover:bg-red-50/30 transition-colors dark:border-[#3d3d3d] dark:bg-[#2a2a2a]"
                      onclick="document.getElementById('sensorGambarInput').click()">
                     <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" class="text-red-400">
@@ -313,8 +312,8 @@
                             <line x1="12" y1="3" x2="12" y2="15"/>
                         </svg>
                     </div>
-                    <p class="text-[12.5px] font-medium text-slate-600">Tarik file ke sini atau klik untuk upload</p>
-                    <p class="text-[11px] text-slate-400">JPG, JPEG, atau PNG · Maks. 2 MB</p>
+                    <p class="text-[12.5px] font-medium text-slate-600 dark:text-slate-200">Tarik file ke sini atau klik untuk upload</p>
+                    <p class="text-[11px] text-slate-400 dark:text-slate-200">JPG, JPEG, atau PNG · Maks. 2 MB</p>
                     <input type="file" id="sensorGambarInput" accept="image/jpg,image/jpeg,image/png" class="hidden">
                 </div>
 
@@ -327,7 +326,7 @@
                         </div>
                         {{-- Info --}}
                         <div class="flex-1 min-w-0">
-                            <p id="sensorFileName" class="text-[12.5px] font-semibold text-slate-800 truncate">-</p>
+                            <p id="sensorFileName" class="text-[12.5px] font-semibold text-slate-800 truncate dark:text-slate-200">-</p>
                             <div class="flex items-center gap-1.5 mt-0.5">
                                 <p id="sensorFileSize" class="text-[11px] text-slate-400">0 KB</p>
                                 <span class="text-slate-300 text-[10px]">•</span>
@@ -356,9 +355,9 @@
             {{-- Nama Sensor (Sensor Group) & Tipe Sensor --}}
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-[11.5px] font-semibold text-slate-500 mb-1.5">Nama Sensor <span class="text-red-500">*</span></label>
+                    <label class="block text-[11.5px] font-semibold text-slate-500 mb-1.5 dark:text-slate-200">Nama Sensor <span class="text-red-500">*</span></label>
                     <select id="sensorModalGroupId"
-                        class="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-700 outline-none focus:border-red-400 box-border transition-colors bg-white">
+                        class="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-700 outline-none focus:border-red-400 box-border transition-colors bg-white dark:border-[#3C3D3F] dark:bg-[#3C3D3F] dark:text-slate-200">
                         <option value="">-- Pilih Sensor Group --</option>
                         @foreach($sensorGroups as $sg)
                             <option value="{{ $sg->id }}">{{ $sg->nama_sensor }} ({{ $sg->kode_sensor }})</option>
@@ -366,17 +365,17 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-[11.5px] font-semibold text-slate-500 mb-1.5">Tipe Sensor</label>
+                    <label class="block text-[11.5px] font-semibold text-slate-500 mb-1.5 dark:text-slate-200">Tipe Sensor</label>
                     <input type="text" id="sensorModalTipe" placeholder="Contoh: Temperature Sensor"
-                        class="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-red-400 box-border transition-colors">
+                        class="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-red-400 box-border transition-colors dark:border-[#3C3D3F] dark:bg-[#3C3D3F] dark:text-slate-200">
                 </div>
             </div>
 
             {{-- Ruangan --}}
             <div>
-                <label class="block text-[11.5px] font-semibold text-slate-500 mb-1.5">Ruangan <span class="text-red-500">*</span></label>
+                <label class="block text-[11.5px] font-semibold text-slate-500 mb-1.5 dark:text-slate-200">Ruangan <span class="text-red-500">*</span></label>
                 <select id="sensorModalRoomId"
-                    class="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-700 outline-none focus:border-red-400 box-border transition-colors bg-white">
+                    class="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-700 outline-none focus:border-red-400 box-border transition-colors bg-white dark:border-[#3C3D3F] dark:bg-[#3C3D3F] dark:text-slate-200">
                     <option value="">-- Pilih Ruangan --</option>
                     @foreach($allRooms as $r)
                         <option value="{{ $r->id }}">{{ $r->name }} ({{ $r->code }})</option>
@@ -387,8 +386,8 @@
             {{-- Status Aktif --}}
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-[11.5px] font-semibold text-slate-700">Status Sensor</p>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Aktifkan agar sensor terdeteksi di sistem</p>
+                    <p class="text-[11.5px] font-semibold text-slate-700 dark:text-slate-200">Status Sensor</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5 dark:text-slate-200">Aktifkan agar sensor terdeteksi di sistem</p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" id="sensorModalActive" class="sr-only peer" checked>
@@ -402,35 +401,43 @@
             </div>
 
             {{-- Daftar Parameter --}}
-            <div>
-                <p class="text-[12px] font-bold text-slate-700 mb-2">Daftar Parameter</p>
-                <div class="rounded-lg border border-slate-100 overflow-hidden">
+            <div class="overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:bg-[#1D1D1D] dark:border-[#1D1D1D]">
+                <div class="flex items-center gap-2 border-b border-slate-200 px-4 py-3 dark:bg-[#1D1D1D] dark:border-[#1D1D1D]">
+                    <p class="text-[12px] font-bold text-slate-700 dark:text-slate-200">Daftar Parameter</p>
+                </div>
+                <div class="border border-slate-100 overflow-hidden dark:bg-[#232323] dark:border-[#232323]">
                     <table class="w-full text-[12px]">
                         <thead>
-                            <tr class="bg-slate-50 text-slate-500 text-left">
+                            <tr class="bg-white text-slate-700 text-left dark:bg-[#232323] dark:border-[#232323] dark:text-slate-200">
                                 <th class="px-3 py-2 font-semibold">Nama Parameter</th>
                                 <th class="px-3 py-2 font-semibold">Kolom Sensor</th>
                                 <th class="px-3 py-2 font-semibold">Satuan</th>
                                 <th class="px-3 py-2 font-semibold text-center">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="sensorParamTableBody" class="divide-y divide-slate-50">
+                        <tbody id="sensorParamTableBody" class="divide-y divide-slate-50 dark:divide-[#1D1D1D]">
                             {{-- Baris parameter diisi via JS --}}
                         </tbody>
+                        <tfoot>
+                            <tr class="bg-white border-t border-slate-100 dark:bg-[#232323] dark:border-[#232323] dark:text-slate-200">
+                                <td colspan="4" class="px-3 py-2">
+                                    <button type="button" onclick="addParamRow()"
+                                        class="text-[12px] font-semibold text-red-600 hover:text-red-800 flex items-center gap-1 cursor-pointer bg-transparent border-none p-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                        Tambah Parameter
+                                    </button>
+                                </td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
-                <button type="button" onclick="addParamRow()"
-                    class="mt-2 text-[12px] font-semibold text-red-600 hover:text-red-800 flex items-center gap-1 cursor-pointer bg-transparent border-none p-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Tambah Parameter
-                </button>
             </div>
         </div>
 
         {{-- Footer --}}
-        <div class="flex justify-end gap-2 px-6 py-4 border-t border-slate-100 bg-slate-50/60">
+        <div class="flex justify-end gap-2 px-6 py-4 border-t border-slate-100 bg-slate-50/60 dark:border-[#232323] dark:bg-[#2a2a2a]">
             <button onclick="closeSensorModal()"
-                class="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg text-[13px] hover:bg-slate-100 transition-colors cursor-pointer bg-white">
+                class="px-4 py-2 border border-slate-200 text-slate-600 dark:border-[#FFFFFF] dark:text-[#FFFFFF] dark:bg-transparent rounded-lg text-[13px] hover:bg-slate-100 transition-colors cursor-pointer bg-white">
                 Batal
             </button>
             <button onclick="saveSensor()"
@@ -443,6 +450,32 @@
 
 {{-- Toast --}}
 <div id="sensor-toast" class="fixed bottom-6 right-6 bg-slate-800 text-white px-[18px] py-2.5 rounded-xl text-[13px] z-[9999] hidden shadow-xl"></div>
+
+{{-- Modal Konfirmasi Hapus Sensor --}}
+<div id="modal-delete-sensor" class="hidden fixed inset-0 bg-black/50 z-[1100] flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#232323] rounded-2xl shadow-2xl w-full max-w-sm text-center overflow-hidden">
+        <div class="px-8 pt-8 pb-6">
+            <div class="flex justify-center mb-4">
+                <img src="{{ asset('icons/delete.svg') }}" alt="Hapus" class="w-12 h-12">
+            </div>
+            <h3 class="text-[16px] font-bold text-slate-800 dark:text-white mb-2">Hapus Sensor</h3>
+            <p class="text-[13px] text-slate-500 dark:text-slate-400">
+                Anda yakin ingin menghapus sensor <strong id="delete-sensor-name" class="text-slate-700 dark:text-slate-200"></strong>?
+                <br>Tindakan ini tidak dapat dibatalkan.
+            </p>
+        </div>
+        <div class="flex justify-center gap-3 px-8 pb-7">
+            <button onclick="closeDeleteSensorModal()"
+                class="px-7 py-2.5 rounded-lg border border-slate-300 dark:border-[#FFFFFF] dark:text-[#FFFFFF] text-[13px] font-medium text-slate-600 hover:bg-slate-50 dark:hover:bg-[#2a2a2a] transition-colors cursor-pointer bg-white dark:bg-transparent">
+                Batal
+            </button>
+            <button onclick="confirmDeleteSensor()"
+                class="px-7 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[13px] font-semibold transition-colors cursor-pointer">
+                Hapus
+            </button>
+        </div>
+    </div>
+</div>
 
 <script>
 const SENSOR_ROUTES = {
@@ -546,7 +579,7 @@ function closeSensorModal() {
 function addParamRow(nama = '', kolom = '', satuan = '') {
     const tbody = document.getElementById('sensorParamTableBody');
     const tr = document.createElement('tr');
-    tr.className = 'bg-white';
+    tr.className = 'bg-white dark:bg-[#232323] dark:border-[#232323] dark:text-slate-200';
 
     // Build select options
     const colOptions = SENSOR_COLS.map(c =>
@@ -556,23 +589,23 @@ function addParamRow(nama = '', kolom = '', satuan = '') {
     tr.innerHTML = `
         <td class="px-3 py-1.5">
             <input type="text" placeholder="Nama Parameter" value="${nama}"
-                class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-[12px] outline-none focus:border-red-400 param-nama">
+                class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-[12px] outline-none focus:border-red-400 param-nama dark:bg-[#3C3D3F] dark:border-[#3C3D3F] dark:text-slate-200">
         </td>
         <td class="px-3 py-1.5">
             <div class="relative">
-                <select class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-[12px] outline-none focus:border-red-400 appearance-none bg-white cursor-pointer param-kolom">
+                <select class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-[12px] outline-none focus:border-red-400 appearance-none bg-white cursor-pointer param-kolom dark:bg-[#3C3D3F] dark:border-[#3C3D3F] dark:text-slate-200">
                     ${colOptions}
                 </select>
             </div>
         </td>
         <td class="px-3 py-1.5">
             <input type="text" placeholder="°C, %, ppm..." value="${satuan}"
-                class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-[12px] outline-none focus:border-red-400 param-satuan">
+                class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-[12px] outline-none focus:border-red-400 param-satuan dark:bg-[#3C3D3F] dark:border-[#3C3D3F] dark:text-slate-200">
         </td>
         <td class="px-3 py-1.5 text-center">
             <button onclick="this.closest('tr').remove()"
                 class="w-7 h-7 flex items-center justify-center rounded-lg bg-red-50 hover:bg-red-100 text-red-500 mx-auto cursor-pointer border-none transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                <img src="{{ asset('icons/trash.svg') }}" alt="Hapus" class="w-7 h-7">
             </button>
         </td>
     `;
@@ -636,21 +669,40 @@ function saveSensor() {
         });
 }
 
+let _deleteSensorId = null;
+
 function deleteSensor(id, nama) {
-    if (!confirm('Hapus sensor "' + nama + '"? Tindakan ini tidak dapat dibatalkan.')) return;
-    fetch(SENSOR_ROUTES.destroy.replace('__ID__', id), {
+    _deleteSensorId = id;
+    document.getElementById('delete-sensor-name').textContent = nama;
+    document.getElementById('modal-delete-sensor').classList.remove('hidden');
+}
+
+function closeDeleteSensorModal() {
+    _deleteSensorId = null;
+    document.getElementById('modal-delete-sensor').classList.add('hidden');
+}
+
+function confirmDeleteSensor() {
+    if (!_deleteSensorId) return;
+    fetch(SENSOR_ROUTES.destroy.replace('__ID__', _deleteSensorId), {
         method: 'DELETE',
         headers: { 'X-CSRF-TOKEN': SENSOR_CSRF, 'Accept': 'application/json' },
     })
     .then(r => r.json())
     .then(data => {
+        closeDeleteSensorModal();
         if (data.success) {
             showSensorToast('Sensor dihapus ✓');
             setTimeout(() => location.reload(), 900);
         }
     })
-    .catch(() => showSensorToast('Gagal menghapus sensor.'));
+    .catch(() => { closeDeleteSensorModal(); showSensorToast('Gagal menghapus sensor.'); });
 }
+
+document.getElementById('modal-delete-sensor').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteSensorModal();
+});
+
 
 // Helpers: format bytes
 function fmtBytes(bytes) {

@@ -41,6 +41,10 @@ Route::middleware(['auth', 'permission:lihat_energi'])->group(function () {
 // ── Log Peringatan ────────────────────────────────────────────────────────────
 Route::middleware(['auth', 'permission:lihat_log'])->group(function () {
     Route::get('/log-peringatan', [PeringatanController::class, 'logIndex'])->name('log-peringatan.index');
+    // Mark individual alert as read (saat buka detail)
+    Route::patch('/log-peringatan/{alert}/read', [PeringatanController::class, 'logMarkRead'])->name('log-peringatan.mark-read');
+    // Tandai semua dibaca
+    Route::patch('/log-peringatan/read-all', [PeringatanController::class, 'logMarkAllRead'])->name('log-peringatan.read-all');
 });
 
 // ── Kelola Pengaturan (Umum) ──────────────────────────────────────────────────
