@@ -1,4 +1,6 @@
+@php use App\Models\Alert; @endphp
 <!DOCTYPE html>
+
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -372,7 +374,130 @@
         }
     };
 </script>
+
+{{-- ═══ ALERT TOAST NOTIFICATION CONTAINER ═══ --}}
+<div id="alert-toast-container"
+     style="position:fixed; bottom:24px; right:24px; z-index:9999; display:flex; flex-direction:column; gap:10px; pointer-events:none; max-width:340px;">
+</div>
+
+<style>
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(100%); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeOutRight {
+    from { opacity: 1; transform: translateX(0); }
+    to   { opacity: 0; transform: translateX(110%); }
+}
+.alert-toast {
+    pointer-events: all;
+    animation: slideInRight .35s cubic-bezier(.16,1,.3,1) both;
+    cursor: pointer;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    border-left: 4px solid #ef4444;
+    padding: 12px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 280px;
+}
+.dark .alert-toast {
+    background: #1e1e1e;
+    box-shadow: 0 8px 32px rgba(0,0,0,.45);
+    color: #e2e8f0;
+}
+.alert-toast.warning  { border-left-color: #f59e0b; }
+.alert-toast.sensor   { border-left-color: #64748b; }
+.alert-toast.dismiss  { animation: fadeOutRight .3s ease forwards; }
+</style>
+
+<script>
+/* ═══ ALERT POLLING NOTIFICATION ═══ */
+(function() {
+    const LOG_URL    = '{{ route("log-peringatan.index") }}';
+    const UNREAD_URL = '/api/alerts/unread';
+    let _lastCount   = {{ Alert::where('is_read', false)->count() }};
+    let _shownIds    = new Set();
+
+    function makeToast(alert) {
+        const container = document.getElementById('alert-toast-container');
+        if (!container || _shownIds.has(alert.id)) return;
+        _shownIds.add(alert.id);
+
+        const typeClass = alert.type === 'sensor_offline' ? 'sensor'
+                        : (alert.type === 'critical')     ? ''
+                        :                                   'warning';
+
+        const icon = alert.type === 'sensor_offline'
+            ? '📡'
+            : (alert.type === 'critical' ? '🔴' : '⚠️');
+
+        const div = document.createElement('div');
+        div.className = 'alert-toast ' + typeClass;
+        div.innerHTML = `
+            <div style="flex-shrink:0; font-size:20px; line-height:1;">${icon}</div>
+            <div style="flex:1; min-width:0;">
+                <div style="font-size:12px; font-weight:700; color:#ef4444; margin-bottom:2px;">
+                    Peringatan Baru <span style="font-weight:400; color:#94a3b8; font-size:11px;">${alert.created_at}</span>
+                </div>
+                <div style="font-size:12.5px; font-weight:600; color:#1e293b;" class="dark:text-slate-100">${alert.room}</div>
+                <div style="font-size:11.5px; color:#64748b; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:220px;">${alert.message}</div>
+            </div>
+            <button onclick="event.stopPropagation(); dismissToast(this.closest('.alert-toast'));"
+                style="background:none; border:none; color:#94a3b8; cursor:pointer; padding:0; font-size:16px; line-height:1; flex-shrink:0;">✕</button>
+        `;
+        div.addEventListener('click', () => { window.location.href = LOG_URL; });
+        container.prepend(div);
+
+        // Auto dismiss setelah 7 detik
+        setTimeout(() => dismissToast(div), 7000);
+    }
+
+    window.dismissToast = function(el) {
+        if (!el) return;
+        el.classList.add('dismiss');
+        setTimeout(() => el?.remove(), 320);
+    };
+
+    async function pollAlerts() {
+        try {
+            const res  = await fetch(UNREAD_URL, { headers: { 'Accept': 'application/json' } });
+            if (!res.ok) return;
+            const data = await res.json();
+
+            // Update badge di sidebar
+            const badge = document.getElementById('alert-badge');
+            if (badge) {
+                if (data.count > 0) {
+                    badge.textContent = data.count > 99 ? '99+' : data.count;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+
+            // Tampilkan toast hanya jika ada alert baru (count naik)
+            if (data.count > _lastCount && data.alerts?.length) {
+                // Toast untuk alert yang belum ditampilkan
+                data.alerts.forEach(a => makeToast(a));
+            }
+            _lastCount = data.count;
+
+        } catch (e) { /* silent fail */ }
+    }
+
+    // Mulai polling setelah 5 detik (beri waktu page load)
+    setTimeout(() => {
+        pollAlerts();                               // poll pertama
+        setInterval(pollAlerts, 30_000);            // poll setiap 30 detik
+    }, 5000);
+})();
+</script>
+
 @stack('modals')
+
 @stack('scripts')
 </body>
 </html>

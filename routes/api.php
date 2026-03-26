@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\SensorDataController;
+use App\Http\Controllers\Api\AlertNotifController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,3 +21,8 @@ Route::get('/ping', fn() => response()->json(['status' => 'ok', 'service' => 'BM
 // POST /api/sensor-data
 // Body: { id_alat, jam, hari, sensor1:{nama,nilai,satuan}, ..., sensor16:{...} }
 Route::post('/sensor-data', [SensorDataController::class, 'store']);
+
+// ── Alert Notifications (butuh session/auth web) ────────────────────────────
+Route::middleware('web')->group(function () {
+    Route::get('/alerts/unread', [AlertNotifController::class, 'unread']);
+});
