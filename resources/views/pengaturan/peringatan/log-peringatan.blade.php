@@ -82,7 +82,11 @@
 
                     {{-- Tipe / Severity badge --}}
                     <td class="px-4 py-3">
-                        @if($alert->type === 'critical')
+                        @if($alert->type === 'sensor_offline')
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600">
+                                📡 Sensor
+                            </span>
+                        @elseif($alert->type === 'critical' || $alert->alertRule?->severity === 'critical')
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-red-100 text-red-700">
                                 🔴 Critical
                             </span>
@@ -128,8 +132,54 @@
 
                 {{-- Detail row (hidden) --}}
                 <tr id="alert-detail-{{ $alert->id }}" class="hidden bg-slate-50/80">
-                    <td colspan="6" class="px-6 py-3">
-                        <pre class="text-[12px] text-slate-600 whitespace-pre-wrap font-mono leading-relaxed">{{ $alert->message }}</pre>
+                    <td colspan="6" class="px-6 py-4">
+                        @if($alert->type === 'sensor_offline')
+                            <div class="grid grid-cols-2 gap-3 text-[12.5px]">
+                                <div>
+                                    <span class="text-slate-400 text-[11px] uppercase tracking-wide font-semibold">Nama Peringatan</span>
+                                    <p class="font-semibold text-slate-800 mt-0.5">Sensor Offline</p>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 text-[11px] uppercase tracking-wide font-semibold">Kategori</span>
+                                    <p class="font-semibold text-slate-800 mt-0.5">Sensor</p>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 text-[11px] uppercase tracking-wide font-semibold">Ruangan</span>
+                                    <p class="font-semibold text-slate-800 mt-0.5">{{ $alert->room?->name ?? '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 text-[11px] uppercase tracking-wide font-semibold">Waktu Terdeteksi</span>
+                                    <p class="font-semibold text-slate-800 mt-0.5">{{ $alert->created_at->format('d M Y, H:i:s') }}</p>
+                                </div>
+                                <div class="col-span-2">
+                                    <span class="text-slate-400 text-[11px] uppercase tracking-wide font-semibold">Keterangan</span>
+                                    <p class="text-slate-700 mt-0.5">{{ $alert->message }}</p>
+                                </div>
+                            </div>
+                        @else
+                            <div class="grid grid-cols-2 gap-3 text-[12.5px]">
+                                <div>
+                                    <span class="text-slate-400 text-[11px] uppercase tracking-wide font-semibold">Nama Peringatan</span>
+                                    <p class="font-semibold text-slate-800 mt-0.5">{{ $alert->alertRule?->name ?? ucfirst(str_replace('_', ' ', $alert->type)) }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 text-[11px] uppercase tracking-wide font-semibold">Kategori</span>
+                                    <p class="font-semibold text-slate-800 mt-0.5">{{ $alert->alertRule?->kategori ?? '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 text-[11px] uppercase tracking-wide font-semibold">Ruangan</span>
+                                    <p class="font-semibold text-slate-800 mt-0.5">{{ $alert->room?->name ?? '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 text-[11px] uppercase tracking-wide font-semibold">Nilai Terukur</span>
+                                    <p class="font-semibold text-slate-800 mt-0.5">{{ $alert->nilai !== null ? $alert->nilai : '-' }}</p>
+                                </div>
+                                <div class="col-span-2">
+                                    <span class="text-slate-400 text-[11px] uppercase tracking-wide font-semibold">Keterangan</span>
+                                    <p class="text-slate-700 mt-0.5">{{ $alert->message }}</p>
+                                </div>
+                            </div>
+                        @endif
                     </td>
                 </tr>
             @empty
@@ -137,7 +187,7 @@
                     <td colspan="6" class="px-4 py-14 text-center">
                         <div class="flex flex-col items-center text-slate-400">
                             <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" stroke="currentColor"
-                                 stroke-width="1.5" viewBox="0 0 24 24" class="mb-2 opacity-40">
+                                stroke-width="1.5" viewBox="0 0 24 24" class="mb-2 opacity-40">
                                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                                 <polyline points="22 4 12 14.01 9 11.01"/>
                             </svg>

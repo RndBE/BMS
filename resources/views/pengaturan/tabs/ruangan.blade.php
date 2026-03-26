@@ -159,7 +159,7 @@
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block text-[11.5px] font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Kode Ruangan <span class="text-red-500">*</span></label>
-                    <input type="text" id="roomModalCode" placeholder="RM-01"
+                    <input type="text" id="roomModalCode" placeholder="id_alat contoh: 30001"
                         class="w-full px-3 py-2 border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg text-[13px] outline-none focus:border-red-400 box-border uppercase transition-colors">
                 </div>
                 <div>

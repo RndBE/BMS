@@ -406,20 +406,24 @@
                     <p class="text-[12px] font-bold text-slate-700 dark:text-slate-200">Daftar Parameter</p>
                 </div>
                 <div class="border border-slate-100 overflow-hidden dark:bg-[#232323] dark:border-[#232323]">
-                    <table class="w-full text-[12px]">
+                    <table class="w-full text-[12px]" style="table-layout:fixed">
                         <thead>
-                            <tr class="bg-white text-slate-700 text-left dark:bg-[#232323] dark:border-[#232323] dark:text-slate-200">
+                            <tr class="bg-white text-slate-700 text-left dark:bg-[#232323] dark:border-[#232323] dark:text-slate-200"
+                                style="display:table;width:100%;table-layout:fixed">
                                 <th class="px-3 py-2 font-semibold">Nama Parameter</th>
                                 <th class="px-3 py-2 font-semibold">Kolom Sensor</th>
                                 <th class="px-3 py-2 font-semibold">Satuan</th>
-                                <th class="px-3 py-2 font-semibold text-center">Aksi</th>
+                                <th class="px-3 py-2 font-semibold text-center w-12">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="sensorParamTableBody" class="divide-y divide-slate-50 dark:divide-[#1D1D1D]">
+                        <tbody id="sensorParamTableBody"
+                               class="divide-y divide-slate-50 dark:divide-[#1D1D1D]"
+                               style="display:block;max-height:160px;overflow-y:auto">
                             {{-- Baris parameter diisi via JS --}}
                         </tbody>
                         <tfoot>
-                            <tr class="bg-white border-t border-slate-100 dark:bg-[#232323] dark:border-[#232323] dark:text-slate-200">
+                            <tr class="bg-white border-t border-slate-100 dark:bg-[#232323] dark:border-[#232323] dark:text-slate-200"
+                                style="display:table;width:100%;table-layout:fixed">
                                 <td colspan="4" class="px-3 py-2">
                                     <button type="button" onclick="addParamRow()"
                                         class="text-[12px] font-semibold text-red-600 hover:text-red-800 flex items-center gap-1 cursor-pointer bg-transparent border-none p-0">
@@ -580,6 +584,7 @@ function addParamRow(nama = '', kolom = '', satuan = '') {
     const tbody = document.getElementById('sensorParamTableBody');
     const tr = document.createElement('tr');
     tr.className = 'bg-white dark:bg-[#232323] dark:border-[#232323] dark:text-slate-200';
+    tr.style.cssText = 'display:table;width:100%;table-layout:fixed';
 
     // Build select options
     const colOptions = SENSOR_COLS.map(c =>

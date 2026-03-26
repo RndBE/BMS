@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Observers\SensorReadingObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -19,6 +20,11 @@ class SensorReading extends Model
     ];
 
     protected $casts = ['waktu' => 'datetime'];
+
+    protected static function booted(): void
+    {
+        static::observe(SensorReadingObserver::class);
+    }
 
     public function room(): BelongsTo
     {

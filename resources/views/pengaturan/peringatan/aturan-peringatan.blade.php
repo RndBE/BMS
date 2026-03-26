@@ -5,7 +5,7 @@
         {{-- Search --}}
         <div class="relative">
             <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400"
-                 fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
             </svg>
             <input type="text" id="search-rule" placeholder="Cari peringatan..."
@@ -74,11 +74,15 @@
                         {{ $rule->durasi_tunda ? $rule->durasi_tunda . ' menit' : '—' }}
                     </td>
                     <td class="px-5 py-3">
-                        <span class="inline-flex items-center gap-1 text-[12px] font-medium
-                            {{ $rule->severity === 'critical' ? 'text-red-600' : 'text-orange-500' }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
-                            {{ ucfirst($rule->severity) }}
-                        </span>
+                        @if($rule->severity === 'critical')
+                            <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-red-600 bg-red-50 rounded-full px-2.5 py-0.5">
+                                <img src="{{ asset('icons/poor.svg') }}" alt="Poor" class="w-4 h-4 shrink-0"> Poor
+                            </span>
+                        @else
+                            <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 bg-orange-50 rounded-full px-2.5 py-0.5">
+                                <img src="{{ asset('icons/warning.svg') }}" alt="Warning" class="w-4 h-4 shrink-0"> Warning
+                            </span>
+                        @endif
                     </td>
                     <td class="px-5 py-3 text-right">
                         <button class="btn-edit-rule text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
@@ -168,14 +172,14 @@
                     <div class="relative">
                         <input id="rule-durasi" type="number" min="0" placeholder="e.g. 15"
                                class="w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3.5 py-2.5 pr-14 text-[13px] focus:outline-none focus:border-red-400 transition-colors">
-                        <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-[12px] text-slate-200 select-none">menit</span>
+                        <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-[12px] text-slate-700 dark:text-slate-300 select-none">menit</span>
                     </div>
                 </div>
                 <div>
                     <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-200 mb-1.5">Status</label>
                     <select id="rule-severity" class="w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors bg-white">
                         <option value="warning">Warning</option>
-                        <option value="critical">Critical</option>
+                        <option value="critical">Poor</option>
                     </select>
                 </div>
             </div>
@@ -200,7 +204,7 @@
                     <div class="relative w-32">
                         <input id="rule-threshold" type="number" step="any" placeholder="28"
                                class="w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3.5 py-2.5 pr-10 text-[13px] focus:outline-none focus:border-red-400 transition-colors">
-                        <span id="rule-unit" class="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-slate-400 select-none">°C</span>
+                        <span id="rule-unit" class="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-slate-700 dark:text-slate-300 select-none">°C</span>
                     </div>
                 </div>
             </div>

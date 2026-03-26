@@ -23,7 +23,7 @@
         /* ── Base sidebar & layout transition ── */
         #sidebar       { transition: width .25s ease, transform .25s ease; width: 220px; }
         #topbar        { transition: left .25s ease; left: 220px; }
-        #main-content  { transition: margin-left .25s ease; margin-left: 220px; }
+        #main-content  { transition: margin-left .25s ease; margin-left: 220px; overflow-x: hidden; }
         #sidebar-labels { transition: opacity .15s ease, width .25s ease; }
         #sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 99; }
 

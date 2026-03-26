@@ -79,15 +79,13 @@
         $unit       = $parameterUnits[$parameter];
         $th         = $thresholds[$parameter] ?? $thresholds['temperature'];
 
-        $chartLabels = $chartData->pluck('label')->toJson();
-        $chartValues = $chartData->pluck('value')->map(fn($v) => round((float)$v, 2))->toJson();
-
         // Warna per parameter
         $colorMap = [
             'temperature' => ['line' => '#ef4444', 'fill' => 'rgba(239,68,68,0.12)'],
-            'humidity'    => ['line' => '#3b82f6', 'fill' => 'rgba(59,130,246,0.12)'],
-            'energy'      => ['line' => '#f59e0b', 'fill' => 'rgba(245,158,11,0.12)'],
-            'power'       => ['line' => '#8b5cf6', 'fill' => 'rgba(139,92,246,0.12)'],
+            'humidity'    => ['line' => '#ef4444', 'fill' => 'rgba(239,68,68,0.12)'],
+            'energy'      => ['line' => '#ef4444', 'fill' => 'rgba(239,68,68,0.12)'],
+            'power'       => ['line' => '#ef4444', 'fill' => 'rgba(239,68,68,0.12)'],
+            'co2'         => ['line' => '#ef4444', 'fill' => 'rgba(239,68,68,0.12)'],
         ];
         $color = $colorMap[$parameter] ?? $colorMap['temperature'];
     @endphp
@@ -95,7 +93,7 @@
     <div class="flex flex-col xl:flex-row gap-5">
 
         {{-- Chart --}}
-        <div class="flex-1 bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm p-5">
+        <div class="flex-1 min-w-0 bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm p-5">
             <div class="text-center mb-1">
                 <div class="text-[20px] font-semibold text-slate-800 dark:text-white">
                     Grafik {{ $paramLabel }} Ruangan {{ $selectedRoom?->name ?? '-' }}
@@ -200,8 +198,8 @@
                                     'high_humidity'  => asset('icons/kelembapan.svg'),
                                     'low_humidity'   => asset('icons/kelembapan.svg'),
                                     // CO2
-                                    'co2_tinggi'     => asset('icons/co2.svg'),
-                                    'co2_rendah'     => asset('icons/co2.svg'),
+                                    'co2_tinggi'     => asset('icons/co2_tinggi.svg'),
+                                    'co2_rendah'     => asset('icons/co2_tinggi.svg'),
                                     // Daya / Energi
                                     'high_power'     => asset('icons/daya-tinggi.svg'),
                                     'low_power'      => asset('icons/daya.svg'),
@@ -214,11 +212,25 @@
                                     'critical'       => asset('icons/poor.svg'),
                                     'warning'        => asset('icons/warning.svg'),
                                 ];
-                                $iconSrc = $iconMap[$alert->type] ?? asset('icons/warning.svg');
+                                $iconSrc   = $iconMap[$alert->type] ?? asset('icons/warning.svg');
+                                $isCo2Icon = in_array($alert->type, ['co2_tinggi', 'co2_rendah']);
                             @endphp
                             <div class="flex items-start justify-between gap-2">
                                 <div class="flex items-center gap-1.5 min-w-0">
-                                    <img src="{{ $iconSrc }}" alt="{{ $alert->type }}" class="w-5 h-5 shrink-0">
+                                    @if($isCo2Icon)
+                                        {{-- Icon CO2 — tampil abu-abu via mask-image --}}
+                                        <div class="shrink-0" style="
+                                            width:20px; height:20px;
+                                            background-color: #52260bff;
+                                            -webkit-mask-image: url('{{ $iconSrc }}');
+                                            mask-image: url('{{ $iconSrc }}');
+                                            -webkit-mask-size: contain; mask-size: contain;
+                                            -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+                                            -webkit-mask-position: center; mask-position: center;
+                                        "></div>
+                                    @else
+                                        <img src="{{ $iconSrc }}" alt="{{ $alert->type }}" class="w-5 h-5 shrink-0">
+                                    @endif
                                     <span class="text-[12px] text-slate-700 dark:text-slate-300 truncate">{{ $alert->message ?? $alert->type }}</span>
                                 </div>
                                 <span class="text-[10px] text-slate-400 shrink-0 whitespace-nowrap">
@@ -234,32 +246,71 @@
 
     {{-- ── STAT CARDS ──────────────────────────────────────────────────────── --}}
     @php
-        // Icon SVG dari public/icons sesuai parameter
-        $iconMap = [
-            'temperature' => asset('icons/suhu.svg'),
-            'humidity'    => asset('icons/kelembapan.svg'),
-            'energy'      => asset('icons/energi.svg'),
-            'power'       => asset('icons/daya.svg'),
-            'co2'         => asset('icons/energi.svg'), // pakai energi.svg untuk CO2
+        // Ikon spesifik per card per parameter dari folder analisa_data
+        // bg & border menggunakan hex langsung agar bisa pakai warna custom
+        $cardIconMap = [
+            'temperature' => [
+                'terbaru'  => ['icon' => 'analisa_data/suhu_terbaru.svg',   'color' => '#D9EDFF'],
+                'rerata'   => ['icon' => 'analisa_data/rerata_suhu.svg',    'color' => '#FFF3E9'],
+                'tertinggi'=> ['icon' => 'analisa_data/suhu_tertinggi.svg', 'color' => '#FFE1E2'],
+                'terendah' => ['icon' => 'analisa_data/suhu_terendah.svg',  'color' => '#D9F6FC'],
+            ],
+            'humidity' => [
+                'terbaru'  => ['icon' => 'analisa_data/kelembaban_terbaru.svg',  'color' => '#D9EDFF'],
+                'rerata'   => ['icon' => 'analisa_data/rerata_kelembaban.svg',   'color' => '#FFF3E9'],
+                'tertinggi'=> ['icon' => 'analisa_data/kelembaban_tinggi.svg',   'color' => '#FFE1E2'],
+                'terendah' => ['icon' => 'analisa_data/kelembaban_rendah.svg',   'color' => '#D9F6FC'],
+            ],
+            'co2' => [
+                'terbaru'  => ['icon' => 'analisa_data/co2_terbaru.svg',   'color' => '#D9EDFF'],
+                'rerata'   => ['icon' => 'analisa_data/rerata_co2.svg',    'color' => '#FFF3E9'],
+                'tertinggi'=> ['icon' => 'analisa_data/co2_tertinggi.svg', 'color' => '#FFE1E2'],
+                'terendah' => ['icon' => 'analisa_data/co2_terendah.svg',  'color' => '#D9F6FC'],
+            ],
         ];
-        $statIcon = $iconMap[$parameter] ?? asset('icons/suhu.svg');
+        $genericIconMap = [
+            'energy' => ['icon' => 'energi.svg', 'color' => '#FFF9E6'],
+            'power'  => ['icon' => 'daya.svg',   'color' => '#F3EEFF'],
+        ];
+        $paramCards = $cardIconMap[$parameter] ?? null;
+        $genericFallback = $genericIconMap[$parameter] ?? ['icon' => 'suhu.svg', 'color' => '#F1F5F9'];
 
         $statCards = [
-            ['icon' => $statIcon, 'label' => $paramLabel . ' Terbaru',  'value' => ($latest  !== null ? number_format((float)$latest,  1) : '–') . ' ' . $unit],
-            ['icon' => $statIcon, 'label' => 'Rerata ' . $paramLabel,   'value' => ($average !== null ? $average : '–') . ' ' . $unit],
-            ['icon' => $statIcon, 'label' => $paramLabel . ' Tertinggi', 'value' => ($max     !== null ? $max     : '–') . ' ' . $unit],
-            ['icon' => $statIcon, 'label' => $paramLabel . ' Terendah',  'value' => ($min     !== null ? $min     : '–') . ' ' . $unit],
+            [
+                'iconData' => $paramCards ? $paramCards['terbaru']   : $genericFallback,
+                'label'    => $paramLabel . ' Terbaru',
+                'value'    => ($latest  !== null ? number_format((float)$latest, 1) : '0') . ' ' . $unit,
+            ],
+            [
+                'iconData' => $paramCards ? $paramCards['rerata']    : $genericFallback,
+                'label'    => 'Rerata ' . $paramLabel,
+                'value'    => ($average !== null ? $average : '–') . ' ' . $unit,
+            ],
+            [
+                'iconData' => $paramCards ? $paramCards['tertinggi'] : $genericFallback,
+                'label'    => $paramLabel . ' Tertinggi',
+                'value'    => ($max !== null ? $max : '–') . ' ' . $unit,
+            ],
+            [
+                'iconData' => $paramCards ? $paramCards['terendah']  : $genericFallback,
+                'label'    => $paramLabel . ' Terendah',
+                'value'    => ($min !== null ? $min : '–') . ' ' . $unit,
+            ],
         ];
     @endphp
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         @foreach($statCards as $card)
-            <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm px-5 py-4 flex flex-col gap-2">
-                <div class="flex items-center gap-2">
-                    <img src="{{ $card['icon'] }}" alt="icon" class="w-6 h-6 shrink-0 dark:brightness-75 dark:invert">
-                    <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide leading-tight">{{ $card['label'] }}</div>
+            @php $idata = $card['iconData']; @endphp
+            <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm px-5 py-4 flex items-center gap-3.5">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                    style="background-color: {{ $idata['color'] }}; border: 1.5px solid {{ $idata['color'] }}">
+                    <img src="{{ asset('icons/' . $idata['icon']) }}" alt="{{ $card['label'] }}" class="w-6 h-6">
                 </div>
-                <div class="text-[22px] font-bold text-slate-800 dark:text-white leading-tight">{{ $card['value'] }}</div>
+                <div class="min-w-0">
+                    <div class="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide truncate">{{ $card['label'] }}</div>
+                    <div class="text-[18px] font-bold text-slate-800 dark:text-white leading-tight">{{ $card['value'] }}</div>
+                </div>
             </div>
         @endforeach
     </div>
@@ -319,8 +370,8 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script>
 (function () {
-    const labels     = @json($chartData->pluck('label'));
-    const values     = @json($chartData->pluck('value')->map(fn($v) => round((float)$v, 2)));
+    const labels     = @json($chartLabels);
+    const values     = @json($chartValues);
     const lineColor  = '{{ $color['line'] }}';
     const fillColor  = '{{ $color['fill'] }}';
     const unit       = '{{ $unit }}';
@@ -335,10 +386,10 @@
 
     // Threshold dari PHP
     const th = {
-        normalMin: {{ $th['normal_min'] }},
-        normalMax: {{ $th['normal_max'] }},
-        warnLower: {{ $th['warn_lower'] }},
-        warnUpper: {{ $th['warn_upper'] }},
+        normalMin: {{ $th['normal_min'] ?? 'null' }},
+        normalMax: {{ $th['normal_max'] ?? 'null' }},
+        warnLower: {{ $th['warn_lower'] ?? 'null' }},
+        warnUpper: {{ $th['warn_upper'] ?? 'null' }},
     };
 
     function getStatus(val) {
@@ -404,8 +455,9 @@
                 backgroundColor: fillColor,
                 fill: true,
                 tension: 0.4,
+                spanGaps: false,
                 pointBackgroundColor: '#fff',
-                pointBorderColor: lineColor,
+                pointBorderColor: values.map(v => v === null ? 'transparent' : lineColor),
                 pointBorderWidth: 1.5,
                 pointRadius: 3,
                 pointHoverRadius: 5,

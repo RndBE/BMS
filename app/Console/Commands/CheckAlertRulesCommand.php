@@ -4,8 +4,10 @@ namespace App\Console\Commands;
 
 use App\Models\Alert;
 use App\Models\AlertRule;
+use App\Models\Room;
 use App\Models\SensorParameter;
 use App\Models\SensorReading;
+use App\Models\SensorReadingLatest;
 use App\Services\WhatsappService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
@@ -46,7 +48,59 @@ class CheckAlertRulesCommand extends Command
         $this->info("Selesai. Total alert baru: {$triggered}");
         Log::info("[alert:check] Selesai. Alert baru: {$triggered}");
 
+        // ── Cek sensor offline ────────────────────────────────────────────────
+        $this->checkOfflineSensors();
+
         return self::SUCCESS;
+    }
+
+    /**
+     * Cek ruangan yang sensor-nya tidak mengirim data > 60 menit.
+     * Buat Alert type='sensor_offline' + ubah rooms.status ke 'poor'.
+     * Cooldown: tidak buat alert duplikat dalam 60 menit.
+     */
+    private function checkOfflineSensors(int $thresholdMinutes = 60): void
+    {
+        $cutoff  = Carbon::now()->subMinutes($thresholdMinutes);
+
+        // Ruangan yang sensor_reading_latests.waktu-nya sudah melewati threshold
+        $offlineRooms = SensorReadingLatest::where('waktu', '<', $cutoff)
+            ->orWhereNull('waktu')
+            ->with('room')
+            ->get();
+
+        foreach ($offlineRooms as $latest) {
+            $roomId   = $latest->room_id;
+            $roomName = $latest->room->name ?? "Room #{$roomId}";
+
+            // Cooldown: skip jika sudah ada alert offline dalam 60 menit terakhir
+            $sudahAda = Alert::where('room_id', $roomId)
+                ->where('type', 'sensor_offline')
+                ->where('created_at', '>=', Carbon::now()->subMinutes(60))
+                ->exists();
+
+            if ($sudahAda) {
+                continue;
+            }
+
+            // Buat alert
+            Alert::create([
+                'room_id'       => $roomId,
+                'alert_rule_id' => null,
+                'type'          => 'sensor_offline',
+                'message'       => "Sensor {$roomName} offline — dalam {$thresholdMinutes} menit",
+                'nilai'         => null,
+                'is_read'       => false,
+            ]);
+
+            // Update status ruangan jadi poor
+            Room::where('id', $roomId)
+                ->where('status', '!=', 'poor')
+                ->update(['status' => 'poor', 'updated_at' => now()]);
+
+            $this->line("  ⚠ OFFLINE: {$roomName} (terakhir: " . ($latest->waktu ?? 'tidak ada') . ")");
+            Log::warning("[alert:check] Sensor offline | Room={$roomName} | waktu={$latest->waktu}");
+        }
     }
 
     private function checkRoom(AlertRule $rule, int $roomId, WhatsappService $wa): int
@@ -60,12 +114,16 @@ class CheckAlertRulesCommand extends Command
             return 0;
         }
 
-        // Ambil reading terbaru
-        $reading = SensorReading::where('room_id', $roomId)
-            ->orderByDesc('waktu')
-            ->first();
+        // Ambil reading terbaru dari snapshot table (lebih cepat dari sensor_readings)
+        $reading = SensorReadingLatest::where('room_id', $roomId)->first();
 
         if (! $reading) {
+            return 0;
+        }
+
+        // ── Skip jika sensor offline (data > 60 menit) ───────────────────────
+        // Alert sensor_offline sudah ditangani terpisah di checkOfflineSensors()
+        if ($reading->waktu && $reading->waktu->lt(Carbon::now()->subMinutes(60))) {
             return 0;
         }
 

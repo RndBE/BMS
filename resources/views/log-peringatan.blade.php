@@ -15,8 +15,8 @@ $kategoriColor = [
 
 function logBadge(string $type): string {
     return match($type) {
-        'critical' => '<span class="inline-flex items-center gap-1 text-[11.5px] font-bold text-red-600"><img src="' . asset('icons/poor.svg') . '" alt="Poor" class="w-4 h-4 shrink-0">Poor</span>',
-        default    => '<span class="inline-flex items-center gap-1 text-[11.5px] font-bold text-yellow-600"><img src="' . asset('icons/warning.svg') . '" alt="Warning" class="w-4 h-4 shrink-0">Warning</span>',
+        'critical' => '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-red-600 bg-red-50 rounded-full px-2.5 py-0.5"><img src="' . asset('icons/poor.svg') . '" alt="Poor" class="w-4 h-4 shrink-0">Poor</span>',
+        default    => '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 bg-orange-50 rounded-full px-2.5 py-0.5"><img src="' . asset('icons/warning.svg') . '" alt="Warning" class="w-4 h-4 shrink-0">Warning</span>',
     };
 }
 @endphp
@@ -337,10 +337,10 @@ function openLogDetail(id) {
         }).catch(() => {});
     }
 
-    // Badge
+    // Badge drawer
     document.getElementById('drawerBadge').innerHTML = a.type === 'critical'
-        ? '<span class="inline-flex items-center gap-1 text-[11.5px] font-bold text-red-600"><span class="w-2 h-2 rounded-full bg-red-600 inline-block"></span>Poor</span>'
-        : '<span class="inline-flex items-center gap-1 text-[11.5px] font-bold text-yellow-600"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2.5\'><path d=\'M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\'/></svg>Warning</span>';
+        ? '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-red-600 bg-red-50 rounded-full px-2.5 py-0.5"><img src="{{ asset('icons/poor.svg') }}" class="w-4 h-4 shrink-0">Poor</span>'
+        : '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 bg-orange-50 rounded-full px-2.5 py-0.5"><img src="{{ asset('icons/warning.svg') }}" class="w-4 h-4 shrink-0">Warning</span>';
 
     document.getElementById('drawerName').textContent = a.name;
 

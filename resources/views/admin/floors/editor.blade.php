@@ -87,7 +87,21 @@
             </div>
         </div>
 
-        {{-- Daftar Ruangan --}}
+        {{-- CCTV (Drag ke Canvas) --}}
+        <div>
+            <div class="text-[13px] font-bold text-slate-800 border-b border-slate-100 pb-2">📷 Ikon CCTV</div>
+            <p class="text-[11px] text-slate-400 leading-relaxed mt-1.5">Drag ikon CCTV ke canvas untuk menandai posisi kamera.</p>
+            <div class="mt-2 flex flex-col gap-1.5">
+                <div class="flex items-center gap-2 px-2.5 py-2 rounded-lg bg-slate-50 border border-slate-200 text-[12px] cursor-grab select-none hover:bg-slate-100 transition-colors"
+                    draggable="true"
+                    data-cctv-label="CCTV"
+                    ondragstart="onCctvDragStart(event, this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                    <span class="font-medium text-slate-700">Kamera CCTV</span>
+                </div>
+            </div>
+        </div>
+
         <div class="flex-1">
             <div class="text-[13px] font-bold text-slate-800 border-b border-slate-100 pb-2">🏠 Daftar Ruangan (<span id="roomCountLabel">{{ $floor->rooms->count() }}</span>)</div>
             <div class="flex flex-col gap-1.5 mt-2" id="roomListPanel">
@@ -772,9 +786,62 @@ document.getElementById('modalEditRoom').addEventListener('click', function(e) {
     if (e.target === this) closeEditModal();
 });
 
-/* ── Drag & Drop: Ruangan dari panel ke canvas ── */
-let _draggedRoom = null;
+/* ── Drag & Drop: shared state ── */
+let _draggedRoom = null;   // harus dideklarasi sebelum onCctvDragStart
+let _draggedCctv = null;
+let _cctvCounter = 1;
 
+
+function onCctvDragStart(event, el) {
+    _draggedRoom = null;  // pastikan tidak bentrok dengan room drag
+    _draggedCctv = { label: el.dataset.cctvLabel || 'CCTV' };
+    event.dataTransfer.effectAllowed = 'copy';
+    event.dataTransfer.setData('text/plain', 'cctv');
+}
+
+function addCctvToCanvas(natX, natY) {
+    const label  = 'CCTV ' + _cctvCounter++;
+    const inv    = 1 / _editorZoom;
+    const bgW    = 70 * inv;
+    const bgH    = 46 * inv;
+    const fSize  = 10 * inv;
+    const emoSz  = 16 * inv;
+
+    const bg = new fabric.Rect({
+        width: bgW, height: bgH,
+        fill: '#1e293b', stroke: '#94a3b8', strokeWidth: inv,
+        rx: 7 * inv, ry: 7 * inv,
+        originX: 'center', originY: 'center',
+    });
+
+    // Pakai emoji sebagai ikon kamera (synchronous, tidak perlu fromURL)
+    const cam = new fabric.Text('📷', {
+        fontSize: emoSz,
+        originX: 'center', originY: 'center',
+        top: -7 * inv,
+    });
+
+    const text = new fabric.Text(label, {
+        fontSize: fSize,
+        fill: 'white', fontFamily: 'Inter, sans-serif', fontWeight: '600',
+        originX: 'center', originY: 'center',
+        top: 10 * inv,
+    });
+
+    const group = new fabric.Group([bg, cam, text], {
+        left: natX, top: natY,
+        originX: 'center', originY: 'center',
+        hasControls: true, hasBorders: true,
+        data: { type: 'cctv', label },
+    });
+
+    canvas.add(group);
+    canvas.setActiveObject(group);
+    canvas.renderAll();
+    showToast(label + ' ditempatkan ✓');
+}
+
+/* ── Drag & Drop: Ruangan dari panel ke canvas ── */
 function onRoomDragStart(event, el) {
     _draggedRoom = {
         id:     el.dataset.roomId,
@@ -791,33 +858,32 @@ function onRoomDragStart(event, el) {
 function initDropZone() {
     const wrapper = document.getElementById('canvasWrapper');
 
-    wrapper.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        wrapper.classList.add('ring-2', 'ring-blue-400', 'ring-inset');
-    });
+    // Fabric.js membuat "upper-canvas" overlay di atas canvas asli
+    // yang menangkap semua pointer/mouse events → drop harus ke sana juga
+    const targets = [wrapper, canvas.upperCanvasEl, canvas.wrapperEl];
 
-    wrapper.addEventListener('dragleave', function(e) {
-        if (!wrapper.contains(e.relatedTarget)) {
-            wrapper.classList.remove('ring-2', 'ring-blue-400', 'ring-inset');
-        }
-    });
-
-    wrapper.addEventListener('drop', function(e) {
+    function handleCanvasDrop(e) {
         e.preventDefault();
         wrapper.classList.remove('ring-2', 'ring-blue-400', 'ring-inset');
-        if (!_draggedRoom) return;
 
-        // Hitung posisi drop relatif ke canvas element
-        const canvasEl = document.getElementById('floor-canvas');
+        // Hitung posisi drop relatif ke canvas
+        const canvasEl = canvas.upperCanvasEl;
         const rect     = canvasEl.getBoundingClientRect();
         const clientX  = e.clientX - rect.left;
         const clientY  = e.clientY - rect.top;
+        const vpt      = canvas.viewportTransform;
+        const natX     = (clientX - vpt[4]) / vpt[0];
+        const natY     = (clientY - vpt[5]) / vpt[3];
 
-        // Transform ke natural canvas coords (bagi viewport transform zoom)
-        const vpt  = canvas.viewportTransform;
-        const natX = (clientX - vpt[4]) / vpt[0];
-        const natY = (clientY - vpt[5]) / vpt[3];
+        // ── CCTV drop ──
+        if (_draggedCctv) {
+            _draggedCctv = null;
+            addCctvToCanvas(natX, natY);
+            return;
+        }
+
+        // ── Room drop ──
+        if (!_draggedRoom) return;
 
         const xPct = Math.max(0, Math.min(100, (natX / _natW) * 100));
         const yPct = Math.max(0, Math.min(100, (natY / _natH) * 100));
@@ -840,6 +906,21 @@ function initDropZone() {
             }
         })
         .catch(() => showToast('Gagal menempatkan ruangan'));
+    }
+
+    targets.forEach(el => {
+        if (!el) return;
+        el.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = _draggedCctv ? 'copy' : 'move';
+            wrapper.classList.add('ring-2', 'ring-blue-400', 'ring-inset');
+        });
+        el.addEventListener('dragleave', function(e) {
+            if (!wrapper.contains(e.relatedTarget)) {
+                wrapper.classList.remove('ring-2', 'ring-blue-400', 'ring-inset');
+            }
+        });
+        el.addEventListener('drop', handleCanvasDrop);
     });
 }
 

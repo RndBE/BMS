@@ -45,7 +45,7 @@
         }
         .left-panel .illustration {
             width: 100%;
-            max-width: 620px;
+            max-width: 590px;
             display: block;
             margin: 0 auto;
         }

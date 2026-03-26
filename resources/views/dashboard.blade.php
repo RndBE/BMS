@@ -19,7 +19,7 @@
     </div>
     <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl px-4 py-3.5 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
         <div class="text-[13px] text-slate-900 dark:text-slate-200 font-medium mb-2 flex items-center gap-1.5">
-            <img src="{{ asset('icons/suhu.svg') }}" alt="Normal" class="w-7 h-7">
+            <img src="{{ asset('icons/suhu-rerata.svg') }}" alt="Normal" class="w-7 h-7">
             Rerata Suhu
         </div>
         <div><span class="text-[22px] font-bold text-slate-800 dark:text-white">{{ number_format($avgTemp ?? 0, 1) }}</span> <span class="text-[22px] font-bold text-slate-800 dark:text-white">°C</span></div>
@@ -57,7 +57,7 @@
 <!-- ROOM HOVER TOOLTIP -->
 <div id="room-tooltip" class="hidden fixed z-[9999] bg-white rounded-xl shadow-[0_8px_24px_rgba(0,0,0,.18)] px-3.5 py-3 min-w-[170px] pointer-events-none border border-slate-200 font-['Inter']">
     <div id="tt-name" class="text-[14px] font-bold text-slate-800 mb-2"></div>
-    <div id="tt-status" class="text-[11px] font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1 mb-2.5"></div>
+    <div id="tt-status" class="text-[11px] font-semibold px-2.5 py-1 rounded-full inline-flex items-center gap-1.5 mb-2.5"></div>
     <div class="flex items-center gap-2 text-[13px] text-slate-700 py-0.5"><span>🌡️</span><span id="tt-temp"></span></div>
     <div class="flex items-center gap-2 text-[13px] text-slate-700 py-0.5"><span>💧</span><span id="tt-hum"></span></div>
     <div class="flex items-center gap-2 text-[13px] text-slate-700 py-0.5"><span>❄️</span><span id="tt-ac"></span></div>
@@ -67,7 +67,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
 
     <!-- FLOOR PLAN — Fabric.js canvas (read-only, from manajemen denah) -->
-    <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl p-4 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
+    <div class="min-w-0 bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl p-4 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
         <div class="flex items-center justify-between mb-3">
             <div class="text-[14px] font-semibold text-slate-800 dark:text-white">
                 🗺️ Denah
@@ -135,26 +135,43 @@
                     // Ikon berdasarkan parameter_key lalu kategori
                     $alertIcon = match(true) {
                         str_contains($paramKey, 'suhu') || str_contains($paramKey, 'temp')  => 'suhu-tinggi',
+                        str_contains($paramKey, 'co2')                                       => 'co2_tinggi',
                         str_contains($paramKey, 'daya') || str_contains($paramKey, 'power')
                             || str_contains($paramKey, 'tegangan')                           => 'daya-tinggi',
                         $kateg === 'Perangkat'                                               => 'freeze',
                         $kateg === 'Sensor' || str_contains($paramKey, 'sensor')             => 'sensor-offline',
                         // legacy types
                         $alert->type === 'sensor_offline'                                   => 'sensor-offline',
+                        $alert->type === 'co2_tinggi' || $alert->type === 'co2_rendah'      => 'co2_tinggi',
                         $alert->type === 'high_temp'                                        => 'suhu-tinggi',
                         $alert->type === 'ac_off'                                           => 'freeze',
                         $alert->type === 'high_power'                                       => 'daya-tinggi',
                         default                                                             => 'alert-triangle',
                     };
 
+                    $isCo2Alert = in_array($alert->type, ['co2_tinggi', 'co2_rendah'])
+                        || str_contains($paramKey, 'co2');
+
                     $alertTitle = $alert->alertRule?->name
                         ?? ($alert->message ? \Str::limit($alert->message, 35) : ucfirst(str_replace('_', ' ', $alert->type)));
                 @endphp
                 <div class="flex items-center gap-2.5 py-2.5 border-b border-slate-50 last:border-0">
                     <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
-                        <img src="{{ asset('icons/' . $alertIcon . '.svg') }}"
-                            onerror="this.src='{{ asset('icons/status.svg') }}'"
-                            alt="{{ $alertTitle }}" class="w-5 h-5">
+                        @if($isCo2Alert)
+                            <div style="
+                                width:20px; height:20px;
+                                background-color: #92400e;
+                                -webkit-mask-image: url('{{ asset('icons/co2_tinggi.svg') }}');
+                                mask-image: url('{{ asset('icons/co2_tinggi.svg') }}');
+                                -webkit-mask-size: contain; mask-size: contain;
+                                -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+                                -webkit-mask-position: center; mask-position: center;
+                            "></div>
+                        @else
+                            <img src="{{ asset('icons/' . $alertIcon . '.svg') }}"
+                                onerror="this.src='{{ asset('icons/status.svg') }}'"
+                                alt="{{ $alertTitle }}" class="w-5 h-5">
+                        @endif
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="text-[13px] font-semibold text-slate-800 dark:text-slate-200 truncate">{{ $alertTitle }}</div>
@@ -256,9 +273,13 @@ function initDashCanvas() {
     document.getElementById('dashCanvasHint')?.remove();
     feather.replace();
 
-    // ResizeObserver: fires instantly on ANY wrapper size change
-    // (window resize, sidebar expand/collapse animation, etc.)
-    const _ro = new ResizeObserver(() => resizeCanvas());
+    // ResizeObserver: debounce 50ms agar canvas hanya di-redraw sekali
+    // setelah ukuran wrapper stabil (bukan di setiap frame animasi sidebar)
+    let _roTimer;
+    const _ro = new ResizeObserver(() => {
+        clearTimeout(_roTimer);
+        _roTimer = setTimeout(() => resizeCanvas(), 50);
+    });
     _ro.observe(wrapper);
 }
 
@@ -444,14 +465,14 @@ function renderRoomDetail(room) {
         </div>
         <div class="text-[11px] text-slate-400 flex items-center gap-1.5 mb-3.5">
             <span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span>
-            Terakhir diperbarui: ${room.updated_at}
+            Terakhir diperbarui: ${new Date().toLocaleString('id-ID', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).replace(/\./g,':')}
         </div>
         <div class="space-y-0">
-            ${detailRow('🌡️ Suhu', temp)}
-            ${detailRow('💧 Kelembaban', hum)}
-            ${detailRow('🌿 Level CO₂', co2)}
-            ${detailRow('❄️ Status AC', `<span class="${acColor} font-bold">${room.ac_status}</span>`)}
-            ${detailRow('📡 Sensor', sensorTxt)}
+            ${detailRow('Suhu', temp)}
+            ${detailRow('Kelembaban', hum)}
+            ${detailRow('Level CO₂', co2)}
+            ${detailRow('Status AC', `<span class="${acColor} font-bold">${room.ac_status}</span>`)}
+            ${detailRow('Sensor', sensorTxt)}
         </div>
         <button onclick="window.location.href='{{ route('analisa-data.index') }}?room_id=' + ${room.id}"
             class="block w-full py-2.5 bg-[#B40404] hover:bg-[#B40404] text-white border-none rounded-lg text-[13px] font-semibold cursor-pointer text-center mt-4 transition-colors">
@@ -472,19 +493,19 @@ function detailRow(label, value) {
 function showMarkerTooltip(event, roomId) {
     const room = ROOM_DETAIL_MAP[roomId];
     if (!room) return;
-    const statusConfig = {
-        normal:  { bg: '#dcfce7', color: '#15803d', icon: '✓ Normal' },
-        warning: { bg: '#fef3c7', color: '#b45309', icon: '▲ Warning' },
-        poor:    { bg: '#fee2e2', color: '#b91c1c', icon: '● Poor' },
+    const statusIcons = {
+        normal:  { img: '{{ asset('icons/normal.svg') }}',  label: 'Normal',  bg: '#dcfce7', color: '#15803d' },
+        warning: { img: '{{ asset('icons/warning.svg') }}', label: 'Warning', bg: '#fff7ed', color: '#c2410c' },
+        poor:    { img: '{{ asset('icons/poor.svg') }}',    label: 'Poor',    bg: '#fee2e2', color: '#b91c1c' },
     };
-    const cfg = statusConfig[room.status] || statusConfig.normal;
+    const cfg = statusIcons[room.status] || statusIcons.normal;
     const temp = room.temperature ? `${fmtVal(room.temperature.value)} ${room.temperature.unit}` : '-';
-    const hum  = room.humidity    ? `${fmtVal(room.humidity.value)} ${room.humidity.unit}`    : '-';
+    const hum  = room.humidity    ? `${fmtVal(room.humidity.value)} ${room.humidity.unit}`       : '-';
     const ac   = room.ac_status || '-';
 
     document.getElementById('tt-name').textContent = room.name;
     const statusEl = document.getElementById('tt-status');
-    statusEl.textContent = cfg.icon;
+    statusEl.innerHTML = `<img src="${cfg.img}" style="width:16px;height:16px;flex-shrink:0"> ${cfg.label}`;
     statusEl.style.background = cfg.bg;
     statusEl.style.color = cfg.color;
     document.getElementById('tt-temp').textContent = temp;

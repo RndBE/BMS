@@ -8,21 +8,31 @@
 
 {{-- ── STAT CARDS ───────────────────────────────────────────────────────────── --}}
 <div class="grid grid-cols-5 gap-4 mb-5">
-    @php
-        $statCards = [
-            ['icon' => asset('icons/daya.svg'),   'label' => 'Daya Saat Ini',        'value' => number_format($currentPower, 1) . ' kW'],
-            ['icon' => asset('icons/energi.svg'), 'label' => 'Energi Hari Ini',       'value' => number_format($energyToday, 1)  . ' kWH'],
-            ['icon' => asset('icons/daya.svg'),   'label' => 'Daya Puncak Hari Ini',  'value' => number_format($peakPower, 1)    . ' kW'],
-            ['icon' => asset('icons/daya.svg'),   'label' => 'Rata-Rata Beban',        'value' => number_format($avgLoad, 1)      . ' kW'],
-            ['icon' => asset('icons/daya.svg'),   'label' => 'Tegangan Rata-Rata',     'value' => '220 V'],
-        ];
-    @endphp
-    @foreach($statCards as $card)
-        <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm px-4 py-3.5 flex flex-col gap-1">
-            <div class="flex items-center gap-1.5 text-[12px] text-slate-500 dark:text-slate-400 font-medium">
-                <img src="{{ $card['icon'] }}" class="w-5 h-5"> {{ $card['label'] }}
+    @foreach($statCardData as $card)
+        <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm px-5 py-4 flex items-center gap-3.5">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                 style="background-color: {{ $card['bg'] }}; border: 1.5px solid {{ $card['bg'] }}">
+                <div style="
+                    width: 24px; height: 24px;
+                    background-color: {{ $card['iconColor'] }};
+                    -webkit-mask-image: url('{{ asset('icons/' . $card['icon']) }}');
+                    mask-image: url('{{ asset('icons/' . $card['icon']) }}');
+                    -webkit-mask-size: contain;
+                    mask-size: contain;
+                    -webkit-mask-repeat: no-repeat;
+                    mask-repeat: no-repeat;
+                    -webkit-mask-position: center;
+                    mask-position: center;
+                "></div>
             </div>
-            <div class="text-[22px] font-bold text-slate-800 dark:text-white leading-tight">{{ $card['value'] }}</div>
+            <div class="min-w-0">
+                <div class="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide truncate">
+                    {{ $card['label'] }}
+                </div>
+                <div class="text-[18px] font-bold text-slate-800 dark:text-white leading-tight">
+                    {{ $card['value'] }}
+                </div>
+            </div>
         </div>
     @endforeach
 </div>
@@ -46,7 +56,6 @@
                             class="appearance-none border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 bg-gray-100 rounded-full pl-3 pr-7 py-1.5 text-[12px] font-medium text-slate-700 focus:outline-none cursor-pointer hover:border-gray-300 transition-colors">
                             <option value="power"   {{ $parameter === 'power'   ? 'selected' : '' }}>Daya</option>
                             <option value="voltage" {{ $parameter === 'voltage' ? 'selected' : '' }}>Tegangan</option>
-                            <option value="energy"  {{ $parameter === 'energy'  ? 'selected' : '' }}>Energi</option>
                         </select>
                     </div>
                     {{-- Periode --}}
@@ -301,9 +310,10 @@
                 backgroundColor: gradient,
                 borderWidth: 2,
                 // Hollow circles: background putih, border sesuai status
+                spanGaps: false,
                 pointRadius: 5,
                 pointBackgroundColor: '#fff',
-                pointBorderColor: values.map(v => statusColors[getStatus(v)]),
+                pointBorderColor: values.map(v => v === null ? 'transparent' : statusColors[getStatus(v)]),
                 pointBorderWidth: 2,
                 pointHoverRadius: 6,
                 pointHoverBackgroundColor: '#fff',

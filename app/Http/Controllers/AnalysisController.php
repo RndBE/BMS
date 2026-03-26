@@ -6,6 +6,7 @@ use App\Models\Alert;
 use App\Models\AlertLimit;
 use App\Models\Room;
 use App\Models\SensorReading;
+use App\Models\SensorReadingLatest;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -91,6 +92,12 @@ class AnalysisController extends Controller
             ],
         };
 
+        // Jika periode harian dan tanggal = hari ini → potong dateTo ke jam sekarang
+        // supaya chart & tabel tidak menampilkan jam yang belum terjadi
+        if ($periode === 'harian' && $date->isSameDay(Carbon::today())) {
+            $dateTo = Carbon::now()->setTimezone($timezone);
+        }
+
         // Query chart data (group by jam/hari) — gunakan $column bukan $parameter
         $chartData = SensorReading::where('room_id', $selectedRoomId)
             ->whereBetween('waktu', [$dateFrom, $dateTo])
@@ -103,7 +110,9 @@ class AnalysisController extends Controller
         $statsQuery = SensorReading::where('room_id', $selectedRoomId)
             ->whereBetween('waktu', [$dateFrom, $dateTo]);
 
-        $latest  = SensorReading::where('room_id', $selectedRoomId)->orderByDesc('waktu')->value($column);
+        $latest  = SensorReadingLatest::where('room_id', $selectedRoomId)
+            ->whereDate('waktu', today())
+            ->value($column);
         $average = round((float) $statsQuery->avg($column), 1);
         $max     = round((float) $statsQuery->max($column), 1);
         $min     = round((float) $statsQuery->min($column), 1);
@@ -159,13 +168,49 @@ class AnalysisController extends Controller
 
         // Tabel data parameter utama — rata-rata per jam/hari (sama seperti chart)
         $th = $thresholds[$parameter] ?? $thresholds['temperature'];
-        $tableData = SensorReading::where('room_id', $selectedRoomId)
-            ->whereBetween('waktu', [$dateFrom, $dateTo])
-            ->selectRaw("DATE_FORMAT(waktu, '{$groupFormat}') as label, AVG({$column}) as nilai, MAX(waktu) as last_waktu")
-            ->groupByRaw("DATE_FORMAT(waktu, '{$groupFormat}')")
-            ->orderBy('last_waktu')
-            ->get()
-            ->map(function ($row) use ($th) {
+
+        // Untuk periode harian: generate semua label jam 00:00 s.d. jam terakhir dateTo
+        // Untuk 12h: format berbeda (misal 09:00 AM); untuk 24h: HH:00
+        if ($periode === 'harian') {
+            $endHour   = (int) $dateTo->format('H');
+            $allLabels = [];
+            for ($h = 0; $h <= $endHour; $h++) {
+                // Format label sesuai setting waktu
+                $allLabels[] = $is12h
+                    ? Carbon::today()->setTimezone($timezone)->setHour($h)->format('g:00 A')
+                    : sprintf('%02d:00', $h);
+            }
+
+            // Index chartData berdasarkan label
+            $indexed = $chartData->keyBy('label');
+
+            // Chart: semua label, slot tanpa data diisi null
+            $chartLabels = collect($allLabels);
+            $chartValues = $chartLabels->map(
+                fn($l) => $indexed->has($l)
+                    ? round((float) $indexed[$l]->value, 2)
+                    : null
+            );
+
+            // Tabel: hanya slot yang ada datanya
+            $tableData = $chartLabels->map(function ($l) use ($indexed, $th) {
+                if (! $indexed->has($l)) return null;
+                $val    = (float) $indexed[$l]->value;
+                $status = 'normal';
+                if ($val < $th['warn_lower'] || $val > $th['warn_upper']) {
+                    $status = 'poor';
+                } elseif ($val < $th['normal_min'] || $val > $th['normal_max']) {
+                    $status = 'warning';
+                }
+                return ['waktu' => $l, 'nilai' => round($val, 2), 'status' => $status];
+            })->filter()->values();
+
+        } else {
+            // Periode mingguan / bulanan: tampilkan semua slot dari query
+            $chartLabels = $chartData->pluck('label');
+            $chartValues = $chartData->pluck('value')->map(fn($v) => round((float)$v, 2));
+
+            $tableData = $chartData->map(function ($row) use ($th) {
                 $val    = (float) $row->nilai;
                 $status = 'normal';
                 if ($val < $th['warn_lower'] || $val > $th['warn_upper']) {
@@ -173,12 +218,9 @@ class AnalysisController extends Controller
                 } elseif ($val < $th['normal_min'] || $val > $th['normal_max']) {
                     $status = 'warning';
                 }
-                return [
-                    'waktu'  => $row->label,
-                    'nilai'  => round($val, 2),
-                    'status' => $status,
-                ];
+                return ['waktu' => $row->label, 'nilai' => round($val, 2), 'status' => $status];
             });
+        }
 
         $parameterLabels = [
             'temperature' => 'Suhu',
@@ -194,7 +236,8 @@ class AnalysisController extends Controller
         return view('analisa-data.index', compact(
             'rooms', 'selectedRoom', 'selectedRoomId',
             'parameter', 'periode', 'tanggal', 'date',
-            'chartData', 'latest', 'average', 'max', 'min',
+            'chartData', 'chartLabels', 'chartValues',
+            'latest', 'average', 'max', 'min',
             'thresholds', 'alerts', 'tableData', 'alertLimit',
             'parameterLabels', 'parameterUnits', 'timeFormat',
             'timezone', 'dateFormat', 'phpDateFormat'
