@@ -7,8 +7,20 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
 </head>
-<body class="min-h-screen bg-[#f0f0f0] flex items-center justify-center font-['Inter']">
+<body>
 
     <div class="w-full max-w-md px-6">
 
