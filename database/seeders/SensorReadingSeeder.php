@@ -67,7 +67,7 @@ class SensorReadingSeeder extends Seeder
     public function run(): void
     {
         $from = Carbon::create(2026, 2, 1,  0,  0, 0);
-        $to   = Carbon::create(2026, 3, 27, 14, 00, 00);
+        $to   = Carbon::create(2026, 3, 27, 9, 00, 00);
 
         $totalMinutes = (int) $from->diffInMinutes($to);
         $totalPoints  = (int) ($totalMinutes / $this->intervalMinutes);
