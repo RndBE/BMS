@@ -1,6 +1,19 @@
 @extends('layouts.app')
 
 @section('content')
+{{-- Inline styles untuk kalender agar berfungsi tanpa Tailwind compiled CSS --}}
+<style>
+#rkpGridL,#rkpGridR{display:grid;grid-template-columns:repeat(7,1fr);margin-top:4px;}
+.rkp-day-hdr{display:grid;grid-template-columns:repeat(7,1fr);margin-top:12px;font-size:11px;color:#94a3b8;text-align:center;}
+#rkpCalWrap{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:12px;}
+.rkp-cell-wrap{position:relative;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.rkp-cell-strip{position:absolute;top:0;bottom:0;background:#fef2f2;pointer-events:none;}
+.rkp-circle{position:relative;z-index:10;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:11px;border-radius:50%;cursor:pointer;}
+.rkp-circle-sel{background:#B40404;color:#fff;font-weight:700;}
+.rkp-circle-rng{color:#374151;}
+.rkp-circle-def{color:#374151;}
+.rkp-circle-def:hover{background:#f1f5f9;}
+</style>
 <div x-data="rekapData()" class="space-y-5">
 
     {{-- Header --}}
@@ -46,7 +59,7 @@
                         </div>
 
                         {{-- Dual calendar --}}
-                        <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div id="rkpCalWrap">
                             {{-- Left --}}
                             <div class="rounded-xl border border-slate-200 dark:border-[#3d3d3d] p-3">
                                 <div class="flex items-center justify-between">
@@ -73,10 +86,10 @@
                                     </div>
                                     <div class="w-8"></div>
                                 </div>
-                                <div class="mt-3 grid grid-cols-7 text-[11px] text-slate-400 text-center">
+                                <div class="rkp-day-hdr">
                                     <div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div><div>Min</div>
                                 </div>
-                                <div id="rkpGridL" class="mt-1 grid grid-cols-7"></div>
+                                <div id="rkpGridL"></div>
                             </div>
 
                             {{-- Right --}}
@@ -105,10 +118,10 @@
                                     </div>
                                     <button type="button" id="rkpNext" class="h-8 w-8 rounded-lg border border-slate-200 dark:border-[#3d3d3d] hover:bg-slate-50 dark:hover:bg-[#1D1D1D] flex items-center justify-center text-slate-600 dark:text-slate-300">›</button>
                                 </div>
-                                <div class="mt-3 grid grid-cols-7 text-[11px] text-slate-400 text-center">
+                                <div class="rkp-day-hdr">
                                     <div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div><div>Min</div>
                                 </div>
-                                <div id="rkpGridR" class="mt-1 grid grid-cols-7"></div>
+                                <div id="rkpGridR"></div>
                             </div>
                         </div>
 
@@ -415,7 +428,9 @@ document.addEventListener('DOMContentLoaded', function () {
         grid.innerHTML    = '';
 
         for (let i = 0; i < offset; i++) {
-            const e = document.createElement('div'); e.className = 'h-9'; grid.appendChild(e);
+            const e = document.createElement('div');
+            e.style.cssText = 'height:36px;';
+            grid.appendChild(e);
         }
 
         for (let d = 1; d <= daysInMonth; d++) {
@@ -424,25 +439,25 @@ document.addEventListener('DOMContentLoaded', function () {
             const isSE = isS && isE, inRg = !isSE && isBetween(cur, tempStart, tempEnd);
 
             const wrapper = document.createElement('div');
-            wrapper.className = 'relative h-9 flex items-center justify-center cursor-pointer';
+            wrapper.className = 'rkp-cell-wrap';
 
             if (!isSE && (inRg || isS || isE)) {
                 const strip = document.createElement('div');
-                strip.className = 'absolute inset-y-0 bg-red-50 pointer-events-none';
-                if (isS)      strip.style.cssText = 'left:50%;right:0';
-                else if (isE) strip.style.cssText = 'left:0;right:50%';
-                else          strip.style.cssText = 'left:0;right:0';
+                strip.className = 'rkp-cell-strip';
+                if (isS)      strip.style.cssText = 'left:50%;right:0;position:absolute;top:0;bottom:0;background:#fef2f2;pointer-events:none;';
+                else if (isE) strip.style.cssText = 'left:0;right:50%;position:absolute;top:0;bottom:0;background:#fef2f2;pointer-events:none;';
+                else          strip.style.cssText = 'left:0;right:0;position:absolute;top:0;bottom:0;background:#fef2f2;pointer-events:none;';
                 wrapper.appendChild(strip);
             }
 
             const circle = document.createElement('div');
             circle.textContent = String(d);
             if (isS || isE) {
-                circle.className = 'relative z-10 w-8 h-8 rounded-full flex items-center justify-center text-[11px] bg-[#B40404] text-white font-bold';
+                circle.className = 'rkp-circle rkp-circle-sel';
             } else if (inRg) {
-                circle.className = 'relative z-10 w-8 h-8 flex items-center justify-center text-[11px] text-slate-700 dark:text-slate-300';
+                circle.className = 'rkp-circle rkp-circle-rng';
             } else {
-                circle.className = 'relative z-10 w-8 h-8 rounded-full flex items-center justify-center text-[11px] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1D1D1D]';
+                circle.className = 'rkp-circle rkp-circle-def';
             }
             wrapper.appendChild(circle);
 
