@@ -488,11 +488,11 @@
         } catch (e) { /* silent fail */ }
     }
 
-    // Mulai polling setelah 5 detik (beri waktu page load)
+    // Mulai polling setelah 2 detik (beri waktu page load)
     setTimeout(() => {
         pollAlerts();                               // poll pertama
-        setInterval(pollAlerts, 30_000);            // poll setiap 30 detik
-    }, 5000);
+        setInterval(pollAlerts, 5_000);             // poll setiap 5 detik
+    }, 2000);
 })();
 </script>
 
