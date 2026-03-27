@@ -86,28 +86,50 @@ class DashboardController extends Controller
 
         $offlineThreshold = now()->subMinutes(60);
 
+        // Pre-load SensorParameter per room (1 query, untuk resolusi kolom dinamis)
+        $allParams = SensorParameter::whereIn('room_id', $rooms->pluck('id'))
+            ->whereNotNull('kolom_reading')
+            ->get(['room_id', 'nama_parameter', 'kolom_reading'])
+            ->groupBy('room_id');
+
+        // Helper: cari kolom sensor berdasarkan keyword nama_parameter
+        $resolveCol = function ($roomParams, string $keyword): ?string {
+            if (!$roomParams) return null;
+            $match = $roomParams->first(fn($p) => stripos($p->nama_parameter, $keyword) !== false);
+            return $match?->kolom_reading;
+        };
+
         // Pre-build all room detail data as JSON (eliminates AJAX roundtrip)
-        $roomDetailMap = $rooms->mapWithKeys(function ($room) use ($latestReadings, $offlineThreshold) {
-            $latest    = $latestReadings->get($room->id);
-            $ac        = $room->acUnits->first();
-            $connected = $latest !== null
-                      && $latest->waktu !== null
-                      && $latest->waktu->gte($offlineThreshold);
+        $roomDetailMap = $rooms->mapWithKeys(function ($room) use ($latestReadings, $offlineThreshold, $allParams, $resolveCol) {
+            $latest     = $latestReadings->get($room->id);
+            $ac         = $room->acUnits->first();
+            $connected  = $latest !== null
+                       && $latest->waktu !== null
+                       && $latest->waktu->gte($offlineThreshold);
+            $roomParams = $allParams->get($room->id);
+
+            // Resolve kolom dinamis dari SensorParameter
+            $colSuhu      = $resolveCol($roomParams, 'suhu')      ?? $resolveCol($roomParams, 'temp')   ?? 'sensor1';
+            $colHumidity  = $resolveCol($roomParams, 'kelembab')  ?? $resolveCol($roomParams, 'humid')  ?? 'sensor2';
+            $colCo2       = $resolveCol($roomParams, 'co2')                                              ?? 'sensor5';
+            $colEnergy    = $resolveCol($roomParams, 'energi')    ?? $resolveCol($roomParams, 'energy') ?? 'sensor3';
+            $colPower     = $resolveCol($roomParams, 'daya')      ?? $resolveCol($roomParams, 'power')  ?? 'sensor4';
 
             return [$room->id => [
                 'id'               => $room->id,
                 'name'             => $room->name,
                 'status'           => $room->status,
                 'updated_at'       => $latest?->waktu?->format('d/m/Y H:i') ?? $room->updated_at->format('d/m/Y H:i'),
-                'temperature'      => $latest ? ['value' => $latest->sensor1, 'unit' => '°C']   : null,
-                'humidity'         => $latest ? ['value' => $latest->sensor2, 'unit' => '%']     : null,
-                'co2'              => $latest ? ['value' => $latest->sensor5, 'unit' => 'ppm']   : null,
-                'energy'           => $latest ? ['value' => $latest->sensor3, 'unit' => 'kWh']  : null,
-                'power'            => $latest ? ['value' => $latest->sensor4, 'unit' => 'W']    : null,
+                'temperature'      => $latest ? ['value' => $latest->{$colSuhu},     'unit' => '°C']  : null,
+                'humidity'         => $latest ? ['value' => $latest->{$colHumidity}, 'unit' => '%']   : null,
+                'co2'              => $latest ? ['value' => $latest->{$colCo2},      'unit' => 'ppm'] : null,
+                'energy'           => $latest ? ['value' => $latest->{$colEnergy},   'unit' => 'kWh'] : null,
+                'power'            => $latest ? ['value' => $latest->{$colPower},    'unit' => 'W']   : null,
                 'ac_status'        => $ac ? ($ac->is_active ? 'ON' : 'OFF') : 'N/A',
                 'sensor_connected' => $connected,
             ]];
         });
+
 
         // Refresh interval dari setting (dalam detik)
         $refreshInterval = (int) Setting::get('refresh_interval', '0');
@@ -133,16 +155,32 @@ class DashboardController extends Controller
                   && $latest->waktu !== null
                   && $latest->waktu->gte(now()->subMinutes(60));
 
+        // Resolve kolom dinamis dari SensorParameter room ini
+        $params = SensorParameter::where('room_id', $id)
+            ->whereNotNull('kolom_reading')
+            ->get(['nama_parameter', 'kolom_reading']);
+
+        $resolveCol = function (string $keyword, string $fallback) use ($params): string {
+            $match = $params->first(fn($p) => stripos($p->nama_parameter, $keyword) !== false);
+            return $match?->kolom_reading ?? $fallback;
+        };
+
+        $colSuhu     = $resolveCol('suhu', $resolveCol('temp',   'sensor1'));
+        $colHumidity = $resolveCol('kelembab', $resolveCol('humid', 'sensor2'));
+        $colCo2      = $resolveCol('co2',    'sensor5');
+        $colEnergy   = $resolveCol('energi', $resolveCol('energy', 'sensor3'));
+        $colPower    = $resolveCol('daya',   $resolveCol('power',  'sensor4'));
+
         return response()->json([
             'id'               => $room->id,
             'name'             => $room->name,
             'status'           => $room->status,
             'updated_at'       => $latest?->waktu?->format('d/m/Y H:i') ?? $room->updated_at->format('d/m/Y H:i'),
-            'temperature'      => $latest ? ['value' => $latest->sensor1, 'unit' => '°C']   : null,
-            'humidity'         => $latest ? ['value' => $latest->sensor2, 'unit' => '%']     : null,
-            'co2'              => $latest ? ['value' => $latest->sensor5, 'unit' => 'ppm']   : null,
-            'energy'           => $latest ? ['value' => $latest->sensor3, 'unit' => 'kWh']  : null,
-            'power'            => $latest ? ['value' => $latest->sensor4, 'unit' => 'W']    : null,
+            'temperature'      => $latest ? ['value' => $latest->{$colSuhu},     'unit' => '°C']  : null,
+            'humidity'         => $latest ? ['value' => $latest->{$colHumidity}, 'unit' => '%']   : null,
+            'co2'              => $latest ? ['value' => $latest->{$colCo2},      'unit' => 'ppm'] : null,
+            'energy'           => $latest ? ['value' => $latest->{$colEnergy},   'unit' => 'kWh'] : null,
+            'power'            => $latest ? ['value' => $latest->{$colPower},    'unit' => 'W']   : null,
             'ac_status'        => $ac ? ($ac->is_active ? 'ON' : 'OFF') : 'N/A',
             'sensor_connected' => $connected,
         ]);
