@@ -7,6 +7,7 @@ use App\Models\AlertLimit;
 use App\Models\AlertRule;
 use App\Models\Room;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class PeringatanController extends Controller
 {
@@ -119,6 +120,7 @@ class PeringatanController extends Controller
         $data['room_ids']   = $request->input('room_ids', []);
 
         $rule = AlertRule::create($data);
+        Cache::forget('alert_rules_active'); // flush cache Observer
         return response()->json(['success' => true, 'rule' => $rule]);
     }
 
@@ -141,18 +143,21 @@ class PeringatanController extends Controller
         $data['room_ids']   = $request->input('room_ids', []);
 
         $alertRule->update($data);
+        Cache::forget('alert_rules_active'); // flush cache Observer
         return response()->json(['success' => true, 'rule' => $alertRule->fresh()]);
     }
 
     public function rulesDestroy(AlertRule $alertRule)
     {
         $alertRule->delete();
+        Cache::forget('alert_rules_active'); // flush cache Observer
         return response()->json(['success' => true]);
     }
 
     public function rulesToggle(AlertRule $alertRule)
     {
         $alertRule->update(['is_active' => !$alertRule->is_active]);
+        Cache::forget('alert_rules_active'); // flush cache Observer
         return response()->json(['success' => true, 'is_active' => $alertRule->is_active]);
     }
 

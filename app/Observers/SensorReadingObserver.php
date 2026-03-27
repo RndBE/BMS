@@ -7,6 +7,7 @@ use App\Models\Room;
 use App\Models\SensorParameter;
 use App\Models\SensorReading;
 use App\Models\SensorReadingLatest;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 
 class SensorReadingObserver
@@ -25,25 +26,24 @@ class SensorReadingObserver
         SensorReadingLatest::updateOrCreate(
             ['room_id' => $roomId],
             array_merge($sensorCols, [
-                'recorded_at'     => $reading->waktu,
-                'waktu'           => $reading->waktu,
-                'updated_at'      => now(),
+                'recorded_at' => $reading->waktu,
+                'waktu'       => $reading->waktu,
+                'updated_at'  => now(),
             ])
         );
 
-        // ── 2. Hitung status baru berdasarkan AlertLimit ──────────────────────
-        // Cache AlertLimit 60 detik agar tidak query DB setiap reading masuk
-        $limits = Cache::remember('alert_limits_all', 60, fn () => AlertLimit::all()->keyBy('parameter_key'));
-
-        // Mapping parameter_key → kolom reading (untuk room ini)
-        // Ambil dari sensor_parameters yang sudah ada di room
+        // ── 2. Ambil sensor parameters room ini (di-cache 60 detik) ──────────
         $params = Cache::remember("sensor_params_{$roomId}", 60, function () use ($roomId) {
             return SensorParameter::where('room_id', $roomId)
                 ->whereNotNull('kolom_reading')
                 ->get(['nama_parameter', 'kolom_reading']);
         });
 
-        // parameter_key mapping: nama_parameter → key di AlertLimit
+        // ── 3. Hitung status room berdasarkan AlertLimit ──────────────────────
+        $limits = Cache::remember('alert_limits_all', 60, fn () =>
+            AlertLimit::all()->keyBy('parameter_key')
+        );
+
         $keyMap = [
             'suhu'        => 'suhu',
             'temperature' => 'suhu',
@@ -54,13 +54,12 @@ class SensorReadingObserver
             'energi'      => 'energi',
         ];
 
-        $worstStatus = 'normal'; // default
+        $worstStatus = 'normal';
 
         foreach ($params as $param) {
-            $kolom = $param->kolom_reading;              // e.g. "sensor1"
+            $kolom = $param->kolom_reading;
             $nilai = (float) ($reading->{$kolom} ?? 0);
 
-            // cari parameter_key dari nama_parameter (case-insensitive)
             $paramKey = null;
             foreach ($keyMap as $pattern => $key) {
                 if (stripos($param->nama_parameter, $pattern) !== false) {
@@ -75,17 +74,15 @@ class SensorReadingObserver
 
             $lim = $limits[$paramKey];
 
-            // Cek poor
             $isPoor = ($lim->poor_low  !== null && $nilai < $lim->poor_low)
                    || ($lim->poor_high !== null && $nilai > $lim->poor_high);
 
             if ($isPoor) {
                 $worstStatus = 'poor';
-                break; // poor sudah worst-case, stop
+                break;
             }
 
-            // Cek warning
-            $isWarning = ($lim->warn_low_min !== null && $nilai >= $lim->warn_low_min && $nilai <= ($lim->warn_low_max ?? PHP_FLOAT_MAX))
+            $isWarning = ($lim->warn_low_min  !== null && $nilai >= $lim->warn_low_min  && $nilai <= ($lim->warn_low_max  ?? PHP_FLOAT_MAX))
                       || ($lim->warn_high_min !== null && $nilai >= $lim->warn_high_min && $nilai <= ($lim->warn_high_max ?? PHP_FLOAT_MAX));
 
             if ($isWarning && $worstStatus !== 'poor') {
@@ -93,9 +90,16 @@ class SensorReadingObserver
             }
         }
 
-        // Update rooms.status hanya jika berubah (hindari unnecessary write)
+        // Update status room jika berubah (hindari write tidak perlu)
         Room::where('id', $roomId)
             ->where('status', '!=', $worstStatus)
             ->update(['status' => $worstStatus, 'updated_at' => now()]);
+
+        // ── 4. Trigger pengecekan AlertRule → Log Peringatan ─────────────────
+        // Evaluasi semua AlertRule aktif terhadap SensorReadingLatest.
+        // Menggunakan Artisan::call (synchronous) agar tidak perlu queue worker.
+        // CheckAlertRulesCommand menangani: type mapping, cooldown (durasi_tunda),
+        // pembuatan Alert ke log, notifikasi WhatsApp, dan deteksi sensor offline.
+        Artisan::call('alert:check');
     }
 }
