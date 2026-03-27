@@ -2,11 +2,13 @@
 
 namespace App\Observers;
 
+use App\Models\Alert;
 use App\Models\AlertLimit;
 use App\Models\Room;
 use App\Models\SensorParameter;
 use App\Models\SensorReading;
 use App\Models\SensorReadingLatest;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 
@@ -95,11 +97,34 @@ class SensorReadingObserver
             ->where('status', '!=', $worstStatus)
             ->update(['status' => $worstStatus, 'updated_at' => now()]);
 
-        // ── 4. Trigger pengecekan AlertRule → Log Peringatan ─────────────────
-        // Evaluasi semua AlertRule aktif terhadap SensorReadingLatest.
-        // Menggunakan Artisan::call (synchronous) agar tidak perlu queue worker.
-        // CheckAlertRulesCommand menangani: type mapping, cooldown (durasi_tunda),
-        // pembuatan Alert ke log, notifikasi WhatsApp, dan deteksi sensor offline.
+        // ── 5. Alert sensor kembali online ───────────────────────────────────────
+        // Jika ada alert 'sensor_offline' yang belum dibalas dengan 'sensor_online',
+        // buat alert sekali bahwa sensor sudah aktif kembali.
+        $lastOfflineAt = Alert::where('room_id', $roomId)
+            ->where('type', 'sensor_offline')
+            ->orderByDesc('created_at')
+            ->value('created_at');
+
+        if ($lastOfflineAt) {
+            $alreadyOnline = Alert::where('room_id', $roomId)
+                ->where('type', 'sensor_online')
+                ->where('created_at', '>=', $lastOfflineAt)
+                ->exists();
+
+            if (! $alreadyOnline) {
+                $roomName = Room::find($roomId)?->name ?? "Room #{$roomId}";
+                Alert::create([
+                    'room_id'       => $roomId,
+                    'alert_rule_id' => null,
+                    'type'          => 'sensor_online',
+                    'message'       => "Sensor {$roomName} kembali online",
+                    'nilai'         => null,
+                    'is_read'       => false,
+                ]);
+            }
+        }
+
+        // ── 6. Trigger pengecekan AlertRule → Log Peringatan ─────────────────
         Artisan::call('alert:check');
     }
 }

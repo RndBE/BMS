@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\BuildingController;
 use App\Http\Controllers\Admin\FloorController;
 use App\Http\Controllers\Admin\RoomMarkerController;
 use App\Http\Controllers\AnalysisController;
+use App\Http\Controllers\RekapDataController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnergyController;
 use App\Http\Controllers\PengaturanController;
@@ -31,6 +32,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // ── Analisa Data ──────────────────────────────────────────────────────────────
 Route::middleware(['auth', 'permission:lihat_analisa'])->group(function () {
     Route::get('/analisa-data', [AnalysisController::class, 'index'])->name('analisa-data.index');
+});
+
+// ── Rekap Data ──────────────────────────────────────────────────────────────
+Route::middleware(['auth', 'permission:lihat_analisa'])->group(function () {
+    Route::get('/rekap-data', [RekapDataController::class, 'index'])->name('rekap-data.index');
 });
 
 // ── Energi ────────────────────────────────────────────────────────────────────

@@ -3,42 +3,52 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OtpMail;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\View\View;
 
 class PasswordResetLinkController extends Controller
 {
-    /**
-     * Display the password reset link request view.
-     */
     public function create(): View
     {
         return view('auth.forgot-password');
     }
 
-    /**
-     * Handle an incoming password reset link request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'email' => ['required', 'email'],
+            'email' => ['required', 'email', 'exists:users,email'],
+        ], [
+            'email.exists' => 'Email tidak ditemukan dalam sistem.',
         ]);
 
-        // We will send the password reset link to this user. Once we have attempted
-        // to send the link, we will examine the response then see the message we
-        // need to show to the user. Finally, we'll send out a proper response.
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        $email = $request->email;
+        $user  = User::where('email', $email)->first();
 
-        return $status == Password::RESET_LINK_SENT
-                    ? back()->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                        ->withErrors(['email' => __($status)]);
+        // Generate OTP 6 digit
+        $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        // Hapus OTP lama, simpan yang baru (hashed)
+        DB::table('password_reset_otps')->where('email', $email)->delete();
+        DB::table('password_reset_otps')->insert([
+            'email'      => $email,
+            'otp'        => Hash::make($otp),
+            'expires_at' => now()->addMinutes(15),
+        ]);
+
+        // Kirim email
+        Mail::to($email)->send(new OtpMail($otp, $user?->name ?? ''));
+
+        // Simpan email di session agar bisa dipakai di halaman verify-otp
+        session(['otp_email' => $email]);
+
+        return redirect()->route('otp.verify')
+            ->with('status', 'Kode verifikasi telah dikirim ke email Anda.');
     }
 }

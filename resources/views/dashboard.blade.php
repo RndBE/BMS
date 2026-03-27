@@ -70,7 +70,7 @@
     <div class="min-w-0 bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl p-4 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
         <div class="flex items-center justify-between mb-3">
             <div class="text-[14px] font-semibold text-slate-800 dark:text-white">
-                🗺️ Denah
+                Denah
                 @if($displayFloor)
                     — {{ $displayFloor->building->name ?? '' }} · {{ $displayFloor->name }}
                 @endif

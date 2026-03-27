@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\SensorDataController;
 use App\Http\Controllers\Api\AlertNotifController;
+use App\Http\Controllers\RekapDataController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,4 +27,5 @@ Route::post('/sensor-data', [SensorDataController::class, 'store']);
 Route::middleware('web')->group(function () {
     Route::get('/alerts/unread',            [AlertNotifController::class,  'unread']);
     Route::get('/dashboard/rooms-status',   [\App\Http\Controllers\DashboardController::class, 'roomsStatus']);
+    Route::get('/rekap-data',               [RekapDataController::class, 'getData']);
 });

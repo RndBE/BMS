@@ -33,6 +33,7 @@
                 <tr>
                     <th class="px-5 py-3 text-left font-semibold text-slate-800 dark:text-slate-200">Nama Peringatan</th>
                     <th class="px-5 py-3 text-left font-semibold text-slate-800 dark:text-slate-200">Kategori</th>
+                    <th class="px-5 py-3 text-left font-semibold text-slate-800 dark:text-slate-200">Ruangan</th>
                     <th class="px-5 py-3 text-center font-semibold text-slate-800 dark:text-slate-200">Aktif</th>
                     <th class="px-5 py-3 text-left font-semibold text-slate-800 dark:text-slate-200">Durasi Tunda</th>
                     <th class="px-5 py-3 text-left font-semibold text-slate-800 dark:text-slate-200">Status</th>
@@ -61,6 +62,17 @@
                             <span class="text-[12px] text-blue-500 font-medium hover:underline cursor-pointer">{{ $rule->kategori }}</span>
                         @else
                             <span class="text-[12px] text-slate-300">—</span>
+                        @endif
+                    </td>
+                    <td class="px-5 py-3">
+                        @if(empty($rule->room_ids))
+                            <span class="text-[11.5px] text-slate-400 italic">Semua Ruangan</span>
+                        @else
+                            <div class="flex flex-wrap gap-1">
+                                @foreach($rooms->whereIn('id', $rule->room_ids ?? []) as $r)
+                                    <span class="inline-block bg-red-50 text-red-600 text-[11px] font-medium px-2 py-0.5 rounded-full">{{ $r->name }}</span>
+                                @endforeach
+                            </div>
                         @endif
                     </td>
                     <td class="px-5 py-3 text-center">
@@ -153,6 +165,7 @@
                         <p class="text-[12px] text-slate-200 col-span-2">Tidak ada ruangan tersedia.</p>
                     @endif
                 </div>
+                <p class="mt-1.5 text-[11.5px] text-slate-400">Kosongkan untuk berlaku di <strong>semua ruangan</strong>.</p>
             </div>
 
             {{-- Status Keaktifan --}}
