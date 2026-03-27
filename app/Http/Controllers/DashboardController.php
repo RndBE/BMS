@@ -152,8 +152,8 @@ class DashboardController extends Controller
         $latest    = SensorReadingLatest::where('room_id', $id)->first();
         $ac        = $room->acUnits->first();
         $connected = $latest !== null
-                  && $latest->waktu !== null
-                  && $latest->waktu->gte(now()->subMinutes(60));
+                && $latest->waktu !== null
+                && $latest->waktu->gte(now()->subMinutes(60));
 
         // Resolve kolom dinamis dari SensorParameter room ini
         $params = SensorParameter::where('room_id', $id)
@@ -183,6 +183,60 @@ class DashboardController extends Controller
             'power'            => $latest ? ['value' => $latest->{$colPower},    'unit' => 'W']   : null,
             'ac_status'        => $ac ? ($ac->is_active ? 'ON' : 'OFF') : 'N/A',
             'sensor_connected' => $connected,
+        ]);
+    }
+
+    /**
+     * GET /api/dashboard/rooms-status
+     * Return status + data sensor terbaru semua room (untuk live polling di dashboard).
+     */
+    public function roomsStatus(): JsonResponse
+    {
+        $offlineThreshold = now()->subMinutes(60);
+        $rooms            = Room::select('id', 'name', 'status')->get();
+        $latestReadings   = SensorReadingLatest::whereIn('room_id', $rooms->pluck('id'))->get()->keyBy('room_id');
+        $allParams        = SensorParameter::whereIn('room_id', $rooms->pluck('id'))
+            ->whereNotNull('kolom_reading')
+            ->get(['room_id', 'nama_parameter', 'kolom_reading'])
+            ->groupBy('room_id');
+
+        $resolveCol = function ($rp, string $kw, string $fb) {
+            if (!$rp) return $fb;
+            $m = $rp->first(fn($p) => stripos($p->nama_parameter, $kw) !== false);
+            return $m?->kolom_reading ?? $fb;
+        };
+
+        $statusCounts = ['normal' => 0, 'warning' => 0, 'poor' => 0];
+
+        $roomStatuses = $rooms->map(function ($room) use ($latestReadings, $allParams, $resolveCol, $offlineThreshold, &$statusCounts) {
+            $latest    = $latestReadings->get($room->id);
+            $connected = $latest && $latest->waktu && $latest->waktu->gte($offlineThreshold);
+            $rp        = $allParams->get($room->id);
+
+            $colSuhu = $resolveCol($rp, 'suhu',    $resolveCol($rp, 'temp',   'sensor1'));
+            $colHum  = $resolveCol($rp, 'kelembab', $resolveCol($rp, 'humid', 'sensor2'));
+            $colCo2  = $resolveCol($rp, 'co2',     'sensor5');
+            $colEn   = $resolveCol($rp, 'energi',  $resolveCol($rp, 'energy', 'sensor3'));
+            $colPow  = $resolveCol($rp, 'daya',    $resolveCol($rp, 'power',  'sensor4'));
+
+            $statusCounts[$room->status] = ($statusCounts[$room->status] ?? 0) + 1;
+
+            return [
+                'id'               => $room->id,
+                'status'           => $room->status,
+                'sensor_connected' => $connected,
+                'updated_at'       => $latest?->waktu?->format('d/m/Y H:i'),
+                'temperature'      => $latest ? ['value' => $latest->{$colSuhu}, 'unit' => '°C']  : null,
+                'humidity'         => $latest ? ['value' => $latest->{$colHum},  'unit' => '%']   : null,
+                'co2'              => $latest ? ['value' => $latest->{$colCo2},  'unit' => 'ppm'] : null,
+                'energy'           => $latest ? ['value' => $latest->{$colEn},   'unit' => 'kWh'] : null,
+                'power'            => $latest ? ['value' => $latest->{$colPow},  'unit' => 'W']   : null,
+            ];
+        })->keyBy('id');
+
+        return response()->json([
+            'rooms'         => $roomStatuses,
+            'status_counts' => $statusCounts,
         ]);
     }
 }

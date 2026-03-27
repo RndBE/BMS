@@ -24,5 +24,6 @@ Route::post('/sensor-data', [SensorDataController::class, 'store']);
 
 // ── Alert Notifications (butuh session/auth web) ────────────────────────────
 Route::middleware('web')->group(function () {
-    Route::get('/alerts/unread', [AlertNotifController::class, 'unread']);
+    Route::get('/alerts/unread',            [AlertNotifController::class,  'unread']);
+    Route::get('/dashboard/rooms-status',   [\App\Http\Controllers\DashboardController::class, 'roomsStatus']);
 });

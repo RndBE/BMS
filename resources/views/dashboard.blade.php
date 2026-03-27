@@ -10,11 +10,11 @@
         </div>
         <div class="flex items-center gap-1 text-[18px] font-bold ">
             <img src="{{ asset('icons/normal.svg') }}" alt="Normal" class="w-7 h-7">
-            <span class="text-[22px] font-bold text-slate-800 dark:text-white">{{ $statusCounts['normal'] }}</span>
+            <span data-status-count="normal" class="text-[22px] font-bold text-slate-800 dark:text-white">{{ $statusCounts['normal'] }}</span>
             <img src="{{ asset('icons/warning.svg') }}" alt="Warning" class="w-7 h-7">
-            <span class="text-[22px] font-bold text-slate-800 dark:text-white">{{ $statusCounts['warning'] }}</span>
+            <span data-status-count="warning" class="text-[22px] font-bold text-slate-800 dark:text-white">{{ $statusCounts['warning'] }}</span>
             <img src="{{ asset('icons/poor.svg') }}" alt="Poor" class="w-7 h-7">
-            <span class="text-[22px] font-bold text-slate-800 dark:text-white">{{ $statusCounts['poor'] }}</span>
+            <span data-status-count="poor" class="text-[22px] font-bold text-slate-800 dark:text-white">{{ $statusCounts['poor'] }}</span>
         </div>  
     </div>
     <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl px-4 py-3.5 shadow-[0_1px_4px_rgba(0,0,0,.07)]">
@@ -527,6 +527,78 @@ function moveTooltip(event) {
     tooltip.style.left = x + 'px';
     tooltip.style.top  = y + 'px';
 }
+</script>
+
+<script>
+/* ═══ LIVE STATUS POLLING — update marker & detail tanpa reload ═══ */
+(function () {
+    const ROOMS_STATUS_URL = '/api/dashboard/rooms-status';
+
+    // Elemen summary count (3 angka di summary card pertama)
+    const _summarySpans = document.querySelectorAll(
+        '.grid.grid-cols-2 > div:first-child span.text-\\[22px\\]'
+    );
+
+    async function pollRoomsStatus() {
+        try {
+            const res  = await fetch(ROOMS_STATUS_URL, { headers: { 'Accept': 'application/json' } });
+            if (!res.ok) return;
+            const data = await res.json();   // { rooms: {id: {...}}, status_counts: {...} }
+
+            // ── 1. Update ROOM_DETAIL_MAP in-memory ──────────────────────────
+            if (data.rooms) {
+                Object.keys(data.rooms).forEach(id => {
+                    const fresh = data.rooms[id];
+                    if (ROOM_DETAIL_MAP[id]) {
+                        // Pertahankan name & ac_status (tidak berubah dari sensor)
+                        ROOM_DETAIL_MAP[id].status           = fresh.status;
+                        ROOM_DETAIL_MAP[id].sensor_connected = fresh.sensor_connected;
+                        ROOM_DETAIL_MAP[id].updated_at       = fresh.updated_at;
+                        ROOM_DETAIL_MAP[id].temperature      = fresh.temperature;
+                        ROOM_DETAIL_MAP[id].humidity         = fresh.humidity;
+                        ROOM_DETAIL_MAP[id].co2              = fresh.co2;
+                        ROOM_DETAIL_MAP[id].energy           = fresh.energy;
+                        ROOM_DETAIL_MAP[id].power            = fresh.power;
+                    }
+                    // Update FLOOR_ROOMS status juga (dipakai saat redraw marker)
+                    const fr = FLOOR_ROOMS.find(r => String(r.id) === String(id));
+                    if (fr) fr.status = fresh.status;
+                });
+            }
+
+            // ── 2. Redraw semua marker di canvas (warna + icon berubah) ──────
+            if (dashCanvas) {
+                // Hapus semua marker lama
+                dashCanvas.getObjects('group')
+                    .filter(o => o.data?.roomId)
+                    .forEach(o => dashCanvas.remove(o));
+                // Gambar ulang dengan status terbaru
+                addRoomMarkers();
+            }
+
+            // ── 3. Update summary count card (Normal / Warning / Poor) ───────
+            if (data.status_counts) {
+                const sc = data.status_counts;
+                // Cari span angka di summary card pertama via data-status attribute
+                document.querySelectorAll('[data-status-count]').forEach(el => {
+                    const key = el.dataset.statusCount;
+                    if (sc[key] !== undefined) el.textContent = sc[key];
+                });
+            }
+
+            // ── 4. Re-render detail panel jika ada room yang sedang dipilih ──
+            if (selectedRoomId && ROOM_DETAIL_MAP[selectedRoomId]) {
+                renderRoomDetail(ROOM_DETAIL_MAP[selectedRoomId]);
+            }
+
+        } catch (e) { /* silent fail */ }
+    }
+
+    // Mulai polling setelah 10 detik (beri waktu canvas selesai load)
+    setTimeout(() => {
+        setInterval(pollRoomsStatus, 10_000);   // update tiap 10 detik
+    }, 10_000);
+})();
 </script>
 
 @if($refreshInterval > 0)
