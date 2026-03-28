@@ -73,7 +73,13 @@ class CheckAlertRulesCommand extends Command
             $roomId   = $latest->room_id;
             $roomName = $latest->room->name ?? "Room #{$roomId}";
 
-            // Cooldown: skip jika sudah ada alert offline dalam 60 menit terakhir
+            // Selalu update status room ke 'poor' saat sensor offline
+            // (terlepas dari cooldown alert — status harus langsung terefleksi di dashboard)
+            Room::where('id', $roomId)
+                ->where('status', '!=', 'poor')
+                ->update(['status' => 'poor', 'updated_at' => now()]);
+
+            // Cooldown: skip pembuatan alert jika sudah ada alert offline dalam 60 menit terakhir
             $sudahAda = Alert::where('room_id', $roomId)
                 ->where('type', 'sensor_offline')
                 ->where('created_at', '>=', Carbon::now()->subMinutes(60))
@@ -93,14 +99,10 @@ class CheckAlertRulesCommand extends Command
                 'is_read'       => false,
             ]);
 
-            // Update status ruangan jadi poor
-            Room::where('id', $roomId)
-                ->where('status', '!=', 'poor')
-                ->update(['status' => 'poor', 'updated_at' => now()]);
-
             $this->line("  ⚠ OFFLINE: {$roomName} (terakhir: " . ($latest->waktu ?? 'tidak ada') . ")");
             Log::warning("[alert:check] Sensor offline | Room={$roomName} | waktu={$latest->waktu}");
         }
+
     }
 
     private function checkRoom(AlertRule $rule, int $roomId, WhatsappService $wa): int
