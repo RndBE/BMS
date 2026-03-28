@@ -219,11 +219,19 @@ class DashboardController extends Controller
             $colEn   = $resolveCol($rp, 'energi',  $resolveCol($rp, 'energy', 'sensor3'));
             $colPow  = $resolveCol($rp, 'daya',    $resolveCol($rp, 'power',  'sensor4'));
 
-            $statusCounts[$room->status] = ($statusCounts[$room->status] ?? 0) + 1;
+            // Jika sensor offline → update DB langsung + return 'poor'
+            $effStatus = (!$connected && $latest !== null) ? 'poor' : $room->status;
+
+            if (!$connected && $latest !== null && $room->status !== 'poor') {
+                Room::where('id', $room->id)
+                    ->update(['status' => 'poor', 'updated_at' => now()]);
+            }
+
+            $statusCounts[$effStatus] = ($statusCounts[$effStatus] ?? 0) + 1;
 
             return [
                 'id'               => $room->id,
-                'status'           => $room->status,
+                'status'           => $effStatus,
                 'sensor_connected' => $connected,
                 'updated_at'       => $latest?->waktu?->format('d/m/Y H:i'),
                 'temperature'      => $latest ? ['value' => $latest->{$colSuhu}, 'unit' => '°C']  : null,

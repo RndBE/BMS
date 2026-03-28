@@ -198,13 +198,31 @@
     $canvasData    = $displayFloor?->canvas_data;
 
     // Room markers from the display floor
-    $floorRooms = $displayFloor ? $displayFloor->rooms->map(fn($r) => [
-        'id'       => $r->id,
-        'name'     => $r->name,
-        'status'   => $r->status,
-        'marker_x' => $r->marker_x ?? 50,
-        'marker_y' => $r->marker_y ?? 50,
-    ])->values() : collect([]);
+    // Terapkan effective status: poor jika sensor offline > 60 menit
+    $floorOfflineThreshold = now()->subMinutes(60);
+    $floorLatestReadings   = $displayFloor
+        ? \App\Models\SensorReadingLatest::whereIn('room_id', $displayFloor->rooms->pluck('id'))
+            ->get()->keyBy('room_id')
+        : collect([]);
+
+    $floorRooms = $displayFloor ? $displayFloor->rooms->map(function ($r) use ($floorOfflineThreshold, $floorLatestReadings) {
+        $lat        = $floorLatestReadings->get($r->id);
+        $isOffline  = $lat !== null && ($lat->waktu === null || $lat->waktu->lt($floorOfflineThreshold));
+        $effStatus  = $isOffline ? 'poor' : $r->status;
+
+        // Langsung update DB jika perlu (supaya refresh juga konsisten)
+        if ($isOffline && $r->status !== 'poor') {
+            \App\Models\Room::where('id', $r->id)->update(['status' => 'poor', 'updated_at' => now()]);
+        }
+
+        return [
+            'id'       => $r->id,
+            'name'     => $r->name,
+            'status'   => $effStatus,
+            'marker_x' => $r->marker_x ?? 50,
+            'marker_y' => $r->marker_y ?? 50,
+        ];
+    })->values() : collect([]);
 @endphp
 
 <script>
