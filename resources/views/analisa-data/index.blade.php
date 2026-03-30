@@ -28,7 +28,7 @@
                         <span class="select-text truncate">Pilih Ruangan</span>
                         <svg class="w-4 h-4 text-slate-400 shrink-0 pointer-events-none ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
-                    <ul class="select-dropdown absolute top-[100%] left-0 w-full mt-1 bg-white dark:bg-[#2a2a2a] border border-slate-200 dark:border-[#3d3d3d] rounded-lg shadow-lg hidden max-h-60 overflow-y-auto py-1 z-50 text-[13px] text-slate-700 dark:text-slate-200"></ul>
+                    <ul class="select-dropdown absolute top-full left-0 w-full mt-1 bg-white dark:bg-[#2a2a2a] border border-slate-200 dark:border-[#3d3d3d] rounded-lg shadow-lg hidden max-h-60 overflow-y-auto py-1 z-50 text-[13px] text-slate-700 dark:text-slate-200"></ul>
                 </div>
 
                 {{-- Parameter --}}
@@ -43,7 +43,7 @@
                         <span class="select-text truncate">Pilih Parameter</span>
                         <svg class="w-4 h-4 text-slate-400 shrink-0 pointer-events-none ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
-                    <ul class="select-dropdown absolute top-[100%] left-0 w-full mt-1 bg-white dark:bg-[#2a2a2a] border border-slate-200 dark:border-[#3d3d3d] rounded-lg shadow-lg hidden max-h-60 overflow-y-auto py-1 z-50 text-[13px] text-slate-700 dark:text-slate-200"></ul>
+                    <ul class="select-dropdown absolute top-full left-0 w-full mt-1 bg-white dark:bg-[#2a2a2a] border border-slate-200 dark:border-[#3d3d3d] rounded-lg shadow-lg hidden max-h-60 overflow-y-auto py-1 z-50 text-[13px] text-slate-700 dark:text-slate-200"></ul>
                 </div>
 
                 {{-- Periode --}}
@@ -58,7 +58,7 @@
                         <span class="select-text truncate">Pilih Periode</span>
                         <svg class="w-4 h-4 text-slate-400 shrink-0 pointer-events-none ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
-                    <ul class="select-dropdown absolute top-[100%] left-0 w-full mt-1 bg-white dark:bg-[#2a2a2a] border border-slate-200 dark:border-[#3d3d3d] rounded-lg shadow-lg hidden max-h-60 overflow-y-auto py-1 z-50 text-[13px] text-slate-700 dark:text-slate-200"></ul>
+                    <ul class="select-dropdown absolute top-full left-0 w-full mt-1 bg-white dark:bg-[#2a2a2a] border border-slate-200 dark:border-[#3d3d3d] rounded-lg shadow-lg hidden max-h-60 overflow-y-auto py-1 z-50 text-[13px] text-slate-700 dark:text-slate-200"></ul>
                 </div>
 
                 {{-- Tanggal --}}
