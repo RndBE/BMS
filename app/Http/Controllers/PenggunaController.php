@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NewAccountMail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules\Password;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -69,14 +71,25 @@ class PenggunaController extends Controller
             'roles.*'  => 'exists:roles,name',
         ]);
 
+        // Simpan password mentah sebelum di-hash untuk dikirim via email
+        $plainPassword = $data['password'];
+
         $user = User::create([
             'name'     => $data['name'],
             'email'    => $data['email'],
-            'password' => Hash::make($data['password']),
+            'password' => Hash::make($plainPassword),
         ]);
 
         if (!empty($data['roles'])) {
             $user->syncRoles($data['roles']);
+        }
+
+        // Kirim email notifikasi akun baru ke pengguna
+        try {
+            Mail::to($user->email)->send(new NewAccountMail($user, $plainPassword));
+        } catch (\Exception $e) {
+            // Jika email gagal terkirim, akun tetap berhasil dibuat
+            \Log::warning('Gagal mengirim email akun baru ke ' . $user->email . ': ' . $e->getMessage());
         }
 
         return response()->json(['success' => true, 'user' => $user->load('roles')]);
