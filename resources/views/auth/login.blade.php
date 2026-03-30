@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login – BMS Beacon Engineering</title>
+
+    {{-- Preload prioritas gambar agar load lebih instan tanpa cache --}}
+    <link rel="preload" href="{{ asset('images/login_img2.png') }}" as="image">
+    <link rel="preload" href="{{ asset('images/logo_be.svg') }}" as="image" type="image/svg+xml">
+    <link rel="preload" href="{{ asset('images/logostesy.svg') }}" as="image" type="image/svg+xml">
+    <link rel="preload" href="{{ asset('images/belimo.svg') }}" as="image" type="image/svg+xml">
+
     @vite(['resources/css/app.css'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -228,7 +235,7 @@
     <div class="left-panel">
         <p class="tagline">Smarter control for better buildings.</p>
         <p class="subtitle">Pahami kondisi gedung lebih cepat, kelola dengan lebih tepat</p>
-        <img src="{{ asset('images/login_img2.png') }}" alt="BMS Illustration" class="illustration">
+        <img src="{{ asset('images/login_img2.png') }}" alt="BMS Illustration" class="illustration" decoding="async">
     </div>
 
     {{-- ── Right Panel ── --}}
@@ -303,9 +310,9 @@
         {{-- Partner Logos --}}
         <div class="partner-logos">
             <div class="logo-row">
-                <img src="{{ asset('images/logo_be.svg') }}" alt="Beacon Engineering">
-                <img src="{{ asset('images/logostesy.svg') }}" alt="Stesy">
-                <img src="{{ asset('images/belimo.svg') }}" alt="Belimo">
+                <img src="{{ asset('images/logo_be.svg') }}" alt="Beacon Engineering" decoding="async">
+                <img src="{{ asset('images/logostesy.svg') }}" alt="Stesy" decoding="async">
+                <img src="{{ asset('images/belimo.svg') }}" alt="Belimo" decoding="async">
             </div>
             <p class="copyright">© Beacon Engineering {{ date('Y') }}</p>
         </div>
