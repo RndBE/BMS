@@ -58,9 +58,18 @@
 <div id="room-tooltip" class="hidden fixed z-[9999] bg-white rounded-xl shadow-[0_8px_24px_rgba(0,0,0,.18)] px-3.5 py-3 min-w-[170px] pointer-events-none border border-slate-200 font-['Inter']">
     <div id="tt-name" class="text-[14px] font-bold text-slate-800 mb-2"></div>
     <div id="tt-status" class="text-[11px] font-semibold px-2.5 py-1 rounded-full inline-flex items-center gap-1.5 mb-2.5"></div>
-    <div class="flex items-center gap-2 text-[13px] text-slate-700 py-0.5"><span>🌡️</span><span id="tt-temp"></span></div>
-    <div class="flex items-center gap-2 text-[13px] text-slate-700 py-0.5"><span>💧</span><span id="tt-hum"></span></div>
-    <div class="flex items-center gap-2 text-[13px] text-slate-700 py-0.5"><span>❄️</span><span id="tt-ac"></span></div>
+    <div class="flex items-center gap-2 text-[13px] text-slate-700 py-0.5">
+        <img src="{{ asset('icons/dashboard/suhu.svg') }}" class="w-4 h-4" alt="Suhu">
+        <span id="tt-temp"></span>
+    </div>
+    <div class="flex items-center gap-2 text-[13px] text-slate-700 py-0.5">
+        <img src="{{ asset('icons/dashboard/kelembaban.svg') }}" class="w-4 h-4" alt="Hum">
+        <span id="tt-hum"></span>
+    </div>
+    <div class="flex items-center gap-2 text-[13px] text-slate-700 py-0.5">
+        <img id="tt-ac-icon" src="{{ asset('icons/dashboard/ac_off.svg') }}" class="w-4 h-4" alt="AC">
+        <span id="tt-ac"></span>
+    </div>
 </div>
 
 <!-- MAIN CONTENT -->
@@ -529,6 +538,13 @@ function showMarkerTooltip(event, roomId) {
     document.getElementById('tt-temp').textContent = temp;
     document.getElementById('tt-hum').textContent  = hum;
     document.getElementById('tt-ac').textContent   = ac;
+
+    const acIconEl = document.getElementById('tt-ac-icon');
+    if (acIconEl) {
+        acIconEl.src = (ac === 'ON') 
+            ? "{{ asset('icons/dashboard/ac_on.svg') }}" 
+            : "{{ asset('icons/dashboard/ac_off.svg') }}";
+    }
 
     const tooltip = document.getElementById('room-tooltip');
     tooltip.classList.remove('hidden');
