@@ -17,45 +17,55 @@
         <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm px-5 py-4">
             <div class="flex flex-wrap gap-3 items-end w-full">
                 {{-- Ruangan --}}
-                <div class="flex flex-col gap-2 flex-1">
+                <div class="flex flex-col gap-2 flex-1 relative custom-select-wrapper">
                     <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Ruangan</label>
-                    <select name="room_id" id="sel-room"
-                        class="border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-blue-400 cursor-pointer ">
+                    <select name="room_id" id="sel-room" class="hidden real-select">
                         @foreach($rooms as $room)
-                            <option value="{{ $room->id }}" {{ $room->id == $selectedRoomId ? 'selected' : '' }}>
-                                {{ $room->name }}
-                            </option>
+                            <option value="{{ $room->id }}" {{ $room->id == $selectedRoomId ? 'selected' : '' }}>{{ $room->name }}</option>
                         @endforeach
                     </select>
+                    <button type="button" class="select-btn flex justify-between items-center border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 cursor-pointer">
+                        <span class="select-text truncate">Pilih Ruangan</span>
+                        <svg class="w-4 h-4 text-slate-400 shrink-0 pointer-events-none ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <ul class="select-dropdown absolute top-[100%] left-0 w-full mt-1 bg-white dark:bg-[#2a2a2a] border border-slate-200 dark:border-[#3d3d3d] rounded-lg shadow-lg hidden max-h-60 overflow-y-auto py-1 z-50 text-[13px] text-slate-700 dark:text-slate-200"></ul>
                 </div>
 
                 {{-- Parameter --}}
-                <div class="flex flex-col gap-2 flex-1">
+                <div class="flex flex-col gap-2 flex-1 relative custom-select-wrapper">
                     <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Parameter</label>
-                    <select name="parameter" id="sel-parameter"
-                        class="border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-blue-400 cursor-pointer">
+                    <select name="parameter" id="sel-parameter" class="hidden real-select">
                         @foreach($parameterLabels as $key => $label)
                             <option value="{{ $key }}" {{ $parameter === $key ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
                     </select>
+                    <button type="button" class="select-btn flex justify-between items-center border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 cursor-pointer">
+                        <span class="select-text truncate">Pilih Parameter</span>
+                        <svg class="w-4 h-4 text-slate-400 shrink-0 pointer-events-none ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <ul class="select-dropdown absolute top-[100%] left-0 w-full mt-1 bg-white dark:bg-[#2a2a2a] border border-slate-200 dark:border-[#3d3d3d] rounded-lg shadow-lg hidden max-h-60 overflow-y-auto py-1 z-50 text-[13px] text-slate-700 dark:text-slate-200"></ul>
                 </div>
 
                 {{-- Periode --}}
-                <div class="flex flex-col gap-2 flex-1">
+                <div class="flex flex-col gap-2 flex-1 relative custom-select-wrapper">
                     <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Periode</label>
-                    <select name="periode" id="sel-periode"
-                        class="border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-blue-400 cursor-pointer">
+                    <select name="periode" id="sel-periode" class="hidden real-select">
                         <option value="harian"   {{ $periode === 'harian'   ? 'selected' : '' }}>Harian</option>
                         <option value="mingguan" {{ $periode === 'mingguan' ? 'selected' : '' }}>Mingguan</option>
                         <option value="bulanan"  {{ $periode === 'bulanan'  ? 'selected' : '' }}>Bulanan</option>
                     </select>
+                    <button type="button" class="select-btn flex justify-between items-center border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 cursor-pointer">
+                        <span class="select-text truncate">Pilih Periode</span>
+                        <svg class="w-4 h-4 text-slate-400 shrink-0 pointer-events-none ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <ul class="select-dropdown absolute top-[100%] left-0 w-full mt-1 bg-white dark:bg-[#2a2a2a] border border-slate-200 dark:border-[#3d3d3d] rounded-lg shadow-lg hidden max-h-60 overflow-y-auto py-1 z-50 text-[13px] text-slate-700 dark:text-slate-200"></ul>
                 </div>
 
                 {{-- Tanggal --}}
                 <div class="flex flex-col gap-2 flex-1">
                     <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Tanggal</label>
                     <input type="date" name="tanggal" id="inp-tanggal" value="{{ $tanggal }}"
-                        class="border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-blue-400 w-full cursor-pointer">
+                        class="border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 w-full cursor-pointer">
                 </div>
 
                 {{-- Buttons --}}
@@ -443,6 +453,67 @@
     }
 
     const ctx = document.getElementById('analysisChart').getContext('2d');
+
+    // ── Custom Select Initialization ─────────────────────────────────────────
+    document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => {
+        const realSelect = wrapper.querySelector('.real-select');
+        const btn = wrapper.querySelector('.select-btn');
+        const text = wrapper.querySelector('.select-text');
+        const dropdown = wrapper.querySelector('.select-dropdown');
+        
+        const populateDropdown = () => {
+            dropdown.innerHTML = '';
+            const selectedOpt = realSelect.options[realSelect.selectedIndex];
+            if (selectedOpt) text.textContent = selectedOpt.text;
+            
+            Array.from(realSelect.options).forEach((opt, index) => {
+                const li = document.createElement('li');
+                li.textContent = opt.text;
+                li.className = 'px-3 py-2 cursor-pointer transition-colors ' + 
+                    (index === realSelect.selectedIndex 
+                        ? 'bg-red-50 text-red-700 font-medium dark:bg-red-900/30 dark:text-red-400' 
+                        : 'hover:bg-red-50 hover:text-red-700 dark:hover:bg-[#3d3d3d] dark:hover:text-red-400');
+                
+                li.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    realSelect.selectedIndex = index;
+                    text.textContent = opt.text;
+                    dropdown.classList.add('hidden');
+                    populateDropdown(); // re-render untuk warna status aktif
+                    realSelect.dispatchEvent(new Event('change'));
+                });
+                dropdown.appendChild(li);
+            });
+        };
+        
+        populateDropdown();
+        
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation(); // Biar klik ngga bubar document listener
+            
+            const isHidden = dropdown.classList.contains('hidden');
+            // Tutup semua yang lain
+            document.querySelectorAll('.select-dropdown:not(.hidden)').forEach(d => {
+                d.classList.add('hidden');
+                d.parentElement.querySelector('.select-btn').classList.remove('ring-1', 'ring-red-400');
+            });
+            
+            if (isHidden) {
+                dropdown.classList.remove('hidden');
+                btn.classList.add('ring-1', 'ring-red-400');
+            } else {
+                btn.classList.remove('ring-1', 'ring-red-400');
+            }
+        });
+    });
+
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.select-dropdown').forEach(d => {
+            d.classList.add('hidden');
+            d.parentElement.querySelector('.select-btn').classList.remove('ring-1', 'ring-red-400');
+        });
+    });
 
     new Chart(ctx, {
         type: 'line',

@@ -166,13 +166,19 @@
                 </div>
                 <div>
                     <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-400 mb-1.5">Role</label>
-                    <select id="user-role"
-                            class="w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] focus:outline-none focus:border-red-400 transition-colors bg-white">
-                        <option value="">-- Pilih Role --</option>
-                        @foreach($allRoles as $role)
-                            <option value="{{ $role->name }}">{{ $role->name }}</option>
-                        @endforeach
-                    </select>
+                    <div class="relative custom-select-wrapper w-full">
+                        <select id="user-role" class="hidden real-select">
+                            <option value="">-- Pilih Role --</option>
+                            @foreach($allRoles as $role)
+                                <option value="{{ $role->name }}">{{ $role->name }}</option>
+                            @endforeach
+                        </select>
+                        <button type="button" class="select-btn flex items-center justify-between w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 cursor-pointer transition-colors">
+                            <span class="select-text truncate text-left">-- Pilih Role --</span>
+                            <svg class="w-4 h-4 text-slate-400 shrink-0 pointer-events-none ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <ul class="select-dropdown absolute top-[100%] left-0 w-full mt-1 bg-white dark:bg-[#2a2a2a] border border-slate-200 dark:border-[#3d3d3d] rounded-lg shadow-lg hidden max-h-60 overflow-y-auto py-1 z-[1100] text-[13px] text-slate-700 dark:text-slate-200"></ul>
+                    </div>
                 </div>
             </div>
 
@@ -325,6 +331,89 @@
     });
 
     modal.addEventListener('click', (e) => { if (e.target === modal) closeUserModal(); });
+})();
+</script>
+<script>
+// ── Custom Select Initialization ─────────────────────────────────────────
+(function() {
+    document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => {
+        const realSelect = wrapper.querySelector('.real-select');
+        const btn = wrapper.querySelector('.select-btn');
+        const text = wrapper.querySelector('.select-text');
+        const dropdown = wrapper.querySelector('.select-dropdown');
+        if (!realSelect || !btn || !text || !dropdown) return;
+
+        const populateDropdown = () => {
+            dropdown.innerHTML = '';
+            const selectedOpt = realSelect.options[realSelect.selectedIndex];
+            if (selectedOpt) text.textContent = selectedOpt.text;
+            
+            Array.from(realSelect.options).forEach((opt, index) => {
+                const li = document.createElement('li');
+                li.textContent = opt.text;
+                li.className = 'px-3 py-2 cursor-pointer transition-colors ' + 
+                    (index === realSelect.selectedIndex 
+                        ? 'bg-red-50 text-red-700 font-medium dark:bg-red-900/30 dark:text-red-400' 
+                        : 'hover:bg-red-50 hover:text-red-700 dark:hover:bg-[#3d3d3d] dark:hover:text-red-400');
+                
+                li.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    realSelect.selectedIndex = index;
+                    text.textContent = opt.text;
+                    dropdown.classList.add('hidden');
+                    populateDropdown();
+                    if (typeof realSelect.onchange === 'function') {
+                        realSelect.onchange({ target: realSelect });
+                    } else if (realSelect.getAttribute('onchange')) {
+                        eval(realSelect.getAttribute('onchange'));
+                    } else {
+                        realSelect.dispatchEvent(new Event('change'));
+                    }
+                });
+                dropdown.appendChild(li);
+            });
+        };
+        
+        populateDropdown();
+
+        // Mencegat setter .value dari JS (berguna untuk modal edit)
+        const originalSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value') ? 
+                               Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value').set : null;
+        if(originalSetter) {
+            Object.defineProperty(realSelect, 'value', {
+                set: function(val) {
+                    originalSetter.call(this, val);
+                    populateDropdown();
+                },
+                get: function() {
+                    return Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value').get.call(this);
+                }
+            });
+        }
+        
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const isHidden = dropdown.classList.contains('hidden');
+            document.querySelectorAll('.select-dropdown:not(.hidden)').forEach(d => {
+                d.classList.add('hidden');
+                d.parentElement.querySelector('.select-btn')?.classList.remove('border-red-400', 'ring-1', 'ring-red-400');
+            });
+            if (isHidden) {
+                dropdown.classList.remove('hidden');
+                btn.classList.add('border-red-400', 'ring-1', 'ring-red-400');
+            } else {
+                btn.classList.remove('border-red-400', 'ring-1', 'ring-red-400');
+            }
+        });
+    });
+
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.select-dropdown').forEach(d => {
+            d.classList.add('hidden');
+            d.parentElement.querySelector('.select-btn')?.classList.remove('border-red-400', 'ring-1', 'ring-red-400');
+        });
+    });
 })();
 </script>
 @endpush

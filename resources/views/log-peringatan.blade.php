@@ -28,46 +28,62 @@ function logBadge(string $type): string {
         <form method="GET" action="{{ route('log-peringatan.index') }}" id="logForm" class="flex items-center gap-2 flex-wrap">
 
             {{-- Waktu --}}
-            <div class="relative">
-                <select name="waktu" onchange="document.getElementById('logForm').submit()"
-                    class="appearance-none border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg pl-3 pr-8 py-[7px] text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 bg-white cursor-pointer">
+            <div class="relative custom-select-wrapper min-w-[140px]">
+                <select name="waktu" onchange="document.getElementById('logForm').submit()" class="hidden real-select">
                     <option value="hari_ini" {{ (request('waktu','hari_ini')==='hari_ini') ? 'selected':'' }}>Waktu: Hari Ini</option>
                     <option value="7hari"    {{ request('waktu')==='7hari'   ? 'selected':'' }}>Waktu: 7 Hari</option>
                     <option value="30hari"   {{ request('waktu')==='30hari'  ? 'selected':'' }}>Waktu: 30 Hari</option>
                     <option value="semua"    {{ request('waktu')==='semua'   ? 'selected':'' }}>Waktu: Semua</option>
                 </select>
+                <button type="button" class="select-btn flex items-center justify-between w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg pl-3 pr-2 py-[7px] text-[12.5px] text-slate-700 bg-white focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 cursor-pointer">
+                    <span class="select-text truncate text-left">Memuat...</span>
+                    <svg class="w-3.5 h-3.5 text-slate-400 shrink-0 pointer-events-none ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <ul class="select-dropdown absolute top-[100%] left-0 w-full mt-1 bg-white dark:bg-[#2a2a2a] border border-slate-200 dark:border-[#3d3d3d] rounded-lg shadow-lg hidden max-h-60 overflow-y-auto py-1 z-50 text-[12.5px] text-slate-700 dark:text-slate-200"></ul>
             </div>
 
             {{-- Kategori --}}
-            <div class="relative">
-                <select name="kategori" onchange="document.getElementById('logForm').submit()"
-                    class="appearance-none border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg pl-3 pr-8 py-[7px] text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 bg-white cursor-pointer">
+            <div class="relative custom-select-wrapper min-w-[140px]">
+                <select name="kategori" onchange="document.getElementById('logForm').submit()" class="hidden real-select">
                     <option value="">Kategori: Semua</option>
                     @foreach($kategori as $kat)
                         <option value="{{ $kat }}" {{ request('kategori')===$kat ? 'selected':'' }}>Kategori: {{ $kat }}</option>
                     @endforeach
                 </select>
+                <button type="button" class="select-btn flex items-center justify-between w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg pl-3 pr-2 py-[7px] text-[12.5px] text-slate-700 bg-white focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 cursor-pointer">
+                    <span class="select-text truncate text-left">Memuat...</span>
+                    <svg class="w-3.5 h-3.5 text-slate-400 shrink-0 pointer-events-none ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <ul class="select-dropdown absolute top-[100%] left-0 w-full mt-1 bg-white dark:bg-[#2a2a2a] border border-slate-200 dark:border-[#3d3d3d] rounded-lg shadow-lg hidden max-h-60 overflow-y-auto py-1 z-50 text-[12.5px] text-slate-700 dark:text-slate-200"></ul>
             </div>
 
             {{-- Ruangan --}}
-            <div class="relative">
-                <select name="room_id" onchange="document.getElementById('logForm').submit()"
-                    class="appearance-none border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg pl-3 pr-8 py-[7px] text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 bg-white cursor-pointer">
+            <div class="relative custom-select-wrapper min-w-[140px]">
+                <select name="room_id" onchange="document.getElementById('logForm').submit()" class="hidden real-select">
                     <option value="">Ruangan: Semua</option>
                     @foreach($rooms as $room)
                         <option value="{{ $room->id }}" {{ request('room_id')==$room->id ? 'selected':'' }}>Ruangan: {{ $room->name }}</option>
                     @endforeach
                 </select>
+                <button type="button" class="select-btn flex items-center justify-between w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg pl-3 pr-2 py-[7px] text-[12.5px] text-slate-700 bg-white focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 cursor-pointer">
+                    <span class="select-text truncate text-left">Memuat...</span>
+                    <svg class="w-3.5 h-3.5 text-slate-400 shrink-0 pointer-events-none ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <ul class="select-dropdown absolute top-[100%] left-0 w-full mt-1 bg-white dark:bg-[#2a2a2a] border border-slate-200 dark:border-[#3d3d3d] rounded-lg shadow-lg hidden max-h-60 overflow-y-auto py-1 z-50 text-[12.5px] text-slate-700 dark:text-slate-200"></ul>
             </div>
 
             {{-- Status --}}
-            <div class="relative">
-                <select name="severity" onchange="document.getElementById('logForm').submit()"
-                    class="appearance-none border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg pl-3 pr-8 py-[7px] text-[12.5px] text-slate-700 focus:outline-none focus:border-red-400 bg-white cursor-pointer">
+            <div class="relative custom-select-wrapper min-w-[140px]">
+                <select name="severity" onchange="document.getElementById('logForm').submit()" class="hidden real-select">
                     <option value="">Status: Semua</option>
                     <option value="warning"  {{ request('severity')==='warning'  ? 'selected':'' }}>Status: Warning</option>
                     <option value="critical" {{ request('severity')==='critical' ? 'selected':'' }}>Status: Poor</option>
                 </select>
+                <button type="button" class="select-btn flex items-center justify-between w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg pl-3 pr-2 py-[7px] text-[12.5px] text-slate-700 bg-white focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 cursor-pointer">
+                    <span class="select-text truncate text-left">Memuat...</span>
+                    <svg class="w-3.5 h-3.5 text-slate-400 shrink-0 pointer-events-none ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <ul class="select-dropdown absolute top-[100%] left-0 w-full mt-1 bg-white dark:bg-[#2a2a2a] border border-slate-200 dark:border-[#3d3d3d] rounded-lg shadow-lg hidden max-h-60 overflow-y-auto py-1 z-50 text-[12.5px] text-slate-700 dark:text-slate-200"></ul>
             </div>
 
         </form>
@@ -393,6 +409,76 @@ function markAllRead() {
         if (btn) btn.closest('div').classList.add('hidden');
     }).catch(() => {});
 }
+</script>
+
+<script>
+// ── Custom Select Initialization ─────────────────────────────────────────
+(function() {
+    document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => {
+        const realSelect = wrapper.querySelector('.real-select');
+        const btn = wrapper.querySelector('.select-btn');
+        const text = wrapper.querySelector('.select-text');
+        const dropdown = wrapper.querySelector('.select-dropdown');
+        
+        const populateDropdown = () => {
+            dropdown.innerHTML = '';
+            const selectedOpt = realSelect.options[realSelect.selectedIndex];
+            if (selectedOpt) text.textContent = selectedOpt.text;
+            
+            Array.from(realSelect.options).forEach((opt, index) => {
+                const li = document.createElement('li');
+                li.textContent = opt.text;
+                li.className = 'px-3 py-1.5 cursor-pointer transition-colors ' + 
+                    (index === realSelect.selectedIndex 
+                        ? 'bg-red-50 text-red-700 font-medium dark:bg-red-900/30 dark:text-red-400' 
+                        : 'hover:bg-red-50 hover:text-red-700 dark:hover:bg-[#3d3d3d] dark:hover:text-red-400');
+                
+                li.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    realSelect.selectedIndex = index;
+                    text.textContent = opt.text;
+                    dropdown.classList.add('hidden');
+                    populateDropdown();
+                    if (typeof realSelect.onchange === 'function') {
+                        realSelect.onchange({ target: realSelect });
+                    } else if(realSelect.getAttribute('onchange')) {
+                        eval(realSelect.getAttribute('onchange'));
+                    } else {
+                        realSelect.dispatchEvent(new Event('change'));
+                    }
+                });
+                dropdown.appendChild(li);
+            });
+        };
+        
+        populateDropdown();
+        
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const isHidden = dropdown.classList.contains('hidden');
+            document.querySelectorAll('.select-dropdown:not(.hidden)').forEach(d => {
+                d.classList.add('hidden');
+                d.parentElement.querySelector('.select-btn')?.classList.remove('ring-1', 'ring-red-400');
+            });
+            
+            if (isHidden) {
+                dropdown.classList.remove('hidden');
+                btn.classList.add('ring-1', 'ring-red-400');
+            } else {
+                btn.classList.remove('ring-1', 'ring-red-400');
+            }
+        });
+    });
+
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.select-dropdown').forEach(d => {
+            d.classList.add('hidden');
+            d.parentElement.querySelector('.select-btn')?.classList.remove('ring-1', 'ring-red-400');
+        });
+    });
+})();
 </script>
 @endpush
 

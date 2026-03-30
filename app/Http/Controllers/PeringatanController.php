@@ -170,7 +170,8 @@ class PeringatanController extends Controller
 
         $query = Alert::with(['room', 'alertRule'])
             ->when($request->room_id,   fn($q) => $q->where('room_id', $request->room_id))
-            ->when($request->severity,  fn($q) => $q->where('type', $request->severity))
+            ->when($request->severity === 'critical', fn($q) => $q->where('type', 'critical'))
+            ->when($request->severity === 'warning',  fn($q) => $q->where('type', '!=', 'critical'))
             ->when($request->kategori,  fn($q) => $q->whereHas('alertRule', fn($r) => $r->where('kategori', $request->kategori)))
             ->when($request->search,    fn($q) => $q->where('message', 'like', '%'.$request->search.'%')
                 ->orWhereHas('alertRule', fn($r) => $r->where('name', 'like', '%'.$request->search.'%')))
