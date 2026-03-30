@@ -228,7 +228,7 @@
     <div class="left-panel">
         <p class="tagline">Smarter control for better buildings.</p>
         <p class="subtitle">Pahami kondisi gedung lebih cepat, kelola dengan lebih tepat</p>
-        <img src="{{ asset('images/login_img.svg') }}" alt="BMS Illustration" class="illustration">
+        <img src="{{ asset('images/login_img1.png') }}" alt="BMS Illustration" class="illustration">
     </div>
 
     {{-- ── Right Panel ── --}}
