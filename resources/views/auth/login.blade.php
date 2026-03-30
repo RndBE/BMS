@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login – BMS Beacon Engineering</title>
+    <title>BMS Beacon Engineering</title>
 
-    {{-- Preload prioritas gambar agar load lebih instan tanpa cache --}}
+    {{-- Preload prioritas gambar utama (LCP) saja agar tidak memblokir render aset lain --}}
     <link rel="preload" href="{{ asset('images/login_img2.png') }}" as="image">
-    <link rel="preload" href="{{ asset('images/logo_be.svg') }}" as="image" type="image/svg+xml">
-    <link rel="preload" href="{{ asset('images/logostesy.svg') }}" as="image" type="image/svg+xml">
-    <link rel="preload" href="{{ asset('images/belimo.svg') }}" as="image" type="image/svg+xml">
 
     @vite(['resources/css/app.css'])
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -235,7 +234,7 @@
     <div class="left-panel">
         <p class="tagline">Smarter control for better buildings.</p>
         <p class="subtitle">Pahami kondisi gedung lebih cepat, kelola dengan lebih tepat</p>
-        <img src="{{ asset('images/login_img2.png') }}" alt="BMS Illustration" class="illustration" decoding="async">
+        <img src="{{ asset('images/login_img2.png') }}" alt="BMS Illustration" class="illustration">
     </div>
 
     {{-- ── Right Panel ── --}}
