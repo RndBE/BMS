@@ -17,48 +17,54 @@
         <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm px-5 py-4">
             <div class="flex flex-wrap gap-3 items-end w-full">
                 {{-- Ruangan --}}
-                <div class="flex flex-col gap-2 flex-1 relative custom-select-wrapper">
+                <div class="flex flex-col gap-2 flex-1">
                     <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Ruangan</label>
-                    <select name="room_id" id="sel-room" class="hidden real-select">
-                        @foreach($rooms as $room)
-                            <option value="{{ $room->id }}" {{ $room->id == $selectedRoomId ? 'selected' : '' }}>{{ $room->name }}</option>
-                        @endforeach
-                    </select>
-                    <button type="button" class="select-btn flex justify-between items-center border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 cursor-pointer">
-                        <span class="select-text truncate">Pilih Ruangan</span>
-                        <svg class="w-4 h-4 text-slate-400 shrink-0 pointer-events-none ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <ul class="select-dropdown absolute top-full left-0 w-full mt-1 bg-white dark:bg-[#2a2a2a] border border-slate-200 dark:border-[#3d3d3d] rounded-lg shadow-lg hidden max-h-60 overflow-y-auto py-1 z-50 text-[13px] text-slate-700 dark:text-slate-200"></ul>
+                    <div class="relative custom-select-wrapper w-full">
+                        <select name="room_id" id="sel-room" class="hidden real-select">
+                            @foreach($rooms as $room)
+                                <option value="{{ $room->id }}" {{ $room->id == $selectedRoomId ? 'selected' : '' }}>{{ $room->name }}</option>
+                            @endforeach
+                        </select>
+                        <button type="button" class="select-btn flex justify-between items-center w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 cursor-pointer">
+                            <span class="select-text truncate">Pilih Ruangan</span>
+                            <svg class="w-4 h-4 text-slate-400 shrink-0 pointer-events-none ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <ul class="select-dropdown absolute top-full left-0 w-full mt-1 bg-white dark:bg-[#2a2a2a] border border-slate-200 dark:border-[#3d3d3d] rounded-lg shadow-lg hidden max-h-60 overflow-y-auto py-1 z-50 text-[13px] text-slate-700 dark:text-slate-200"></ul>
+                    </div>
                 </div>
 
                 {{-- Parameter --}}
-                <div class="flex flex-col gap-2 flex-1 relative custom-select-wrapper">
+                <div class="flex flex-col gap-2 flex-1">
                     <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Parameter</label>
-                    <select name="parameter" id="sel-parameter" class="hidden real-select">
-                        @foreach($parameterLabels as $key => $label)
-                            <option value="{{ $key }}" {{ $parameter === $key ? 'selected' : '' }}>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                    <button type="button" class="select-btn flex justify-between items-center border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 cursor-pointer">
-                        <span class="select-text truncate">Pilih Parameter</span>
-                        <svg class="w-4 h-4 text-slate-400 shrink-0 pointer-events-none ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <ul class="select-dropdown absolute top-full left-0 w-full mt-1 bg-white dark:bg-[#2a2a2a] border border-slate-200 dark:border-[#3d3d3d] rounded-lg shadow-lg hidden max-h-60 overflow-y-auto py-1 z-50 text-[13px] text-slate-700 dark:text-slate-200"></ul>
+                    <div class="relative custom-select-wrapper w-full">
+                        <select name="parameter" id="sel-parameter" class="hidden real-select">
+                            @foreach($parameterLabels as $key => $label)
+                                <option value="{{ $key }}" {{ $parameter === $key ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        <button type="button" class="select-btn flex justify-between items-center w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 cursor-pointer">
+                            <span class="select-text truncate">Pilih Parameter</span>
+                            <svg class="w-4 h-4 text-slate-400 shrink-0 pointer-events-none ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <ul class="select-dropdown absolute top-full left-0 w-full mt-1 bg-white dark:bg-[#2a2a2a] border border-slate-200 dark:border-[#3d3d3d] rounded-lg shadow-lg hidden max-h-60 overflow-y-auto py-1 z-50 text-[13px] text-slate-700 dark:text-slate-200"></ul>
+                    </div>
                 </div>
 
                 {{-- Periode --}}
-                <div class="flex flex-col gap-2 flex-1 relative custom-select-wrapper">
+                <div class="flex flex-col gap-2 flex-1">
                     <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Periode</label>
-                    <select name="periode" id="sel-periode" class="hidden real-select">
-                        <option value="harian"   {{ $periode === 'harian'   ? 'selected' : '' }}>Harian</option>
-                        <option value="mingguan" {{ $periode === 'mingguan' ? 'selected' : '' }}>Mingguan</option>
-                        <option value="bulanan"  {{ $periode === 'bulanan'  ? 'selected' : '' }}>Bulanan</option>
-                    </select>
-                    <button type="button" class="select-btn flex justify-between items-center border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 cursor-pointer">
-                        <span class="select-text truncate">Pilih Periode</span>
-                        <svg class="w-4 h-4 text-slate-400 shrink-0 pointer-events-none ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <ul class="select-dropdown absolute top-full left-0 w-full mt-1 bg-white dark:bg-[#2a2a2a] border border-slate-200 dark:border-[#3d3d3d] rounded-lg shadow-lg hidden max-h-60 overflow-y-auto py-1 z-50 text-[13px] text-slate-700 dark:text-slate-200"></ul>
+                    <div class="relative custom-select-wrapper w-full">
+                        <select name="periode" id="sel-periode" class="hidden real-select">
+                            <option value="harian"   {{ $periode === 'harian'   ? 'selected' : '' }}>Harian</option>
+                            <option value="mingguan" {{ $periode === 'mingguan' ? 'selected' : '' }}>Mingguan</option>
+                            <option value="bulanan"  {{ $periode === 'bulanan'  ? 'selected' : '' }}>Bulanan</option>
+                        </select>
+                        <button type="button" class="select-btn flex justify-between items-center w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 cursor-pointer">
+                            <span class="select-text truncate">Pilih Periode</span>
+                            <svg class="w-4 h-4 text-slate-400 shrink-0 pointer-events-none ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <ul class="select-dropdown absolute top-full left-0 w-full mt-1 bg-white dark:bg-[#2a2a2a] border border-slate-200 dark:border-[#3d3d3d] rounded-lg shadow-lg hidden max-h-60 overflow-y-auto py-1 z-50 text-[13px] text-slate-700 dark:text-slate-200"></ul>
+                    </div>
                 </div>
 
                 {{-- Tanggal --}}
