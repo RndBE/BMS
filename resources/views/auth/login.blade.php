@@ -6,7 +6,7 @@
     <title>BMS Beacon Engineering</title>
 
     {{-- Preload prioritas gambar utama (LCP) saja agar tidak memblokir render aset lain --}}
-    <link rel="preload" href="{{ asset('images/login_img2.png') }}" as="image">
+    <link rel="preload" href="{{ asset('images/login_img3.webp') }}" as="image">
 
     @vite(['resources/css/app.css'])
     
@@ -234,7 +234,7 @@
     <div class="left-panel">
         <p class="tagline">Smarter control for better buildings.</p>
         <p class="subtitle">Pahami kondisi gedung lebih cepat, kelola dengan lebih tepat</p>
-        <img src="{{ asset('images/login_img2.png') }}" alt="BMS Illustration" class="illustration">
+        <img src="{{ asset('images/login_img3.webp') }}" alt="BMS Illustration" class="illustration">
     </div>
 
     {{-- ── Right Panel ── --}}
