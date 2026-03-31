@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BMS Beacon Engineering</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo_be.svg') }}">
 
     {{-- Preload prioritas gambar utama (LCP) saja agar tidak memblokir render aset lain --}}
     <link rel="preload" href="{{ asset('images/login_img3.webp') }}" as="image">
