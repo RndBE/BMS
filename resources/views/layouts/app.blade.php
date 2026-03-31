@@ -110,7 +110,7 @@
 
         @can('lihat_analisa')
         <a href="{{ route('rekap-data.index') }}" class="nav-item flex items-center gap-3 px-5 py-[11px] no-underline text-[13.5px] font-medium relative transition-all duration-200 {{ request()->routeIs('rekap-data.*') ? 'bg-red-700 text-white' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#1e1e1e] hover:text-slate-900 dark:hover:text-white' }}">
-            <img src="{{ asset('icons/analisa-data.svg') }}" alt="Rekap Data" class="w-[18px] h-[18px] shrink-0">
+            <img src="{{ asset('icons/rekap-data.svg') }}" alt="Rekap Data" class="w-[18px] h-[18px] shrink-0">
             <span class="sidebar-label">Rekap Data</span>
         </a>
         @endcan
