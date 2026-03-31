@@ -39,9 +39,23 @@
         body.sidebar-collapsed .sidebar-label  { display: none; }
         body.sidebar-collapsed .sidebar-section-label { display: none; }
         body.sidebar-collapsed .sidebar-logo-text { display: none; }
-        body.sidebar-collapsed .nav-item       { justify-content: center; padding-left: 0; padding-right: 0; }
+        body.sidebar-collapsed .nav-item       { justify-content: center; padding: 0 !important; width: 40px; height: 40px; margin: 6px auto; border-radius: 10px; }
+        body.sidebar-collapsed #pengaturan-chevron { display: none; }
         body.sidebar-collapsed .nav-item svg,
-        body.sidebar-collapsed .nav-item i     { margin: 0 auto; }
+        body.sidebar-collapsed .nav-item img,
+        body.sidebar-collapsed .nav-item i     { margin: 0; }
+        
+        /* Tampilan khusus Submenu Pengaturan saat collapsed */
+        body.sidebar-collapsed #pengaturan-sub .absolute { left: 50% !important; transform: translateX(-50%); }
+        body.sidebar-collapsed #pengaturan-sub img { display: none !important; }
+        body.sidebar-collapsed #pengaturan-sub a { 
+            background: transparent !important; 
+            box-shadow: none !important; 
+            margin: 0 !important; 
+            padding: 0 !important;
+            height: 31px;
+            width: 100%;
+        }
 
         /* ── Tablet (768–1023px): auto-collapse to icons ── */
         @media (min-width: 768px) and (max-width: 1023px) {
@@ -49,7 +63,21 @@
             #topbar       { left: 64px !important; }
             #main-content { margin-left: 64px !important; }
             .sidebar-label, .sidebar-logo-text, .sidebar-section-label { display: none !important; }
-            .nav-item { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
+            #pengaturan-chevron { display: none !important; }
+            .nav-item { justify-content: center !important; padding: 0 !important; width: 40px !important; height: 40px !important; margin: 6px auto !important; border-radius: 10px !important; }
+            .nav-item svg, .nav-item img, .nav-item i { margin: 0; }
+
+            /* Submenu Pengaturan Collapsed Tablet */
+            #pengaturan-sub .absolute { left: 50% !important; transform: translateX(-50%); }
+            #pengaturan-sub img { display: none !important; }
+            #pengaturan-sub a { 
+                background: transparent !important; 
+                box-shadow: none !important; 
+                margin: 0 !important; 
+                padding: 0 !important;
+                height: 31px;
+                width: 100%;
+            }
         }
 
         /* ── Mobile (< 768px): sidebar overlay ── */
@@ -142,42 +170,55 @@
             <div id="pengaturan-sub" class="overflow-hidden transition-all duration-200" style="max-height:0;">
                 @can('kelola_pengaturan')
                 @php $isActive = request()->routeIs('pengaturan.umum'); @endphp
-                <a href="{{ route('pengaturan.umum') }}"
-                    class="flex items-center gap-3 pl-12 pr-5 py-[9px] no-underline text-[13px] font-medium transition-all duration-150
-                            {{ $isActive ? 'bg-red-700 text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e1e1e]' }}">
-                    <img src="{{ asset('icons/umum.svg') }}" alt="Umum" class="w-[15px] h-[15px] shrink-0 {{ $isActive ? 'opacity-90' : 'opacity-70' }}">
-                    <span class="sidebar-label">Umum</span>
-                </a>
+                <div class="relative py-[2.5px] group">
+                    <!-- Garis Indikator -->
+                    <div class="absolute left-[26px] top-0 bottom-0 w-[2px] {{ $isActive ? 'bg-red-600' : 'border-l-[1.5px] border-dashed border-slate-300 dark:border-[#3d3d3d] group-hover:border-slate-400 dark:group-hover:border-slate-500 transition-colors' }}"></div>
+                    <a href="{{ route('pengaturan.umum') }}"
+                        class="relative flex items-center gap-3 ml-[44px] mr-4 px-3 py-[8px] rounded-[10px] no-underline text-[13px] font-medium transition-all duration-150
+                                {{ $isActive ? 'bg-red-700 text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#2a2a2a]' }}">
+                        <img src="{{ asset('icons/umum.svg') }}" alt="Umum" class="w-[15px] h-[15px] shrink-0 {{ $isActive ? 'opacity-90' : 'opacity-70' }}">
+                        <span class="sidebar-label">Umum</span>
+                    </a>
+                </div>
                 @endcan
 
                 @can('kelola_konfigurasi')
                 @php $isActive = request()->routeIs('pengaturan.konfigurasi'); @endphp
-                <a href="{{ route('pengaturan.konfigurasi') }}"
-                    class="flex items-center gap-3 pl-12 pr-5 py-[9px] no-underline text-[13px] font-medium transition-all duration-150
-                            {{ $isActive ? 'bg-red-700 text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e1e1e]' }}">
-                    <img src="{{ asset('icons/konfig.svg') }}" alt="Konfigurasi" class="w-[15px] h-[15px] shrink-0 {{ $isActive ? 'opacity-90' : 'opacity-70' }}">
-                    <span class="sidebar-label">Konfigurasi</span>
-                </a>
+                <div class="relative py-[2.5px] group">
+                    <div class="absolute left-[26px] top-0 bottom-0 w-[2px] {{ $isActive ? 'bg-red-600' : 'border-l-[1.5px] border-dashed border-slate-300 dark:border-[#3d3d3d] group-hover:border-slate-400 dark:group-hover:border-slate-500 transition-colors' }}"></div>
+                    <a href="{{ route('pengaturan.konfigurasi') }}"
+                        class="relative flex items-center gap-3 ml-[44px] mr-4 px-3 py-[8px] rounded-[10px] no-underline text-[13px] font-medium transition-all duration-150
+                                {{ $isActive ? 'bg-red-700 text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#2a2a2a]' }}">
+                        <img src="{{ asset('icons/konfig.svg') }}" alt="Konfigurasi" class="w-[15px] h-[15px] shrink-0 {{ $isActive ? 'opacity-90' : 'opacity-70' }}">
+                        <span class="sidebar-label">Konfigurasi</span>
+                    </a>
+                </div>
                 @endcan
 
                 @can('kelola_peringatan')
                 @php $isActive = request()->routeIs('pengaturan.peringatan'); @endphp
-                <a href="{{ route('pengaturan.peringatan') }}"
-                    class="flex items-center gap-3 pl-12 pr-5 py-[9px] no-underline text-[13px] font-medium transition-all duration-150
-                            {{ $isActive ? 'bg-red-700 text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e1e1e]' }}">
-                    <img src="{{ asset('icons/peringatan.svg') }}" alt="Peringatan" class="w-[15px] h-[15px] shrink-0 {{ $isActive ? 'opacity-90' : 'opacity-70' }}">
-                    <span class="sidebar-label">Peringatan</span>
-                </a>
+                <div class="relative py-[2.5px] group">
+                    <div class="absolute left-[26px] top-0 bottom-0 w-[2px] {{ $isActive ? 'bg-red-600' : 'border-l-[1.5px] border-dashed border-slate-300 dark:border-[#3d3d3d] group-hover:border-slate-400 dark:group-hover:border-slate-500 transition-colors' }}"></div>
+                    <a href="{{ route('pengaturan.peringatan') }}"
+                        class="relative flex items-center gap-3 ml-[44px] mr-4 px-3 py-[8px] rounded-[10px] no-underline text-[13px] font-medium transition-all duration-150
+                                {{ $isActive ? 'bg-red-700 text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#2a2a2a]' }}">
+                        <img src="{{ asset('icons/peringatan.svg') }}" alt="Peringatan" class="w-[15px] h-[15px] shrink-0 {{ $isActive ? 'opacity-90' : 'opacity-70' }}">
+                        <span class="sidebar-label">Peringatan</span>
+                    </a>
+                </div>
                 @endcan
 
                 @can('kelola_pengguna')
                 @php $isActive = request()->routeIs('pengaturan.pengguna'); @endphp
-                <a href="{{ route('pengaturan.pengguna') }}"
-                    class="flex items-center gap-3 pl-12 pr-5 py-[9px] no-underline text-[13px] font-medium transition-all duration-150
-                            {{ $isActive ? 'bg-red-700 text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1e1e1e]' }}">
-                    <img src="{{ asset('icons/pengguna.svg') }}" alt="Pengguna" class="w-[15px] h-[15px] shrink-0 {{ $isActive ? 'opacity-90' : 'opacity-70' }}">
-                    <span class="sidebar-label">Pengguna</span>
-                </a>
+                <div class="relative py-[2.5px] group">
+                    <div class="absolute left-[26px] top-0 bottom-0 w-[2px] {{ $isActive ? 'bg-red-600' : 'border-l-[1.5px] border-dashed border-slate-300 dark:border-[#3d3d3d] group-hover:border-slate-400 dark:group-hover:border-slate-500 transition-colors' }}"></div>
+                    <a href="{{ route('pengaturan.pengguna') }}"
+                        class="relative flex items-center gap-3 ml-[44px] mr-4 px-3 py-[8px] rounded-[10px] no-underline text-[13px] font-medium transition-all duration-150
+                                {{ $isActive ? 'bg-red-700 text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#2a2a2a]' }}">
+                        <img src="{{ asset('icons/pengguna.svg') }}" alt="Pengguna" class="w-[15px] h-[15px] shrink-0 {{ $isActive ? 'opacity-90' : 'opacity-70' }}">
+                        <span class="sidebar-label">Pengguna</span>
+                    </a>
+                </div>
                 @endcan
             </div>
         </div>
@@ -353,7 +394,7 @@
             sub.style.maxHeight = '0';
             chevron.style.transform = 'rotate(0deg)';
         } else {
-            sub.style.maxHeight = sub.scrollHeight + 'px';
+            sub.style.maxHeight = sub.scrollHeight + 80 + 'px';
             chevron.style.transform = 'rotate(180deg)';
         }
     }
@@ -364,7 +405,7 @@
         const sub     = document.getElementById('pengaturan-sub');
         const chevron = document.getElementById('pengaturan-chevron');
         if (sub) {
-            sub.style.maxHeight = sub.scrollHeight + 'px';
+            sub.style.maxHeight = sub.scrollHeight + 80 + 'px';
             chevron.style.transform = 'rotate(180deg)';
         }
     }
