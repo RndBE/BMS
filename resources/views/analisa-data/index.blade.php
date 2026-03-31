@@ -38,8 +38,8 @@
                     <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Parameter</label>
                     <div class="relative custom-select-wrapper w-full">
                         <select name="parameter" id="sel-parameter" class="hidden real-select">
-                            @foreach($parameterLabels as $key => $label)
-                                <option value="{{ $key }}" {{ $parameter === $key ? 'selected' : '' }}>{{ $label }}</option>
+                            @foreach($paramMap as $colKey => $info)
+                                <option value="{{ $colKey }}" {{ $parameter === $colKey ? 'selected' : '' }}>{{ $info['nama'] }}</option>
                             @endforeach
                         </select>
                         <button type="button" class="select-btn flex justify-between items-center w-full border border-slate-200 dark:border-[#3d3d3d] dark:bg-[#2a2a2a] dark:text-slate-200 rounded-lg px-3 py-[7px] text-[13px] text-slate-700 bg-white focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 cursor-pointer">
@@ -91,19 +91,11 @@
 
     {{-- ── MAIN ROW: Chart + Side Panel ───────────────────────────────────── --}}
     @php
-        $paramLabel = $parameterLabels[$parameter];
-        $unit       = $parameterUnits[$parameter];
-        $th         = $thresholds[$parameter] ?? $thresholds['temperature'];
+        $paramLabel = $paramInfo['nama'];
+        $unit       = $paramInfo['unit'];
 
-        // Warna per parameter
-        $colorMap = [
-            'temperature' => ['line' => '#ef4444', 'fill' => 'rgba(239,68,68,0.12)'],
-            'humidity'    => ['line' => '#ef4444', 'fill' => 'rgba(239,68,68,0.12)'],
-            'energy'      => ['line' => '#ef4444', 'fill' => 'rgba(239,68,68,0.12)'],
-            'power'       => ['line' => '#ef4444', 'fill' => 'rgba(239,68,68,0.12)'],
-            'co2'         => ['line' => '#ef4444', 'fill' => 'rgba(239,68,68,0.12)'],
-        ];
-        $color = $colorMap[$parameter] ?? $colorMap['temperature'];
+        // Semua parameter pakai warna merah BMS (konsisten)
+        $color = ['line' => '#ef4444', 'fill' => 'rgba(239,68,68,0.12)'];
     @endphp
 
     <div class="flex flex-col xl:flex-row gap-5">
@@ -262,66 +254,69 @@
 
     {{-- ── STAT CARDS ──────────────────────────────────────────────────────── --}}
     @php
-        // Ikon spesifik per card per parameter dari folder analisa_data
-        // bg & border menggunakan hex langsung agar bisa pakai warna custom
-        $cardIconMap = [
-            'temperature' => [
-                'terbaru'  => ['icon' => 'analisa_data/suhu_terbaru.svg',   'color' => '#D9EDFF'],
-                'rerata'   => ['icon' => 'analisa_data/rerata_suhu.svg',    'color' => '#FFF3E9'],
-                'tertinggi'=> ['icon' => 'analisa_data/suhu_tertinggi.svg', 'color' => '#FFE1E2'],
-                'terendah' => ['icon' => 'analisa_data/suhu_terendah.svg',  'color' => '#D9F6FC'],
-            ],
-            'humidity' => [
-                'terbaru'  => ['icon' => 'analisa_data/kelembaban_terbaru.svg',  'color' => '#D9EDFF'],
-                'rerata'   => ['icon' => 'analisa_data/rerata_kelembaban.svg',   'color' => '#FFF3E9'],
-                'tertinggi'=> ['icon' => 'analisa_data/kelembaban_tinggi.svg',   'color' => '#FFE1E2'],
-                'terendah' => ['icon' => 'analisa_data/kelembaban_rendah.svg',   'color' => '#D9F6FC'],
-            ],
-            'co2' => [
-                'terbaru'  => ['icon' => 'analisa_data/co2_terbaru.svg',   'color' => '#D9EDFF'],
-                'rerata'   => ['icon' => 'analisa_data/rerata_co2.svg',    'color' => '#FFF3E9'],
-                'tertinggi'=> ['icon' => 'analisa_data/co2_tertinggi.svg', 'color' => '#FFE1E2'],
-                'terendah' => ['icon' => 'analisa_data/co2_terendah.svg',  'color' => '#D9F6FC'],
-            ],
+        // Deteksi ikon berdasarkan kata kunci di nama_parameter (case-insensitive)
+        $nameLower = strtolower($paramLabel);
+
+        // Definisi ikon per kelompok keyword
+        $keywordIcons = [
+            'suhu'       => ['terbaru'=>'analisa_data/suhu_terbaru.svg',          'rerata'=>'analisa_data/rerata_suhu.svg',       'tertinggi'=>'analisa_data/suhu_tertinggi.svg',      'terendah'=>'analisa_data/suhu_terendah.svg',     'color_terbaru'=>'#D9EDFF','color_rerata'=>'#FFF3E9','color_tertinggi'=>'#FFE1E2','color_terendah'=>'#D9F6FC'],
+            'temperatur' => ['terbaru'=>'analisa_data/suhu_terbaru.svg',          'rerata'=>'analisa_data/rerata_suhu.svg',       'tertinggi'=>'analisa_data/suhu_tertinggi.svg',      'terendah'=>'analisa_data/suhu_terendah.svg',     'color_terbaru'=>'#D9EDFF','color_rerata'=>'#FFF3E9','color_tertinggi'=>'#FFE1E2','color_terendah'=>'#D9F6FC'],
+            'kelembab'   => ['terbaru'=>'analisa_data/kelembaban_terbaru.svg',    'rerata'=>'analisa_data/rerata_kelembaban.svg', 'tertinggi'=>'analisa_data/kelembaban_tinggi.svg',   'terendah'=>'analisa_data/kelembaban_rendah.svg', 'color_terbaru'=>'#D9EDFF','color_rerata'=>'#FFF3E9','color_tertinggi'=>'#FFE1E2','color_terendah'=>'#D9F6FC'],
+            'humid'      => ['terbaru'=>'analisa_data/kelembaban_terbaru.svg',    'rerata'=>'analisa_data/rerata_kelembaban.svg', 'tertinggi'=>'analisa_data/kelembaban_tinggi.svg',   'terendah'=>'analisa_data/kelembaban_rendah.svg', 'color_terbaru'=>'#D9EDFF','color_rerata'=>'#FFF3E9','color_tertinggi'=>'#FFE1E2','color_terendah'=>'#D9F6FC'],
+            'co2'        => ['terbaru'=>'analisa_data/co2_terbaru.svg',           'rerata'=>'analisa_data/rerata_co2.svg',        'tertinggi'=>'analisa_data/co2_tertinggi.svg',        'terendah'=>'analisa_data/co2_terendah.svg',      'color_terbaru'=>'#D9EDFF','color_rerata'=>'#FFF3E9','color_tertinggi'=>'#FFE1E2','color_terendah'=>'#D9F6FC'],
+            'energi'     => ['terbaru'=>'energi.svg',                             'rerata'=>'energi.svg',                        'tertinggi'=>'energi.svg',                            'terendah'=>'energi.svg',                         'color_terbaru'=>'#FFF9E6','color_rerata'=>'#FFF9E6','color_tertinggi'=>'#FFE1E2','color_terendah'=>'#D9F6FC'],
+            'energy'     => ['terbaru'=>'energi.svg',                             'rerata'=>'energi.svg',                        'tertinggi'=>'energi.svg',                            'terendah'=>'energi.svg',                         'color_terbaru'=>'#FFF9E6','color_rerata'=>'#FFF9E6','color_tertinggi'=>'#FFE1E2','color_terendah'=>'#D9F6FC'],
+            'daya'       => ['terbaru'=>'daya.svg',                               'rerata'=>'daya.svg',                          'tertinggi'=>'daya-tinggi.svg',                       'terendah'=>'daya.svg',                           'color_terbaru'=>'#F3EEFF','color_rerata'=>'#F3EEFF','color_tertinggi'=>'#FFE1E2','color_terendah'=>'#D9F6FC'],
+            'power'      => ['terbaru'=>'daya.svg',                               'rerata'=>'daya.svg',                          'tertinggi'=>'daya-tinggi.svg',                       'terendah'=>'daya.svg',                           'color_terbaru'=>'#F3EEFF','color_rerata'=>'#F3EEFF','color_tertinggi'=>'#FFE1E2','color_terendah'=>'#D9F6FC'],
         ];
-        $genericIconMap = [
-            'energy' => ['icon' => 'energi.svg', 'color' => '#FFF9E6'],
-            'power'  => ['icon' => 'daya.svg',   'color' => '#F3EEFF'],
-        ];
-        $paramCards = $cardIconMap[$parameter] ?? null;
-        $genericFallback = $genericIconMap[$parameter] ?? ['icon' => 'suhu.svg', 'color' => '#F1F5F9'];
+
+        // Cari match keyword pertama
+        $matchedIcons = null;
+        foreach ($keywordIcons as $keyword => $icons) {
+            if (str_contains($nameLower, $keyword)) {
+                $matchedIcons = $icons;
+                break;
+            }
+        }
+
+        // Fallback ke ikon generik monitoring jika tidak ada keyword yang cocok
+        $defaultIcon  = 'suhu.svg';
+        $defaultColor = '#F1F5F9';
 
         $statCards = [
             [
-                'iconData' => $paramCards ? $paramCards['terbaru']   : $genericFallback,
-                'label'    => $paramLabel . ' Terbaru',
-                'value'    => ($latest  !== null ? number_format((float)$latest, 1) : '0') . ' ' . $unit,
+                'icon'  => $matchedIcons ? $matchedIcons['terbaru']          : $defaultIcon,
+                'color' => $matchedIcons ? $matchedIcons['color_terbaru']    : $defaultColor,
+                'label' => $paramLabel . ' Terbaru',
+                'value' => ($latest !== null ? number_format((float)$latest, 1) : '0') . ' ' . $unit,
             ],
             [
-                'iconData' => $paramCards ? $paramCards['rerata']    : $genericFallback,
-                'label'    => 'Rerata ' . $paramLabel,
-                'value'    => ($average !== null ? $average : '–') . ' ' . $unit,
+                'icon'  => $matchedIcons ? $matchedIcons['rerata']           : $defaultIcon,
+                'color' => $matchedIcons ? $matchedIcons['color_rerata']     : $defaultColor,
+                'label' => 'Rerata ' . $paramLabel,
+                'value' => ($average !== null ? $average : '–') . ' ' . $unit,
             ],
             [
-                'iconData' => $paramCards ? $paramCards['tertinggi'] : $genericFallback,
-                'label'    => $paramLabel . ' Tertinggi',
-                'value'    => ($max !== null ? $max : '–') . ' ' . $unit,
+                'icon'  => $matchedIcons ? $matchedIcons['tertinggi']        : $defaultIcon,
+                'color' => $matchedIcons ? $matchedIcons['color_tertinggi']  : $defaultColor,
+                'label' => $paramLabel . ' Tertinggi',
+                'value' => ($max !== null ? $max : '–') . ' ' . $unit,
             ],
             [
-                'iconData' => $paramCards ? $paramCards['terendah']  : $genericFallback,
-                'label'    => $paramLabel . ' Terendah',
-                'value'    => ($min !== null ? $min : '–') . ' ' . $unit,
+                'icon'  => $matchedIcons ? $matchedIcons['terendah']         : $defaultIcon,
+                'color' => $matchedIcons ? $matchedIcons['color_terendah']   : $defaultColor,
+                'label' => $paramLabel . ' Terendah',
+                'value' => ($min !== null ? $min : '–') . ' ' . $unit,
             ],
         ];
     @endphp
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         @foreach($statCards as $card)
-            @php $idata = $card['iconData']; @endphp
             <div class="bg-white dark:bg-[#232323] dark:border dark:border-[#2d2d2d] rounded-xl border border-slate-100 shadow-sm px-5 py-4 flex items-center gap-3.5">
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                    style="background-color: {{ $idata['color'] }}; border: 1.5px solid {{ $idata['color'] }}">
-                    <img src="{{ asset('icons/' . $idata['icon']) }}" alt="{{ $card['label'] }}" class="w-6 h-6">
+                    style="background-color: {{ $card['color'] }}; border: 1.5px solid {{ $card['color'] }}">
+                    <img src="{{ asset('icons/' . $card['icon']) }}" alt="{{ $card['label'] }}" class="w-6 h-6">
                 </div>
                 <div class="min-w-0">
                     <div class="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide truncate">{{ $card['label'] }}</div>
@@ -350,7 +345,7 @@
                         <tr class="border-b border-slate-50 dark:border-[#2d2d2d] hover:bg-slate-50 dark:hover:bg-[#2a2a2a] transition-colors">
                             <td class="px-5 py-3 text-slate-600 dark:text-slate-400">{{ $row['waktu'] }}</td>
                             <td class="px-5 py-3 text-slate-700 dark:text-slate-200 font-medium">
-                                {{ $row['nilai'] }} {{ $unit }}
+                                {{ $row['nilai'] }} {{ $paramInfo['unit'] }}
                             </td>
                             <td class="px-5 py-3">
                                 @if($row['status'] === 'normal')
@@ -390,8 +385,8 @@
     const values     = @json($chartValues);
     const lineColor  = '{{ $color['line'] }}';
     const fillColor  = '{{ $color['fill'] }}';
-    const unit       = '{{ $unit }}';
-    const paramLabel = '{{ $paramLabel }}';
+    const unit       = '{{ $paramInfo['unit'] }}';
+    const paramLabel = '{{ $paramInfo['nama'] }}';
 
     // Icon URL dari public/icons (di-pass dari PHP)
     const icons = {
