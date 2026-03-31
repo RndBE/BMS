@@ -305,11 +305,12 @@
                 <div id="sensorDropZone"
                      class="border-2 border-dashed border-slate-200 rounded-xl p-5 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-red-300 hover:bg-red-50/30 transition-colors dark:border-[#3d3d3d] dark:bg-[#2a2a2a]"
                      onclick="document.getElementById('sensorGambarInput').click()">
-                    <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" class="text-red-400">
-                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                            <polyline points="17 8 12 3 7 8"/>
-                            <line x1="12" y1="3" x2="12" y2="15"/>
+                    <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center">
+                        <svg width="26" height="26" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-red-400">
+                            <path d="M26.5625 16.25V10.625C26.5625 8.9674 25.904 7.37769 24.7319 6.20558C23.5598 5.03348 21.9701 4.375 20.3125 4.375H9.6875C8.0299 4.375 6.44019 5.03348 5.26808 6.20558C4.09598 7.37769 3.4375 8.9674 3.4375 10.625V19.375C3.4375 20.1958 3.59916 21.0085 3.91325 21.7668C4.22734 22.5251 4.68772 23.2141 5.26808 23.7944C6.44019 24.9665 8.0299 25.625 9.6875 25.625H17.5125" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M3.7627 21.25L7.1877 17.25C7.6375 16.8033 8.22783 16.5257 8.85879 16.4642C9.48976 16.4027 10.1226 16.5611 10.6502 16.9125C11.1778 17.264 11.8106 17.4224 12.4416 17.3609C13.0726 17.2994 13.6629 17.0218 14.1127 16.575L17.0252 13.6625C17.8621 12.8228 18.9701 12.3078 20.1515 12.2093C21.3329 12.1109 22.5109 12.4354 23.4752 13.125L26.5627 15.5125M10.0127 12.7125C10.2852 12.7109 10.5547 12.6556 10.8058 12.5498C11.0569 12.444 11.2848 12.2898 11.4763 12.0959C11.6678 11.9021 11.8193 11.6724 11.922 11.4201C12.0248 11.1677 12.0768 10.8975 12.0752 10.625C12.0736 10.3525 12.0183 10.083 11.9125 9.83192C11.8067 9.5808 11.6524 9.35297 11.4586 9.16145C11.2648 8.96993 11.0351 8.81847 10.7827 8.7157C10.5303 8.61294 10.2602 8.5609 9.98769 8.56254C9.43737 8.56585 8.9109 8.78765 8.52411 9.17913C8.13732 9.57061 7.92188 10.0997 7.9252 10.65C7.92851 11.2004 8.15031 11.7268 8.54179 12.1136C8.93327 12.5004 9.46237 12.7159 10.0127 12.7125Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M23.3838 18.75V25" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"/>
+                            <path d="M26.2501 21.3813L23.7913 18.9225C23.7379 18.8688 23.6744 18.8262 23.6045 18.7972C23.5345 18.7681 23.4596 18.7532 23.3838 18.7532C23.3081 18.7532 23.2331 18.7681 23.1632 18.7972C23.0933 18.8262 23.0298 18.8688 22.9763 18.9225L20.5176 21.3813" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </div>
                     <p class="text-[12.5px] font-medium text-slate-600 dark:text-slate-200">Tarik file ke sini atau klik untuk upload</p>
