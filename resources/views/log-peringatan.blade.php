@@ -203,12 +203,38 @@ function logBadge(string $type): string {
                     <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
                 </a>
             @endif
-            @foreach($alerts->getUrlRange(1, $alerts->lastPage()) as $page => $url)
-                <a href="{{ $url }}"
-                    class="w-7 h-7 flex items-center justify-center rounded border text-[12px] font-medium no-underline
-                    {{ $page == $alerts->currentPage() ? 'bg-red-700 text-white border-red-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50' }}">
-                    {{ $page }}
-                </a>
+            @php
+                $window = \Illuminate\Pagination\UrlWindow::make($alerts);
+                $elements = array_filter([
+                    $window['first'],
+                    is_array($window['slider']) ? '...' : null,
+                    $window['slider'],
+                    is_array($window['last']) ? '...' : null,
+                    $window['last'],
+                ]);
+            @endphp
+            @foreach($elements as $element)
+                {{-- "Three Dots" Separator --}}
+                @if (is_string($element))
+                    <span class="w-7 h-7 flex items-center justify-center rounded text-[12px] text-slate-400 dark:text-slate-500">
+                        {{ $element }}
+                    </span>
+                @endif
+
+                {{-- Array Of Links --}}
+                @if (is_array($element))
+                    @foreach ($element as $page => $url)
+                        @if ($page == $alerts->currentPage())
+                            <span class="w-7 h-7 flex items-center justify-center rounded border text-[12px] font-medium bg-red-700 text-white border-red-700">
+                                {{ $page }}
+                            </span>
+                        @else
+                            <a href="{{ $url }}" class="w-7 h-7 flex items-center justify-center rounded border border-slate-200 text-slate-500 hover:bg-slate-50 dark:border-[#3d3d3d] dark:text-slate-400 dark:hover:bg-[#2a2a2a] no-underline text-[12px] font-medium transition-colors">
+                                {{ $page }}
+                            </a>
+                        @endif
+                    @endforeach
+                @endif
             @endforeach
             @if($alerts->hasMorePages())
                 <a href="{{ $alerts->nextPageUrl() }}"
