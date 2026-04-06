@@ -41,6 +41,10 @@
       </div>
     </div>
 
+    <div style="text-align: center; margin: 8px 0 28px 0;">
+      <a href="{{ url('/') }}" style="background: #B40404; color: #fff; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-size: 14px; font-weight: 600; display: inline-block; box-shadow: 0 4px 6px rgba(180, 4, 4, 0.25);">Masuk ke Sistem BMS</a>
+    </div>
+
     <div class="warning-box">
       <p>⚠️ <strong>Penting:</strong> Demi keamanan akun Anda, segera ganti kata sandi setelah pertama kali berhasil masuk ke sistem.</p>
     </div>

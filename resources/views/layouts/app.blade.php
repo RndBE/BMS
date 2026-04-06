@@ -220,6 +220,19 @@
                     </a>
                 </div>
                 @endcan
+
+                @can('kelola_pengguna')
+                @php $isActive = request()->routeIs('log-audit.*'); @endphp
+                <div class="relative py-[2.5px] group">
+                    <div class="absolute left-[26px] top-0 bottom-0 w-[2px] {{ $isActive ? 'bg-red-600' : 'border-l-[1.5px] border-dashed border-slate-300 dark:border-[#3d3d3d] group-hover:border-slate-400 dark:group-hover:border-slate-500 transition-colors' }}"></div>
+                    <a href="{{ route('log-audit.index') }}"
+                        class="relative flex items-center gap-3 ml-[44px] mr-4 px-3 py-[8px] rounded-[10px] no-underline text-[13px] font-medium transition-all duration-150
+                                {{ $isActive ? 'bg-red-700 text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#2a2a2a]' }}">
+                        <img src="{{ asset('icons/log.svg') }}" alt="Log Audit" class="w-[15px] h-[15px] shrink-0 {{ $isActive ? 'opacity-90' : 'opacity-70' }}">
+                        <span class="sidebar-label">Log Audit</span>
+                    </a>
+                </div>
+                @endcan
             </div>
         </div>
         @endif

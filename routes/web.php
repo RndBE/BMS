@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\BuildingController;
 use App\Http\Controllers\Admin\FloorController;
 use App\Http\Controllers\Admin\RoomMarkerController;
 use App\Http\Controllers\AnalysisController;
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\RekapDataController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnergyController;
@@ -102,6 +103,9 @@ Route::middleware(['auth', 'permission:kelola_pengguna'])->group(function () {
     Route::post('/pengaturan/pengguna/permissions', [PenggunaController::class, 'permissionStore'])->name('pengaturan.pengguna.permissions.store');
     Route::put('/pengaturan/pengguna/permissions/{permission}', [PenggunaController::class, 'permissionUpdate'])->name('pengaturan.pengguna.permissions.update');
     Route::delete('/pengaturan/pengguna/permissions/{permission}', [PenggunaController::class, 'permissionDestroy'])->name('pengaturan.pengguna.permissions.destroy');
+
+    // Log Audit
+    Route::get('/log-audit', [AuditLogController::class, 'index'])->name('log-audit.index');
 });
 
 
