@@ -77,6 +77,7 @@
                 @else
                     {{-- e.g. Suhu: 21-23 / 26-28 — each pair grouped as flex-1 like Normal --}}
                     <div class="flex-1 flex items-center gap-2 min-w-0">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wide shrink-0">Bawah</span>
                         <input type="number" step="any"
                             name="limits[{{ $i }}][warn_low_min]"
                             value="{{ old("limits.{$i}.warn_low_min", $limit->warn_low_min) }}"
@@ -89,6 +90,7 @@
                     </div>
                     <span class="text-[12px] text-slate-800 shrink-0 font-light px-0.5 dark:text-slate-200">/</span>
                     <div class="flex-1 flex items-center gap-2 min-w-0">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wide shrink-0">Atas</span>
                         <input type="number" step="any"
                             name="limits[{{ $i }}][warn_high_min]"
                             value="{{ old("limits.{$i}.warn_high_min", $limit->warn_high_min) }}"
@@ -119,20 +121,26 @@
                     </div>
                 @else
                     {{-- e.g. < 21 / > 28 --}}
-                    <div class="flex flex-1 rounded-lg overflow-hidden border border-slate-200 dark:border-[#3d3d3d]">
-                        <span class="flex items-center justify-center px-2.5 bg-slate-100 dark:bg-[#2d2d2d] text-[12px] font-semibold text-slate-600 dark:text-slate-300 select-none shrink-0 border-r border-slate-200 dark:border-[#3d3d3d]">&lt;</span>
-                        <input type="number" step="any"
-                            name="limits[{{ $i }}][poor_low]"
-                            value="{{ old("limits.{$i}.poor_low", $limit->poor_low) }}"
-                            class="flex-1 min-w-0 bg-white border-white dark:bg-[#1e1e1e] dark:border-[#3d3d3d] dark:text-slate-200 px-3 py-2 text-[13px] text-slate-700 focus:outline-none transition-colors">
+                    <div class="flex flex-1 items-center gap-2 min-w-0">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wide shrink-0">Bawah</span>
+                        <div class="flex flex-1 rounded-lg overflow-hidden border border-slate-200 dark:border-[#3d3d3d]">
+                            <span class="flex items-center justify-center px-2.5 bg-slate-100 dark:bg-[#2d2d2d] text-[12px] font-semibold text-slate-600 dark:text-slate-300 select-none shrink-0 border-r border-slate-200 dark:border-[#3d3d3d]">&lt;</span>
+                            <input type="number" step="any"
+                                name="limits[{{ $i }}][poor_low]"
+                                value="{{ old("limits.{$i}.poor_low", $limit->poor_low) }}"
+                                class="flex-1 min-w-0 bg-white border-white dark:bg-[#1e1e1e] dark:border-[#3d3d3d] dark:text-slate-200 px-3 py-2 text-[13px] text-slate-700 focus:outline-none transition-colors">
+                        </div>
                     </div>
                     <span class="text-[12px] text-slate-800 shrink-0 font-light px-0.5 dark:text-slate-200">/</span>
-                    <div class="flex flex-1 rounded-lg overflow-hidden border border-slate-200 dark:border-[#3d3d3d]">
-                        <span class="flex items-center justify-center px-2.5 bg-slate-100 dark:bg-[#2d2d2d] text-[12px] font-semibold text-slate-600 dark:text-slate-300 select-none shrink-0 border-r border-slate-200 dark:border-[#3d3d3d]">&gt;</span>
-                        <input type="number" step="any"
-                            name="limits[{{ $i }}][poor_high]"
-                            value="{{ old("limits.{$i}.poor_high", $limit->poor_high) }}"
-                            class="flex-1 min-w-0 bg-white border-white dark:bg-[#1e1e1e] dark:border-[#3d3d3d] dark:text-slate-200 px-3 py-2 text-[13px] text-slate-700 focus:outline-none transition-colors">
+                    <div class="flex flex-1 items-center gap-2 min-w-0">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wide shrink-0">Atas</span>
+                        <div class="flex flex-1 rounded-lg overflow-hidden border border-slate-200 dark:border-[#3d3d3d]">
+                            <span class="flex items-center justify-center px-2.5 bg-slate-100 dark:bg-[#2d2d2d] text-[12px] font-semibold text-slate-600 dark:text-slate-300 select-none shrink-0 border-r border-slate-200 dark:border-[#3d3d3d]">&gt;</span>
+                            <input type="number" step="any"
+                                name="limits[{{ $i }}][poor_high]"
+                                value="{{ old("limits.{$i}.poor_high", $limit->poor_high) }}"
+                                class="flex-1 min-w-0 bg-white border-white dark:bg-[#1e1e1e] dark:border-[#3d3d3d] dark:text-slate-200 px-3 py-2 text-[13px] text-slate-700 focus:outline-none transition-colors">
+                        </div>
                     </div>
                 @endif
             </div>
