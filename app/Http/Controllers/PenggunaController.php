@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\NewAccountMail;
+use App\Models\AuditLog;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -86,11 +87,13 @@ class PenggunaController extends Controller
 
         // Kirim email notifikasi akun baru ke pengguna
         try {
-            Mail::to($user->email)->send(new NewAccountMail($user, $plainPassword));
+            Mail::to($user->email)->queue(new NewAccountMail($user, $plainPassword));
         } catch (\Exception $e) {
             // Jika email gagal terkirim, akun tetap berhasil dibuat
             \Log::warning('Gagal mengirim email akun baru ke ' . $user->email . ': ' . $e->getMessage());
         }
+
+        AuditLog::record('create', 'User', $user->id, "Menambah pengguna baru: {$user->name}", null, $user->toArray());
 
         return response()->json(['success' => true, 'user' => $user->load('roles')]);
     }
@@ -105,6 +108,9 @@ class PenggunaController extends Controller
             'roles.*'  => 'exists:roles,name',
         ]);
 
+        $oldData = $user->toArray();
+        $oldData['roles'] = $user->roles->pluck('name')->toArray();
+
         $user->update([
             'name'  => $data['name'],
             'email' => $data['email'],
@@ -113,7 +119,12 @@ class PenggunaController extends Controller
 
         $user->syncRoles($data['roles'] ?? []);
 
-        return response()->json(['success' => true, 'user' => $user->fresh()->load('roles')]);
+        $newData = $user->fresh()->toArray();
+        $newData['roles'] = $user->roles->pluck('name')->toArray();
+
+        AuditLog::record('update', 'User', $user->id, "Mengubah data pengguna: {$user->name}", $oldData, $newData);
+
+        return response()->json(['success' => true, 'user' => $user->load('roles')]);
     }
 
     public function userDestroy(User $user)
@@ -121,7 +132,15 @@ class PenggunaController extends Controller
         if ($user->id === auth()->id()) {
             return response()->json(['success' => false, 'message' => 'Tidak dapat menghapus akun sendiri.'], 422);
         }
+        
+        $oldData = $user->toArray();
+        $oldData['roles'] = $user->roles->pluck('name')->toArray();
+        $userName = $user->name;
+        
         $user->delete();
+        
+        AuditLog::record('delete', 'User', $oldData['id'], "Menghapus pengguna: {$userName}", $oldData, null);
+        
         return response()->json(['success' => true]);
     }
 
@@ -140,6 +159,11 @@ class PenggunaController extends Controller
             $role->syncPermissions($data['permissions']);
         }
 
+        $newData = $role->toArray();
+        $newData['permissions'] = $role->permissions->pluck('name')->toArray();
+
+        AuditLog::record('create', 'Role', $role->id, "Menambah peran baru: {$role->name}", null, $newData);
+
         return response()->json(['success' => true, 'role' => $role]);
     }
 
@@ -151,15 +175,29 @@ class PenggunaController extends Controller
             'permissions.*' => 'exists:permissions,name',
         ]);
 
+        $oldData = $role->toArray();
+        $oldData['permissions'] = $role->permissions->pluck('name')->toArray();
+
         $role->update(['name' => $data['name']]);
         $role->syncPermissions($data['permissions'] ?? []);
 
-        return response()->json(['success' => true, 'role' => $role->fresh()]);
+        $newData = $role->fresh()->toArray();
+        $newData['permissions'] = $role->permissions->pluck('name')->toArray();
+
+        AuditLog::record('update', 'Role', $role->id, "Mengubah peran: {$role->name}", $oldData, $newData);
+
+        return response()->json(['success' => true, 'role' => $role]);
     }
 
     public function roleDestroy(Role $role)
     {
+        $oldData = $role->toArray();
+        $roleName = $role->name;
+        
         $role->delete();
+
+        AuditLog::record('delete', 'Role', $oldData['id'], "Menghapus peran: {$roleName}", $oldData, null);
+
         return response()->json(['success' => true]);
     }
 
@@ -179,6 +217,9 @@ class PenggunaController extends Controller
         }
 
         $permission = Permission::create(['name' => $name, 'guard_name' => 'web']);
+        
+        AuditLog::record('create', 'Permission', $permission->id, "Menambah permission baru: {$permission->name}", null, $permission->toArray());
+        
         return response()->json(['success' => true, 'permission' => $permission]);
     }
 
@@ -195,13 +236,23 @@ class PenggunaController extends Controller
             return response()->json(['errors' => ['name' => ['Permission sudah ada.']]], 422);
         }
 
+        $oldData = $permission->toArray();
         $permission->update(['name' => $name]);
+
+        AuditLog::record('update', 'Permission', $permission->id, "Mengubah permission: {$permission->name}", $oldData, $permission->fresh()->toArray());
+
         return response()->json(['success' => true, 'permission' => $permission->fresh()]);
     }
 
     public function permissionDestroy(Permission $permission)
     {
+        $oldData = $permission->toArray();
+        $permName = $permission->name;
+
         $permission->delete();
+
+        AuditLog::record('delete', 'Permission', $oldData['id'], "Menghapus permission: {$permName}", $oldData, null);
+
         return response()->json(['success' => true]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Building;
 use App\Models\Floor;
 use App\Models\Room;
@@ -33,6 +34,7 @@ class FloorController extends Controller
             'floor_number' => 'required|integer',
         ]);
         $floor = Floor::create($data);
+        AuditLog::record('create', 'Floor', $floor->id, "Menambah lantai: {$floor->name}", null, $floor->toArray());
         return redirect()->route('admin.floors.show', $floor)->with('success', 'Lantai berhasil ditambahkan.');
     }
 
@@ -42,16 +44,24 @@ class FloorController extends Controller
             'name'         => 'required|string|max:255',
             'floor_number' => 'required|integer',
         ]);
+        $oldData = $floor->toArray();
         $floor->update($data);
+        AuditLog::record('update', 'Floor', $floor->id, "Mengubah lantai: {$floor->name}", $oldData, $floor->fresh()->toArray());
         return back()->with('success', 'Lantai berhasil diperbarui.');
     }
 
     public function destroy(Floor $floor)
     {
+        $oldData = $floor->toArray();
+        $floorName = $floor->name;
+
         if ($floor->plan_file_path) {
             Storage::disk('public')->delete($floor->plan_file_path);
         }
         $floor->delete();
+
+        AuditLog::record('delete', 'Floor', $oldData['id'], "Menghapus lantai: {$floorName}", $oldData, null);
+
         return redirect()->route('admin.buildings.index')->with('success', 'Lantai berhasil dihapus.');
     }
 
@@ -60,7 +70,9 @@ class FloorController extends Controller
         $request->validate([
             'canvas_data' => 'nullable|string',
         ]);
+        $oldData = $floor->toArray();
         $floor->update(['canvas_data' => $request->input('canvas_data')]);
+        AuditLog::record('update', 'Floor', $floor->id, "Menyimpan perubahan canvas denah untuk lantai: {$floor->name}", $oldData, $floor->fresh()->toArray());
         return response()->json(['success' => true]);
     }
 
@@ -80,10 +92,14 @@ class FloorController extends Controller
         $type = $ext === 'svg' ? 'svg' : ($ext === 'pdf' ? 'pdf' : 'image');
         $path = $file->store('floor-plans', 'public');
 
+        $oldData = $floor->toArray();
+
         $floor->update([
             'plan_file_path' => $path,
             'plan_file_type' => $type,
         ]);
+
+        AuditLog::record('update', 'Floor', $floor->id, "Mengupload gambar blueprint denah lantai: {$floor->name}", $oldData, $floor->fresh()->toArray());
 
         return back()->with('success', 'Denah berhasil diupload.');
     }
@@ -99,11 +115,15 @@ class FloorController extends Controller
             ]);
 
             $room = Room::findOrFail($request->room_id);
+            $oldData = $room->toArray();
+
             $room->update([
                 'floor_id' => $floor->id,
                 'marker_x' => $request->marker_x,
                 'marker_y' => $request->marker_y,
             ]);
+
+            AuditLog::record('update', 'Room', $room->id, "Menempatkan ruangan ({$room->name}) ke denah lantai ({$floor->name})", $oldData, $room->fresh()->toArray());
 
             return response()->json(['success' => true, 'room' => $room->fresh()]);
         }
@@ -118,6 +138,9 @@ class FloorController extends Controller
         ]);
         $data['floor_id'] = $floor->id;
         $room = Room::create($data);
+
+        AuditLog::record('create', 'Room', $room->id, "Menambahkan ruangan baru ({$room->name}) ke denah lantai ({$floor->name})", null, $room->toArray());
+
         return response()->json(['success' => true, 'room' => $room]);
     }
 }

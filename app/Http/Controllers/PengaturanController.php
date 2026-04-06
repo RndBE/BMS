@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AcUnit;
+use App\Models\AuditLog;
 use App\Models\Room;
 use App\Models\Sensor;
 use App\Models\SensorGroup;
@@ -39,6 +40,8 @@ class PengaturanController extends Controller
         foreach (['site_name','timezone','date_format','time_format','refresh_interval','default_range'] as $key) {
             Setting::set($key, $request->input($key));
         }
+
+        AuditLog::record('update', 'Setting', null, "Menyimpan pengaturan umum aplikasi");
 
         return back()->with('success', 'Pengaturan berhasil disimpan.');
     }
@@ -110,6 +113,8 @@ class PengaturanController extends Controller
 
         $room = Room::create($data);
 
+        AuditLog::record('create', 'Room', $room->id, "Menambah ruangan baru: {$room->name}", null, $room->toArray());
+
         return response()->json(['success' => true, 'room' => $room]);
     }
 
@@ -125,14 +130,23 @@ class PengaturanController extends Controller
         $data['is_active']  = $request->boolean('is_active', true);
         $data['sort_order'] = $data['sort_order'] ?? 0;
 
+        $oldData = $room->toArray();
         $room->update($data);
+
+        AuditLog::record('update', 'Room', $room->id, "Mengubah ruangan: {$room->name}", $oldData, $room->fresh()->toArray());
 
         return response()->json(['success' => true, 'room' => $room->fresh()]);
     }
 
     public function roomDestroy(Room $room)
     {
+        $oldData = $room->toArray();
+        $roomName = $room->name;
+        
         $room->delete();
+
+        AuditLog::record('delete', 'Room', $oldData['id'], "Menghapus ruangan: {$roomName}", $oldData, null);
+
         return response()->json(['success' => true]);
     }
 
@@ -205,6 +219,8 @@ class PengaturanController extends Controller
             );
         }
 
+        AuditLog::record('create', 'Sensor', $sensor->id, "Menambah sensor baru untuk ruang ID {$sensor->room_id}", null, clone $sensor);
+
         return response()->json(['success' => true, 'sensor' => $sensor->load(['room', 'sensorGroup'])]);
     }
 
@@ -227,6 +243,8 @@ class PengaturanController extends Controller
             if ($gambarPath) Storage::disk('public')->delete($gambarPath);
             $gambarPath = $request->file('gambar')->store('sensors', 'public');
         }
+
+        $oldData = $sensor->toArray();
 
         $sensor->update([
             'room_id'         => $request->room_id,
@@ -262,15 +280,23 @@ class PengaturanController extends Controller
             );
         }
 
+        AuditLog::record('update', 'Sensor', $sensor->id, "Mengubah pengaturan sensor ID {$sensor->id}", $oldData, $sensor->fresh()->toArray());
+
         return response()->json(['success' => true, 'sensor' => $sensor->fresh()->load(['room', 'sensorGroup'])]);
     }
 
     public function sensorDestroy(Sensor $sensor)
     {
+        $oldData = $sensor->toArray();
+        $sensorId = $sensor->id;
+
         if ($sensor->gambar) {
             Storage::disk('public')->delete($sensor->gambar);
         }
         $sensor->delete();
+
+        AuditLog::record('delete', 'Sensor', $oldData['id'], "Menghapus sensor ID {$sensorId}", $oldData, null);
+
         return response()->json(['success' => true]);
     }
 
@@ -288,6 +314,7 @@ class PengaturanController extends Controller
         $data['power_kw']  = $data['power_kw'] ?? 0;
 
         $unit = AcUnit::create($data);
+        AuditLog::record('create', 'AcUnit', $unit->id, "Menambah unit AC baru: {$unit->name}", null, $unit->toArray());
         return response()->json(['success' => true, 'unit' => $unit->load('room')]);
     }
 
@@ -302,19 +329,34 @@ class PengaturanController extends Controller
         $data['is_active'] = $request->boolean('is_active', false);
         $data['power_kw']  = $data['power_kw'] ?? 0;
 
+        $oldData = $acUnit->toArray();
         $acUnit->update($data);
+        
+        AuditLog::record('update', 'AcUnit', $acUnit->id, "Mengubah unit AC: {$acUnit->name}", $oldData, $acUnit->fresh()->toArray());
+        
         return response()->json(['success' => true, 'unit' => $acUnit->fresh()->load('room')]);
     }
 
     public function acDestroy(AcUnit $acUnit)
     {
+        $oldData = $acUnit->toArray();
+        $acName = $acUnit->name;
+
         $acUnit->delete();
+
+        AuditLog::record('delete', 'AcUnit', $oldData['id'], "Menghapus unit AC: {$acName}", $oldData, null);
+
         return response()->json(['success' => true]);
     }
 
     public function acToggle(AcUnit $acUnit)
     {
+        $oldData = $acUnit->toArray();
         $acUnit->update(['is_active' => !$acUnit->is_active]);
+        
+        $status = $acUnit->is_active ? 'menyalakan' : 'mematikan';
+        AuditLog::record('update', 'AcUnit', $acUnit->id, ucfirst($status) . " unit AC: {$acUnit->name}", $oldData, $acUnit->fresh()->toArray());
+        
         return response()->json(['success' => true, 'is_active' => $acUnit->is_active]);
     }
 }

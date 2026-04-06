@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Room;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,7 +18,10 @@ class RoomMarkerController extends Controller
             'marker_y' => 'required|numeric|min:0|max:100',
         ]);
 
+        $oldData = $room->toArray();
         $room->update($data);
+        
+        AuditLog::record('update', 'Room', $room->id, "Mengubah posisi marker ruangan: {$room->name} pada denah", $oldData, $room->fresh()->toArray());
 
         return response()->json(['success' => true, 'room' => $room->only('id', 'name', 'marker_x', 'marker_y')]);
     }
@@ -35,7 +39,10 @@ class RoomMarkerController extends Controller
             'svg_height' => 'nullable|integer|min:10',
         ]);
 
+        $oldData = $room->toArray();
         $room->update($data);
+
+        AuditLog::record('update', 'Room', $room->id, "Mengubah rincian ruangan: {$room->name}", $oldData, $room->fresh()->toArray());
 
         return response()->json(['success' => true, 'room' => $room->fresh()]);
     }
@@ -43,7 +50,13 @@ class RoomMarkerController extends Controller
     /** Delete a room from a floor */
     public function destroy(Room $room): JsonResponse
     {
+        $oldData = $room->toArray();
+        $roomName = $room->name;
+        
         $room->delete();
+
+        AuditLog::record('delete', 'Room', $oldData['id'], "Menghapus ruangan: {$roomName}", $oldData, null);
+        
         return response()->json(['success' => true]);
     }
 }

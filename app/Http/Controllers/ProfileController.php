@@ -26,13 +26,18 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $oldData = $user->toArray();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $user->fill($request->validated());
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
+
+        \App\Models\AuditLog::record('update', 'User', $user->id, "Memperbarui profil sendiri", $oldData, $user->fresh()->toArray());
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
@@ -47,6 +52,9 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+        $oldData = $user->toArray();
+
+        \App\Models\AuditLog::record('delete', 'User', $user->id, "Menghapus akun sendiri", $oldData, null);
 
         Auth::logout();
 
