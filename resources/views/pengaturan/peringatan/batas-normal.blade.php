@@ -31,7 +31,7 @@
             {{-- ── Normal ── --}}
             <div class="flex items-center gap-2">
                 <span class="flex items-center gap-1.5 w-[72px] shrink-0">
-                    <span class="w-[9px] h-[9px] rounded-full bg-green-500 shrink-0"></span>
+                    <img src="{{ asset('icons/normal.svg') }}" alt="Normal" class="w-[15px] h-[15px] shrink-0">
                     <span class="text-[12.5px] text-slate-500 dark:text-slate-400 font-medium">Normal</span>
                 </span>
 
@@ -59,7 +59,7 @@
             {{-- ── Warning ── --}}
             <div class="flex items-center gap-2">
                 <span class="flex items-center gap-1.5 w-[72px] shrink-0">
-                    <span class="w-[9px] h-[9px] rounded-full bg-orange-400 shrink-0"></span>
+                    <img src="{{ asset('icons/warning.svg') }}" alt="Warning" class="w-[15px] h-[15px] shrink-0">
                     <span class="text-[12.5px] text-slate-500 dark:text-slate-400 font-medium">Warning</span>
                 </span>
 
@@ -107,7 +107,7 @@
             {{-- ── Poor ── --}}
             <div class="flex items-center gap-2">
                 <span class="flex items-center gap-1.5 w-[72px] shrink-0">
-                    <span class="w-[9px] h-[9px] rounded-full bg-red-500 shrink-0"></span>
+                    <img src="{{ asset('icons/poor.svg') }}" alt="Poor" class="w-[15px] h-[15px] shrink-0">
                     <span class="text-[12.5px] text-slate-500 dark:text-slate-400 font-medium">Poor</span>
                 </span>
 
